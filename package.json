@@ -1,0 +1,29 @@
+{
+  "name": "tycolor-js",
+  "version": "1.0.0",
+  "description": "Color Library",
+  "productName": "TyColor-js",
+  "scripts": {
+    "start": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/takty/tycolor-js.git"
+  },
+  "author": "Takuto Yanagida",
+  "license": "MIT",
+  "homepage": "https://github.com/takty/tycolor-js#readme",
+  "dependencies": {
+    "fs-extra": "^8.1.0",
+    "glob": "^7.1.4",
+    "gulp": "^4.0.2",
+    "gulp-delete-lines": "0.0.7",
+    "gulp-include": "^2.4.1",
+    "gulp-load-plugins": "^2.0.1",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "^1.4.0",
+    "gulp-replace": "^1.0.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-terser": "^1.2.0"
+  }
+}
