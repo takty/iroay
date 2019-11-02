@@ -1,1 +1,1 @@
-# tycolor-js
+# Colorjst
