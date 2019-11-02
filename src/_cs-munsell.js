@@ -452,3 +452,5 @@ function _initTable() {
 //=include table/_hc2xy-090.js
 //=
 //=include table/_hc2xy-100.js
+
+_initTable();

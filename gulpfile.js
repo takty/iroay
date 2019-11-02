@@ -4,10 +4,10 @@ const $    = require('gulp-load-plugins')({ pattern: ['gulp-*'] });
 gulp.task('compile', () => {
 	return gulp.src(['src/**/[^_]*.js'])
 		.pipe($.plumber())
-		.pipe($.sourcemaps.init())
 		.pipe($.include())
-		.pipe($.deleteLines({ 'filters': [/\/\/=/] }))
+		.pipe($.deleteLines({ filters: [/\/\/=/] }))
 		.pipe($.replace(/^\t$/gm, ''))
+		.pipe($.sourcemaps.init())
 		.pipe($.terser())
 		.pipe($.rename({ extname: '.min.js' }))
 		.pipe($.sourcemaps.write('./map'))

@@ -15,7 +15,7 @@
   "homepage": "https://github.com/takty/tycolor-js#readme",
   "dependencies": {
     "fs-extra": "^8.1.0",
-    "glob": "^7.1.4",
+    "glob": "^7.1.5",
     "gulp": "^4.0.2",
     "gulp-delete-lines": "0.0.7",
     "gulp-include": "^2.4.1",
