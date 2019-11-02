@@ -5,7 +5,7 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2019-10-13
+ * @version 2019-11-02
  *
  */
 
@@ -62,7 +62,7 @@ class Lab {
 		return [
 			this._invFunc(fy + as / 500.0) * Lab.XYZ_TRISTIMULUS_VALUES[0],
 			this._invFunc(fy) * Lab.XYZ_TRISTIMULUS_VALUES[1],
-			this._invFunc(fy - bs / 200.0) * XYZ_TRISTIMULUS_VALUES[2],
+			this._invFunc(fy - bs / 200.0) * Lab.XYZ_TRISTIMULUS_VALUES[2],
 		];
 	}
 
