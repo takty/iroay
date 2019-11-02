@@ -1,42 +1,4 @@
-/**
- *
- * The table of the basic categorical color
- *
- * @author Takuto Yanagida
- * @version 2019-09-29
- */
-
-
-class BasicCategoricalColorTable {
-
-	static categoricalColor(lum, x, y) {
-		let diff = Number.MAX_VALUE;
-		let clum = 0;
-		for (let l of BasicCategoricalColorTable._LUM_TABLE) {
-			const d = Math.abs(lum - l);
-			if (d < diff) {
-				diff = d;
-				clum = 0 | l;
-			}
-		}
-		let dis = Number.MAX_VALUE;
-		let cc = BasicCategoricalColor.BLACK;
-		for (let ent of BasicCategoricalColorTable._CC_TABLE) {
-			if (0 | ent[0] != clum || 0 | ent[3] == -1) continue;
-			const d = Math.sqrt((x - ent[1]) * (x - ent[1]) + (y - ent[2]) * (y - ent[2]));
-			if (d < dis) {
-				dis = d;
-				cc = BasicCategoricalColor.values()[0 | ent[3]];
-			}
-		}
-		return cc;
-	}
-
-}
-
-BasicCategoricalColorTable._LUM_TABLE = [2.0, 5.0, 10.0, 20.0, 30.0, 40.0];
-
-BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
+BasicCategoricalColor._CC_TABLE = [  // [Lum, x, y, Category]
 	[2, 0.175, 0.100, 5],
 	[2, 0.175, 0.125, 5],
 
@@ -58,7 +20,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 
 	[2, 0.250, 0.150, 7],
 	[2, 0.250, 0.175, 7],
-	[2, 0.250, 0.200, -1],  // purple + blue
 	[2, 0.250, 0.225, 5],
 	[2, 0.250, 0.250, 5],
 	[2, 0.250, 0.275, 5],
@@ -88,7 +49,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[2, 0.300, 0.250, 7],
 	[2, 0.300, 0.275, 7],
 	[2, 0.300, 0.300, 1],
-	[2, 0.300, 0.325, -1],
 	[2, 0.300, 0.350, 3],
 	[2, 0.300, 0.375, 3],
 	[2, 0.300, 0.400, 3],
@@ -111,9 +71,7 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[2, 0.350, 0.225, 7],
 	[2, 0.350, 0.250, 7],
 	[2, 0.350, 0.275, 7],
-	[2, 0.350, 0.300, -1],
 	[2, 0.350, 0.325, 1],
-	[2, 0.350, 0.350, -1],
 	[2, 0.350, 0.375, 1],
 	[2, 0.350, 0.400, 1],
 	[2, 0.350, 0.425, 3],
@@ -122,7 +80,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[2, 0.375, 0.225, 7],
 	[2, 0.375, 0.250, 7],
 	[2, 0.375, 0.275, 7],
-	[2, 0.375, 0.300, -1],  // purple + brown
 	[2, 0.375, 0.325, 6],
 	[2, 0.375, 0.350, 6],
 	[2, 0.375, 0.375, 1],
@@ -432,7 +389,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[10, 0.350, 0.250, 7],
 	[10, 0.350, 0.275, 7],
 	[10, 0.350, 0.300, 7],
-	[10, 0.350, 0.325, -1],
 	[10, 0.350, 0.350, 10],
 	[10, 0.350, 0.375, 10],
 	[10, 0.350, 0.400, 3],
@@ -456,8 +412,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 
 	[10, 0.400, 0.225, 7],
 	[10, 0.400, 0.250, 7],
-	[10, 0.400, 0.275, -1],  // pink + purple
-	[10, 0.400, 0.300, -1],  // pink + purple
 	[10, 0.400, 0.325, 8],
 	[10, 0.400, 0.350, 6],
 	[10, 0.400, 0.375, 6],
@@ -467,8 +421,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[10, 0.400, 0.475, 3],
 
 	[10, 0.425, 0.250, 8],
-	[10, 0.425, 0.275, -1],  // pink + purple
-	[10, 0.425, 0.300, -1],  // pink + purple
 	[10, 0.425, 0.325, 6],
 	[10, 0.425, 0.350, 6],
 	[10, 0.425, 0.375, 6],
@@ -478,7 +430,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 
 	[10, 0.450, 0.250, 8],
 	[10, 0.450, 0.275, 8],
-	[10, 0.450, 0.300, -1],
 	[10, 0.450, 0.325, 6],
 	[10, 0.450, 0.350, 6],
 	[10, 0.450, 0.375, 6],
@@ -495,7 +446,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[10, 0.475, 0.425, 6],
 
 	[10, 0.500, 0.300, 2],
-	[10, 0.500, 0.325, -1],
 	[10, 0.500, 0.350, 6],
 	[10, 0.500, 0.375, 6],
 	[10, 0.500, 0.400, 6],
@@ -579,7 +529,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[20, 0.300, 0.225, 7],
 	[20, 0.300, 0.250, 7],
 	[20, 0.300, 0.275, 7],
-	[20, 0.300, 0.300, -1],  // purple + gray
 	[20, 0.300, 0.325, 10],
 	[20, 0.300, 0.350, 3],
 	[20, 0.300, 0.375, 3],
@@ -598,7 +547,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[20, 0.325, 0.275, 7],
 	[20, 0.325, 0.300, 7],
 	[20, 0.325, 0.325, 10],
-	[20, 0.325, 0.350, -1],  // gray + green
 	[20, 0.325, 0.375, 3],
 	[20, 0.325, 0.400, 3],
 	[20, 0.325, 0.425, 3],
@@ -607,12 +555,9 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[20, 0.325, 0.500, 3],
 	[20, 0.325, 0.525, 3],
 
-	[20, 0.350, 0.200, -1],  // purple + pink
 	[20, 0.350, 0.225, 7],
 	[20, 0.350, 0.250, 7],
-	[20, 0.350, 0.275, -1],  // purple + pink
 	[20, 0.350, 0.300, 8],
-	[20, 0.350, 0.325, -1],  // purple + pink
 	[20, 0.350, 0.350, 10],
 	[20, 0.350, 0.375, 3],
 	[20, 0.350, 0.400, 3],
@@ -665,7 +610,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[20, 0.450, 0.350, 9],
 	[20, 0.450, 0.375, 9],
 	[20, 0.450, 0.400, 9],
-	[20, 0.450, 0.425, -1],
 	[20, 0.450, 0.450, 4],
 
 	[20, 0.475, 0.275, 8],
@@ -701,7 +645,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[30, 0.200, 0.250, 5],
 	[30, 0.200, 0.275, 5],
 
-	[30, 0.225, 0.175, -1],  // puple + blue
 	[30, 0.225, 0.200, 5],
 	[30, 0.225, 0.225, 5],
 	[30, 0.225, 0.250, 5],
@@ -762,8 +705,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[30, 0.300, 0.525, 3],
 	[30, 0.300, 0.550, 3],
 
-	[30, 0.325, 0.225, -1],  // pink + purple
-	[30, 0.325, 0.250, -1],  // pink + purple
 	[30, 0.325, 0.275, 7],
 	[30, 0.325, 0.300, 7],
 	[30, 0.325, 0.325, 0],
@@ -894,7 +835,6 @@ BasicCategoricalColorTable._CC_TABLE = [  // [Lum, x, y, Category]
 	[40, 0.300, 0.550, 3],
 
 	[40, 0.325, 0.275, 8],
-	[40, 0.325, 0.300, -1],  // pink + purple
 	[40, 0.325, 0.325, 0],
 	[40, 0.325, 0.350, 0],
 	[40, 0.325, 0.375, 3],

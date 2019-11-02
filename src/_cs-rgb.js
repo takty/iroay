@@ -4,12 +4,23 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2019-09-30
+ * @version 2019-10-14
  *
  */
 
 
-class RGB extends ColorSpace {
+class RGB {
+
+	static _checkRange(vs, min, max) {
+		let isSaturated = false;
+		if (vs[0] > max) { vs[0] = max; isSaturated = true; }
+		if (vs[0] < min) { vs[0] = min; isSaturated = true; }
+		if (vs[1] > max) { vs[1] = max; isSaturated = true; }
+		if (vs[1] < min) { vs[1] = min; isSaturated = true; }
+		if (vs[2] > max) { vs[2] = max; isSaturated = true; }
+		if (vs[2] < min) { vs[2] = min; isSaturated = true; }
+		return isSaturated;
+	}
 
 	// Convert sRGB to Linear RGB (gamma correction).
 	static _func(x) {
@@ -31,9 +42,9 @@ class RGB extends ColorSpace {
 	 */
 	static toLRGB(r, g, b) {
 		return [
-			RGB._func(r / 255.0),
-			RGB._func(g / 255.0),
-			RGB._func(b / 255.0),
+			this._func(r / 255.0),
+			this._func(g / 255.0),
+			this._func(b / 255.0),
 		];
 	}
 
@@ -46,11 +57,11 @@ class RGB extends ColorSpace {
 	 */
 	static fromLRGB(lr, lg, lb) {
 		const dest = [
-			RGB._invFunc(lr) * 255 | 0,
-			RGB._invFunc(lg) * 255 | 0,
-			RGB._invFunc(lb) * 255 | 0,
+			this._invFunc(lr) * 255 | 0,
+			this._invFunc(lg) * 255 | 0,
+			this._invFunc(lb) * 255 | 0,
 		];
-		RGB.isSaturated = ColorSpace.checkRange(dest, 0, 255);
+		this.isSaturated = this._checkRange(dest, 0, 255);
 		return dest;
 	}
 

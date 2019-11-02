@@ -14,6 +14,7 @@
 
 class PCCS {
 
+
 	// Calculation of PCCS value (accurate) ------------------------------------
 
 
@@ -32,13 +33,13 @@ class PCCS {
 	}
 
 	static _calcPccsS(V, C, h) {
-		const a = PCCS._calcInterpolatedCoefficientes(h);
+		const a = PCCS._calcInterpolatedCoefficients(h);
 		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12.0 * Math.PI);
 		const a0 = -C / (1.0 - Math.exp(-g * V));
 		return PCCS._solveEquation(PCCS._simplyCalcPccsS(V, C, h), a[3], a[2], a[1], a0);
 	}
 
-	static _calcInterpolatedCoefficientes(h) {
+	static _calcInterpolatedCoefficients(h) {
 		if (PCCS.MAX_HUE < h) h -= PCCS.MAX_HUE;
 		let hf = 0 | Math.floor(h);
 		if (hf % 2 != 0) --hf;
@@ -76,7 +77,7 @@ class PCCS {
 	}
 
 	static _calcMunsellS(h, l, s) {
-		const a = PCCS._calcInterpolatedCoefficientes(h);
+		const a = PCCS._calcInterpolatedCoefficients(h);
 		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12.0 * Math.PI);
 		return (a[3] * s * s * s + a[2] * s * s + a[1] * s) * (1.0 - Math.exp(-g * l));
 	}
@@ -307,8 +308,7 @@ PCCS.MAX_HUE = 24.0;  // same as MIN_HUE
 
 PCCS.MONO_LIMIT_S = 0.01;
 
-PCCS._HUE_NAMES = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
-
+PCCS._HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
 PCCS._TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
 
 PCCS._MUNSELL_H = [

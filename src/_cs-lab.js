@@ -5,12 +5,12 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2019-09-29
+ * @version 2019-10-13
  *
  */
 
 
-class Lab extends ColorSpace {
+class Lab {
 
 	// Conversion function
 	static _func(x) {
@@ -24,39 +24,45 @@ class Lab extends ColorSpace {
 
 	/**
 	 * Convert CIE 1931 XYZ to CIE 1976 (L*, a*, b*).
-	 * @param src XYZ color
+	 * @param x X of XYZ color
+	 * @param y Y of XYZ color
+	 * @param z Z of XYZ color
 	 * @return CIELAB color
 	 */
-	static fromXYZ(src) {
-		const fy = Lab._func(src[1] / Lab.XYZ_TRISTIMULUS_VALUES[1]);
+	static fromXYZ(x, y, z) {
+		const fy = this._func(y / Lab.XYZ_TRISTIMULUS_VALUES[1]);
 		return [
 			116.0 * fy - 16.0,
-			500.0 * (Lab._func(src[0] / Lab.XYZ_TRISTIMULUS_VALUES[0]) - fy),
-			200.0 * (fy - Lab._func(src[2] / Lab.XYZ_TRISTIMULUS_VALUES[2])),
+			500.0 * (this._func(x / Lab.XYZ_TRISTIMULUS_VALUES[0]) - fy),
+			200.0 * (fy - this._func(z / Lab.XYZ_TRISTIMULUS_VALUES[2])),
 		];
 	}
 
 	/**
 	 * Convert CIE 1931 XYZ to L* of CIE 1976 (L*, a*, b*).
-	 * @param src XYZ color
+	 * @param x X of XYZ color
+	 * @param y Y of XYZ color
+	 * @param z Z of XYZ color
 	 * @return L*
 	 */
-	static lightnessFromXYZ(src) {
-		const fy = Lab._func(src[1] / Lab.XYZ_TRISTIMULUS_VALUES[1]);
+	static lightnessFromXYZ(x, y, z) {
+		const fy = this._func(y / Lab.XYZ_TRISTIMULUS_VALUES[1]);
 		return 116.0 * fy - 16.0;
 	}
 
 	/**
 	 * Convert CIE 1976 (L*, a*, b*) to CIE 1931 XYZ.
-	 * @param src CIELAB color
+	 * @param ls L* of CIELAB color
+	 * @param as a* of CIELAB color
+	 * @param bs b* of CIELAB color
 	 * @return XYZ color
 	 */
-	static toXYZ(src) {
-		const fy = (src[0] + 16.0) / 116.0;
+	static toXYZ(ls, as, bs) {
+		const fy = (ls + 16.0) / 116.0;
 		return [
-			Lab._invFunc(fy + src[1] / 500.0) * Lab.XYZ_TRISTIMULUS_VALUES[0],
-			Lab._invFunc(fy) * Lab.XYZ_TRISTIMULUS_VALUES[1],
-			Lab._invFunc(fy - src[2] / 200.0) * XYZ_TRISTIMULUS_VALUES[2],
+			this._invFunc(fy + as / 500.0) * Lab.XYZ_TRISTIMULUS_VALUES[0],
+			this._invFunc(fy) * Lab.XYZ_TRISTIMULUS_VALUES[1],
+			this._invFunc(fy - bs / 200.0) * XYZ_TRISTIMULUS_VALUES[2],
 		];
 	}
 
@@ -68,22 +74,28 @@ class Lab extends ColorSpace {
 	 * Calculate the conspicuity degree.
 	 * Reference: Effective use of color conspicuity for Re-Coloring system,
 	 * Correspondences on Human interface Vol. 12, No. 1, SIG-DE-01, 2010.
-	 * @param lab CIELAB color
+	 * @param ls L* of CIELAB color
+	 * @param as a* of CIELAB color
+	 * @param bs b* of CIELAB color
 	 * @return Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
-	static conspicuityOf(lab) {
-		return Evaluation.conspicuityOfLab(lab);
+	static conspicuityOf(ls, as, bs) {
+		return Evaluation.conspicuityOfLab(ls, as, bs);
 	}
 
 	/**
 	 * Calculate the color difference between the two colors.
-	 * @param v1 CIELAB color 1
-	 * @param v2 CIELAB color 2
+	 * @param ls1 L* of CIELAB color 1
+	 * @param as1 a* of CIELAB color 1
+	 * @param bs1 b* of CIELAB color 1
+	 * @param ls2 L* of CIELAB color 2
+	 * @param as2 a* of CIELAB color 2
+	 * @param bs2 b* of CIELAB color 2
 	 * @return Color difference
 	 */
-	static differenceBetween(v1, v2) {
-		return Evaluation.differenceBetweenLab(v1, v2);
+	static differenceBetween(ls1, as1, bs1, ls2, as2, bs2) {
+		return Evaluation.differenceBetweenLab(ls1, as1, bs1, ls2, as2, bs2);
 	}
 
 
@@ -92,44 +104,52 @@ class Lab extends ColorSpace {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to sRGB (Gamma 2.2).
-	 * @param src CIELAB color
+	 * @param ls L* of CIELAB color
+	 * @param as a* of CIELAB color
+	 * @param bs b* of CIELAB color
 	 * @return sRGB color
 	 */
-	static toRGB(src) {
-		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(src)));
+	static toRGB(ls, as, bs) {
+		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(ls, as, bs)));
 	}
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to CIELAB (L*a*b*).
-	 * @param src sRGB color
+	 * @param r R of sRGB color
+	 * @param g G of sRGB color
+	 * @param b B of sRGB color
 	 * @return CIELAB color
 	 */
-	static fromRGB(src) {
-		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(src)));
+	static fromRGB(r, g, b) {
+		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(r, g, b)));
 	}
 
 	/**
 	 * Convert CIELAB (L*a*b*) from rectangular coordinate format to polar coordinate format.
-	 * @param src Color in rectangular coordinate format (CIELAB)
+	 * @param ls L* of rectangular coordinate format (CIELAB)
+	 * @param as a* of rectangular coordinate format (CIELAB)
+	 * @param bs b* of rectangular coordinate format (CIELAB)
 	 * @return  Color in polar format
 	 */
-	static toPolarCoordinate(src) {
-		const rad = (src[2] > 0) ? Math.atan2(src[2], src[1]) : (Math.atan2(-src[2], -src[1]) + Math.PI);
-		const c = Math.sqrt(src[1] * src[1] + src[2] * src[2]);
+	static toPolarCoordinate(ls, as, bs) {
+		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
+		const cs = Math.sqrt(as * as + bs * bs);
 		const h = rad * 360.0 / (Math.PI * 2);
-		return [src[0], c, h];
+		return [ls, cs, h];
 	}
 
 	/**
 	 * Convert CIELAB (L*a*b*) from polar coordinate format to rectangular coordinate format.
-	 * @param src  Color in polar format (CIELAB)
+	 * @param ls L* of polar format (CIELAB)
+	 * @param cs C* of polar format (CIELAB)
+	 * @param h h of polar format (CIELAB)
 	 * @return Color in rectangular coordinate format
 	 */
-	static toOrthogonalCoordinate(src) {
-		const rad = src[2] * (Math.PI * 2) / 360.0;
-		const a = Math.cos(rad) * src[1];
-		const b = Math.sin(rad) * src[1];
-		return [src[0], a, b];
+	static toOrthogonalCoordinate(ls, cs, h) {
+		const rad = h * (Math.PI * 2) / 360.0;
+		const as = Math.cos(rad) * cs;
+		const bs = Math.sin(rad) * cs;
+		return [ls, as, bs];
 	}
 
 }

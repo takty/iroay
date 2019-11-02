@@ -3,36 +3,40 @@
  * This class converts the LMS color system.
  *
  * @author Takuto Yanagida
- * @version 2019-09-29
+ * @version 2019-10-13
  *
  */
 
 
-class LMS extends ColorSpace {
+class LMS {
 
 	/**
 	 * Convert CIE 1931 XYZ to LMS.
-	 * @param src XYZ color
+	 * @param x X of XYZ color
+	 * @param y Y of XYZ color
+	 * @param z Z of XYZ color
 	 * @return LMS color
 	 */
-	static fromXYZ(src) {
+	static fromXYZ(x, y, z) {
 		return [
-			LMS.matrix[0][0] * src[0] + LMS.matrix[0][1] * src[1] + LMS.matrix[0][2] * src[2],
-			LMS.matrix[1][0] * src[0] + LMS.matrix[1][1] * src[1] + LMS.matrix[1][2] * src[2],
-			LMS.matrix[2][0] * src[0] + LMS.matrix[2][1] * src[1] + LMS.matrix[2][2] * src[2],
+			LMS.matrix[0][0] * x + LMS.matrix[0][1] * y + LMS.matrix[0][2] * z,
+			LMS.matrix[1][0] * x + LMS.matrix[1][1] * y + LMS.matrix[1][2] * z,
+			LMS.matrix[2][0] * x + LMS.matrix[2][1] * y + LMS.matrix[2][2] * z,
 		];
 	}
 
 	/**
 	 * Convert LMS to CIE 1931 XYZ.
-	 * @param src LMS color
+	 * @param l L of LMS color
+	 * @param m M of LMS color
+	 * @param s S of LMS color
 	 * @return XYZ color
 	 */
-	static toXYZ(src) {
+	static toXYZ(l, m, s) {
 		return [
-			LMS.matrixInverse[0][0] * src[0] + LMS.matrixInverse[0][1] * src[1] + LMS.matrixInverse[0][2] * src[2],
-			LMS.matrixInverse[1][0] * src[0] + LMS.matrixInverse[1][1] * src[1] + LMS.matrixInverse[1][2] * src[2],
-			LMS.matrixInverse[2][0] * src[0] + LMS.matrixInverse[2][1] * src[1] + LMS.matrixInverse[2][2] * src[2],
+			LMS.matrixInverse[0][0] * l + LMS.matrixInverse[0][1] * m + LMS.matrixInverse[0][2] * s,
+			LMS.matrixInverse[1][0] * l + LMS.matrixInverse[1][1] * m + LMS.matrixInverse[1][2] * s,
+			LMS.matrixInverse[2][0] * l + LMS.matrixInverse[2][1] * m + LMS.matrixInverse[2][2] * s,
 		];
 	}
 

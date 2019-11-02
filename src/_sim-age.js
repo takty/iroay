@@ -3,7 +3,7 @@
  * This class performs various simulations of color space.
  *
  * @author Takuto Yanagida
- * @version 2019-09-29
+ * @version 2019-10-14
  *
  */
 
@@ -28,14 +28,16 @@ class AgeSimulation {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of elderly people (70 years old) (conversion other than lightness).
-	 * @param src CIELAB color (young person)
+	 * @param ls L* of CIELAB color (young person)
+	 * @param as a* of CIELAB color (young person)
+	 * @param bs b* of CIELAB color (young person)
 	 * @return CIELAB color in color vision of elderly people
 	 */
-	static labToElderlyAB(src) {
-		const h = ((src[2] > 0) ? Math.atan2(src[2], src[1]) : (Math.atan2(-src[2], -src[1]) + Math.PI)) + AgeSimulation._hueDiff(src[1], src[2]);
-		const c = Math.sqrt(src[1] * src[1] + src[2] * src[2]) * AgeSimulation._chromaRatio(src[1], src[2]);
+	static labToElderlyAB(ls, as, bs) {
+		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) + this._hueDiff(as, bs);
+		const c = Math.sqrt(as * as + bs * bs) * this._chromaRatio(as, bs);
 		return [
-			src[0],
+			ls,
 			Math.cos(h) * c,
 			Math.sin(h) * c,
 		];
@@ -43,14 +45,16 @@ class AgeSimulation {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of young people (20 years old) (conversion other than lightness).
-	 * @param src CIELAB color (elderly person)
+	 * @param ls L* of CIELAB color (elderly person)
+	 * @param as a* of CIELAB color (elderly person)
+	 * @param bs b* of CIELAB color (elderly person)
 	 * @return CIELAB color in color vision of young people
 	 */
-	static labToYoungAB(src) {
-		const h = ((src[2] > 0) ? Math.atan2(src[2], src[1]) : (Math.atan2(-src[2], -src[1]) + Math.PI)) - AgeSimulation._hueDiff(src[1], src[2]);
-		const c = Math.sqrt(src[1] * src[1] + src[2] * src[2]) / AgeSimulation._chromaRatio(src[1], src[2]);
+	static labToYoungAB(ls, as, bs) {
+		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) - this._hueDiff(as, bs);
+		const c = Math.sqrt(as * as + bs * bs) / this._chromaRatio(as, bs);
 		return [
-			src[0],
+			ls,
 			Math.cos(h) * c,
 			Math.sin(h) * c,
 		];

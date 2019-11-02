@@ -5,12 +5,12 @@
  * Reference: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
  *
  * @author Takuto Yanagida
- * @version 2019-09-30
+ * @version 2019-10-13
  *
  */
 
 
-class LRGB extends ColorSpace {
+class LRGB {
 
 	/**
 	 * Convert Linear RGB to CIE 1931 XYZ.
@@ -80,14 +80,14 @@ class LRGB extends ColorSpace {
 	}
 
 	/**
-	 * Convert Linear RGB to YIQ.
+	 * Convert YIQ to Linear RGB.
 	 * @param y Y of YIQ color
 	 * @param i I of YIQ color
 	 * @param q Q of YIQ color
-	 * @return YIQ color
+	 * @return Linear RGB color
 	 */
 	static fromYIQ(y, i, q) {
-		return YIQ.fromLRGB(y, i, q);
+		return YIQ.toLRGB(y, i, q);
 	}
 
 }
