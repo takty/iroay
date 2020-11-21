@@ -3,7 +3,7 @@
  * Basic Categorical Colors
  *
  * @author Takuto Yanagida
- * @version 2019-10-14
+ * @version 2020-11-22
  */
 
 
@@ -28,17 +28,23 @@ class BasicCategoricalColor {
 				clum = l;
 			}
 		}
+		const t = this._CC_TABLE[clum];
+		sx *= 1000;
+		sy *= 1000;
 		let dis = Number.MAX_VALUE;
 		let cc = 1;
-		for (let ent of this._CC_TABLE) {
-			if (ent[0] != clum) continue;
-			const d = Math.sqrt((sx - ent[1]) * (sx - ent[1]) + (sy - ent[2]) * (sy - ent[2]));
+		for (let i = 0; i < 18 * 21; i += 1) {
+			if (t[i] === '.') continue;
+			const x = (i % 18) * 25 + 150;
+			const y = ((i / 18) | 0) * 25 + 75;
+			const d = Math.sqrt((sx - x) * (sx - x) + (sy - y) * (sy - y));
 			if (d < dis) {
 				dis = d;
-				cc = ent[3];
+				cc = t[i];
 			}
 		}
-		return this.COLORS[cc];
+		const ci = (cc === 'a') ? 10 : parseInt(cc);
+		return this.COLORS[ci];
 	}
 
 }
@@ -54,4 +60,4 @@ BasicCategoricalColor._Y_TO_LUM = 60.0;
 BasicCategoricalColor._LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
 //=
-//=include table/_cc.js
+//=include table/_cc-min.js
