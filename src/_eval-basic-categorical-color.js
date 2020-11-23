@@ -3,7 +3,7 @@
  * Basic Categorical Colors
  *
  * @author Takuto Yanagida
- * @version 2020-11-22
+ * @version 2020-11-24
  */
 
 
