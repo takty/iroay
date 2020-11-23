@@ -5,7 +5,7 @@ gulp.task('compile', () => {
 	return gulp.src(['src/**/[^_]*.js'])
 		.pipe($.plumber())
 		.pipe($.include())
-		.pipe($.deleteLines({ filters: [/\/\/=/] }))
+		.pipe($.rmLines({ filters: [/\/\/=/] }))
 		.pipe($.replace(/^\t$/gm, ''))
 		.pipe($.sourcemaps.init())
 		.pipe($.terser())
