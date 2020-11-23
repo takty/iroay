@@ -1,29 +1,27 @@
 {
-  "name": "tycolor-js",
-  "version": "1.0.0",
-  "description": "Color Library",
-  "productName": "TyColor-js",
-  "scripts": {
-    "start": "gulp"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/takty/tycolor-js.git"
-  },
-  "author": "Takuto Yanagida",
-  "license": "MIT",
-  "homepage": "https://github.com/takty/tycolor-js#readme",
-  "dependencies": {
-    "fs-extra": "^9.0.1",
-    "glob": "^7.1.6",
-    "gulp": "^4.0.2",
-    "gulp-delete-lines": "0.0.7",
-    "gulp-include": "^2.4.1",
-    "gulp-load-plugins": "^2.0.5",
-    "gulp-plumber": "^1.2.1",
-    "gulp-rename": "^2.0.0",
-    "gulp-replace": "^1.0.0",
-    "gulp-sourcemaps": "^3.0.0",
-    "gulp-terser": "^2.0.0"
-  }
+	"name": "colorjst",
+	"version": "1.0.0",
+	"description": "Color Library",
+	"productName": "Colorjst",
+	"scripts": {
+		"start": "gulp"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/takty/colorjst.git"
+	},
+	"author": "Takuto Yanagida",
+	"license": "MIT",
+	"homepage": "https://github.com/takty/colorjst#readme",
+	"dependencies": {
+		"gulp": "^4.0.2",
+		"gulp-delete-lines": "0.0.7",
+		"gulp-include": "^2.4.1",
+		"gulp-load-plugins": "^2.0.5",
+		"gulp-plumber": "^1.2.1",
+		"gulp-rename": "^2.0.0",
+		"gulp-replace": "^1.0.0",
+		"gulp-sourcemaps": "^3.0.0",
+		"gulp-terser": "^2.0.0"
+	}
 }
