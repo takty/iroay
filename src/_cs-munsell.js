@@ -7,44 +7,13 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2019-11-02
+ * @version 2020-11-23
  *
  */
 
 
 class Munsell {
 
-	// static {
-	// 	final String pathBase = "/" + Munsell.class.getPackage().getName().replace('.','/') + "/table/";
-
-	// 	for(int vi = 0; vi < TBL_V.length; ++vi) {
-	// 		TBL_MAX_C[vi] = new int[1000 / 25];
-	// 		TBL[vi] = new double[1000 / 25][][];
-	// 		for(int i = 0, n = 1000 / 25; i < n; ++i) TBL[vi][i] = new double[50 / 2 + 2][];  // 2 <= C <= 51
-
-	// 		try {
-	// 			final InputStream is = Munsell.class.getResourceAsStream(pathBase + String.format("hc2xy(%04.1f).csv", TBL_V[vi]));
-	// 			try(final BufferedReader br = new BufferedReader(new InputStreamReader(is, Charset.defaultCharset()))) {
-	// 				while (true) {
-	// 					final String line = br.readLine();
-	// 					if (line == null) break;
-	// 					final String[] cs = line.split(",");
-	// 					if (cs.length < 4) continue;
-	// 					try {
-	// 						final int h10 = (int)(hueNameToHueValue(cs[0]) * 10.0);
-	// 						const c = Integer.valueOf(cs[1]);
-	// 						TBL[vi][h10 / 25][c / 2] = new {Double.valueOf(cs[2]), Double.valueOf(cs[3])};
-	// 						if (TBL_MAX_C[vi][h10 / 25] < c) TBL_MAX_C[vi][h10 / 25] = c;
-	// 					} catch(NumberFormatException nfe) {
-	// 						continue;
-	// 					}
-	// 				}
-	// 			}
-	// 		} catch(IOException ex) {
-	// 			Logger.getLogger(Munsell.class.getName()).log(Level.SEVERE, null, ex);
-	// 		}
-	// 	}
-	// }
 	static _getXy(vi, h10, c) {
 		if (c === 0) return this._ILLUMINANT_C;
 		return this._TBL[vi][h10 / 25][c / 2];
@@ -401,7 +370,7 @@ Munsell._ILLUMINANT_C = [0.3101, 0.3162];  // Standard illuminant C, white point
 Munsell._TBL_V     = [0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
 Munsell._TBL_MAX_C = new Array(Munsell._TBL_V.length);
 Munsell._TBL       = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
-Munsell._TBL_SRC   = new Array(Munsell._TBL_V.length);
+// Munsell._TBL_SRC   = new Array(Munsell._TBL_V.length);
 
 function _initTable() {
 	for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
@@ -410,47 +379,20 @@ function _initTable() {
 		for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell._TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
 
 		const src = Munsell._TBL_SRC[vi];
-		for (let line of src) {
-			const cs = line;
-
-			const h10 = 0 | (Munsell.hueNameToHueValue(cs[0]) * 10);
-			const c = cs[1];
-			Munsell._TBL[vi][h10 / 25][c / 2] = [cs[2], cs[3]];
-
-			if (Munsell._TBL_MAX_C[vi][h10 / 25] < c) {
-				Munsell._TBL_MAX_C[vi][h10 / 25] = c;
+		for (let i = 0; i < src.length; i += 4) {
+			const c0 = src[i];
+			const c1 = src[i + 1];
+			const c2 = src[i + 2] / 1000;
+			const c3 = src[i + 3] / 1000;
+			Munsell._TBL[vi][c0][c1] = [c2, c3];
+			if (Munsell._TBL_MAX_C[vi][c0] < c1 * 2) {
+				Munsell._TBL_MAX_C[vi][c0] = c1 * 2;
 			}
 		}
 	}
 }
 
 //=
-//=include table/_hc2xy-002.js
-//=
-//=include table/_hc2xy-004.js
-//=
-//=include table/_hc2xy-006.js
-//=
-//=include table/_hc2xy-008.js
-//=
-//=include table/_hc2xy-010.js
-//=
-//=include table/_hc2xy-020.js
-//=
-//=include table/_hc2xy-030.js
-//=
-//=include table/_hc2xy-040.js
-//=
-//=include table/_hc2xy-050.js
-//=
-//=include table/_hc2xy-060.js
-//=
-//=include table/_hc2xy-070.js
-//=
-//=include table/_hc2xy-080.js
-//=
-//=include table/_hc2xy-090.js
-//=
-//=include table/_hc2xy-100.js
+//=include table/_hc2xy-min.js
 
 _initTable();
