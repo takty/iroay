@@ -7,7 +7,7 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2020-11-23
+ * @version 2020-11-25
  *
  */
 
@@ -79,9 +79,9 @@ class Munsell {
 		const v_l = ((vi_l == -1) ? 0.0 : this._TBL_V[vi_l]), v_h = this._TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
-		if (this.MAX_HUE <= h) h -= this.MAX_HUE;
+		if (this._MAX_HUE <= h) h -= this._MAX_HUE;
 		let c = (hc_u[1] - hc_l[1]) * r + hc_l[1];
-		if (c < this.MONO_LIMIT_C) c = 0.0;
+		if (c < this._MONO_LIMIT_C) c = 0.0;
 		return [h, v, c];
 	}
 
@@ -200,8 +200,8 @@ class Munsell {
 		const n = hueName.substring(hueName.length - slen);
 
 		let hv = parseFloat(hueName.substring(0, hueName.length - slen));
-		hv += this.HueNames.indexOf(n) * 10;
-		if (this.MAX_HUE <= hv) hv -= this.MAX_HUE;
+		hv += this._HUE_NAMES.indexOf(n) * 10;
+		if (this._MAX_HUE <= hv) hv -= this._MAX_HUE;
 		return hv;
 	}
 
@@ -214,11 +214,10 @@ class Munsell {
 	 */
 	static hueValueToHueName(hue, chroma) {
 		if (hue == -1.0 || this._eq0(chroma)) return 'N';
-		if (hue < 0) hue += this.MAX_HUE;
+		if (hue < 0) hue += this._MAX_HUE;
 		let c = 0 | (hue / 10.0);
 		if (10 <= c) c -= 10;
-		const n = this.HueNames[c];
-		// return String.format("%.1f%s", hue - c * 10.0, n);
+		const n = this._HUE_NAMES[c];
 		return (Math.round(hue - c * 10 * 10) / 10) + n;
 	}
 
@@ -241,12 +240,12 @@ class Munsell {
 	 * @return XYZ color
 	 */
 	static toXYZ(h, v, c) {
-		if (this.MAX_HUE <= h) h -= this.MAX_HUE;
+		if (this._MAX_HUE <= h) h -= this._MAX_HUE;
 		const dest = [this._v2y(v), 0, 0];
 		this.isSaturated = false;
 
 		// When the lightness is 0 or achromatic (check this first)
-		if (this._eq(v, 0.0) || h < 0.0 || c < this.MONO_LIMIT_C) {
+		if (this._eq(v, 0.0) || h < 0.0 || c < this._MONO_LIMIT_C) {
 			dest[1] = this._ILLUMINANT_C[0]; dest[2] = this._ILLUMINANT_C[1];
 			this.isSaturated = this._eq(v, 0.0) && 0.0 < c;
 			return XYZ.fromIlluminantC(...Yxy.toXYZ(...dest));
@@ -344,49 +343,44 @@ class Munsell {
 	 * @return String representation
 	 */
 	static toString(hvc) {
-		if (hvc[2] < this.MONO_LIMIT_C) {
-			// return String.format("N %.1f", hvc[1]);
+		if (hvc[2] < this._MONO_LIMIT_C) {
 			return 'N ' + (Math.round(hvc[1] * 10) / 10);
 		} else {
-			// return String.format("%s %.1f/%.1f", this.hueValueToHueName(hvc[0], hvc[2]), hvc[1], hvc[2]);
 			return this.hueValueToHueName(hvc[0], hvc[2]) + ' ' + (Math.round(hvc[1] * 10) / 10) + '/' + (Math.round(hvc[2] * 10) / 10);
 		}
 	}
 
 }
 
-Munsell.MIN_HUE = 0.0;
-Munsell.MAX_HUE = 100.0;  // Same as MIN_HUE
-
-Munsell.MONO_LIMIT_C = 0.05;
-
 Munsell.isSaturated = false;
 
-Munsell.HueNames = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
-
+Munsell._MIN_HUE = 0.0;
+Munsell._MAX_HUE = 100.0;  // Same as MIN_HUE
+Munsell._MONO_LIMIT_C = 0.05;
+Munsell._HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
 Munsell._EP = 0.0000000000001;
 Munsell._ILLUMINANT_C = [0.3101, 0.3162];  // Standard illuminant C, white point
-
 Munsell._TBL_V     = [0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
 Munsell._TBL_MAX_C = new Array(Munsell._TBL_V.length);
 Munsell._TBL       = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
-// Munsell._TBL_SRC   = new Array(Munsell._TBL_V.length);
 
 function _initTable() {
 	for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
 		Munsell._TBL_MAX_C[vi] = new Array(1000 / 25);
+		Munsell._TBL_MAX_C[vi].fill(0);
 		Munsell._TBL[vi] = new Array(1000 / 25);
 		for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell._TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
 
-		const src = Munsell._TBL_SRC[vi];
-		for (let i = 0; i < src.length; i += 4) {
-			const c0 = src[i];
-			const c1 = src[i + 1];
-			const c2 = src[i + 2] / 1000;
-			const c3 = src[i + 3] / 1000;
-			Munsell._TBL[vi][c0][c1] = [c2, c3];
-			if (Munsell._TBL_MAX_C[vi][c0] < c1 * 2) {
-				Munsell._TBL_MAX_C[vi][c0] = c1 * 2;
+		const src = Munsell._TBL_SRC_MIN[vi];
+		for (const [c0, c23] of Object.entries(src)) {
+			for (let i = 0; i < c23.length; i += 2) {
+				const c1 = i / 2 + 1;
+				const c2 = c23[i + 0] / 1000;
+				const c3 = c23[i + 1] / 1000;
+				Munsell._TBL[vi][c0][c1] = [c2, c3];
+				if (Munsell._TBL_MAX_C[vi][c0] < c1 * 2) {
+					Munsell._TBL_MAX_C[vi][c0] = c1 * 2;
+				}
 			}
 		}
 	}
