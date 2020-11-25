@@ -54,9 +54,7 @@ BasicCategoricalColor.COLORS = [
 	'yellow', 'blue', 'brown', 'purple',
 	'pink', 'orange', 'gray',
 ];
-
 BasicCategoricalColor._Y_TO_LUM = 60.0;
-
 BasicCategoricalColor._LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
 //=

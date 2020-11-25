@@ -7,7 +7,7 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2019-11-02
+ * @version 2020-11-25
  *
  */
 
@@ -40,11 +40,11 @@ class PCCS {
 	}
 
 	static _calcInterpolatedCoefficients(h) {
-		if (PCCS.MAX_HUE < h) h -= PCCS.MAX_HUE;
+		if (PCCS._MAX_HUE < h) h -= PCCS._MAX_HUE;
 		let hf = 0 | Math.floor(h);
 		if (hf % 2 != 0) --hf;
 		let hc = hf + 2;
-		if (PCCS.MAX_HUE < hc) hc -= PCCS.MAX_HUE;
+		if (PCCS._MAX_HUE < hc) hc -= PCCS._MAX_HUE;
 
 		const af = PCCS._COEFFICIENTS[hf / 2], ac = PCCS._COEFFICIENTS[hc / 2], a = [0, 0, 0, 0];
 		for (let i = 0; i < 3; ++i) {
@@ -143,7 +143,7 @@ class PCCS {
 					break;
 			}
 		}
-		if (PCCS.MAX_HUE <= h) h -= PCCS.MAX_HUE;
+		if (PCCS._MAX_HUE <= h) h -= PCCS._MAX_HUE;
 		return [h, l, s];
 	}
 
@@ -155,7 +155,7 @@ class PCCS {
 	static toMunsell(h, l, s) {
 		let H = 0.0, V = l, C = 0.0;
 
-		if (s < PCCS.MONO_LIMIT_S) {
+		if (s < PCCS._MONO_LIMIT_S) {
 			switch (PCCS.conversionMethod) {
 				case PCCS.ConversionMethod.CONCISE:  H = PCCS._simplyCalcMunsellH(h); break;
 				case PCCS.ConversionMethod.ACCURATE: H = PCCS._calcMunsellH(h); break;
@@ -252,15 +252,15 @@ class PCCS {
 	 */
 	toString(h, l, c) {
 		const l_str = (Math.round(l * 10) / 10);
-		if (c < PCCS.MONO_LIMIT_S) {
+		if (c < PCCS._MONO_LIMIT_S) {
 			if (9.5 <= l) return 'W N-' + l_str;
 			if (l <= 1.5) return 'Bk N-' + l_str;
 			return 'Gy-' + l_str + ' N-' + l_str;
 		} else {
 			const t = PCCS.tone(h, l, c);
 			let tn = Math.round(h);
-			if (tn <= 0) tn = PCCS.MAX_HUE;
-			if (PCCS.MAX_HUE < tn) tn -= PCCS.MAX_HUE;
+			if (tn <= 0) tn = PCCS._MAX_HUE;
+			if (PCCS._MAX_HUE < tn) tn -= PCCS._MAX_HUE;
 			const h_str = (Math.round(h * 10) / 10);
 			const c_str = (Math.round(c * 10) / 10);
 			if (t == PCCS.Tone.none) {
@@ -272,18 +272,18 @@ class PCCS {
 	}
 
 	toHueString(h, l, c) {
-		if (c < PCCS.MONO_LIMIT_S) {
+		if (c < PCCS._MONO_LIMIT_S) {
 			return 'N';
 		} else {
 			let tn = Math.round(h);
-			if (tn <= 0) tn = PCCS.MAX_HUE;
-			if (PCCS.MAX_HUE < tn) tn -= PCCS.MAX_HUE;
+			if (tn <= 0) tn = PCCS._MAX_HUE;
+			if (PCCS._MAX_HUE < tn) tn -= PCCS._MAX_HUE;
 			return PCCS._HUE_NAMES[tn];
 		}
 	}
 
 	toToneString(h, l, c) {
-		if (c < PCCS.MONO_LIMIT_S) {
+		if (c < PCCS._MONO_LIMIT_S) {
 			if (9.5 <= l) return 'W';
 			if (l <= 1.5) return 'Bk';
 			return 'Gy';
@@ -296,20 +296,16 @@ class PCCS {
 }
 
 // Hue [0.0, 24.0), 24.0 is also acceptable
-PCCS.MIN_HUE = 0.0;
-PCCS.MAX_HUE = 24.0;  // same as MIN_HUE
-
-PCCS.MONO_LIMIT_S = 0.01;
-
+PCCS._MIN_HUE = 0.0;
+PCCS._MAX_HUE = 24.0;  // same as MIN_HUE
+PCCS._MONO_LIMIT_S = 0.01;
 PCCS._HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
 PCCS._TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
-
 PCCS._MUNSELL_H = [
 	96,  // Dummy
 	0,  4,  7, 10, 14, 18, 22, 25, 28, 33, 38, 43,
 	49, 55, 60, 65, 70, 73, 76, 79, 83, 87, 91, 96, 100
 ];
-
 PCCS._COEFFICIENTS = [
 	[0.853642,  0.084379, -0.002798],  // 0 == 24
 	[1.042805,  0.046437,  0.001607],  // 2
