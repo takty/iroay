@@ -7,7 +7,7 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2020-11-25
+ * @version 2020-11-26
  *
  */
 
@@ -21,19 +21,19 @@ class Munsell {
 
 	// Find Y of XYZ (C) from Munsell's V (JIS).
 	static _v2y(v) {
-		const v2 = v * v, v3 = v2 * v, v4 = v2 * v2, v5 = v2 * v3;
-		const y = 1.1913 * v - 0.22532 * v2 + 0.23351 * v3 - 0.020483 * v4 + 0.00081936 * v5;
-		return y / 100.0;
+		if (v <= 1) return v * 0.0121;
+		const v2 = v * v, v3 = v2 * v;
+		const y = 0.0467 * v3 + 0.5602 * v2 - 0.1753 * v + 0.8007;
+		return y / 100;
 	}
 
 	// Munsell's V is obtained from Y of XYZ (C) (JIS, Newton's method).
 	static _y2v(y) {
-		if (this._eq(y, 0.0)) return 0.0;
-		let v = 0;
+		if (y <= 0.0121) return y / 0.0121;
+		let v = 10;
 		while (true) {
-			const f = this._v2y(v) * 100.0 - y * 100.0;
-			const v2 = v * v, v3 = v2 * v, v4 = v2 * v2;
-			const fp = 1.1913 - 2 * 0.22532 * v + 3 * 0.23351 * v2 - 4 * 0.020483 * v3 + 5 * 0.00081936 * v4;
+			const f = v2y(v) * 100 - y * 100;
+			const fp = 3 * 0.0467 * (v * v) + 2 * 0.5602 * v - 0.1753;
 			const v1 = -f / fp + v;
 			if (Math.abs(v1 - v) < 0.01) break;
 			v = v1;
@@ -53,14 +53,14 @@ class Munsell {
 	static _yxy2mun(Y, x, y) {
 		const v = this._y2v(Y);  // Find Munsell lightness
 
-		// When the lightness is maximum 10.0
+		// When the lightness is maximum 10
 		if (this._eq(v, this._TBL_V[this._TBL_V.length - 1])) {
 			const hc = this._interpolateHC(x, y, this._TBL_V.length - 1);
 			return [hc[0], v, hc[1]];
 		}
 		// When the lightness is 0 or the lightness is larger than the maximum 10, or when it is an achromatic color (standard illuminant C)
-		if (this._eq(v, 0.0) || this._TBL_V[this._TBL_V.length - 1] < v || (this._eq(x, this._ILLUMINANT_C[0]) && this._eq(y, this._ILLUMINANT_C[1]))) {
-			return [0.0, v, 0.0];
+		if (this._eq0(v) || this._TBL_V[this._TBL_V.length - 1] < v || (this._eq(x, this._ILLUMINANT_C[0]) && this._eq(y, this._ILLUMINANT_C[1]))) {
+			return [0, v, 0];
 		}
 		// Obtain lower side
 		let vi_l = -1;
@@ -72,16 +72,16 @@ class Munsell {
 		const vi_u = vi_l + 1;
 		const hc_u = this._interpolateHC(x, y, vi_u);
 
-		// When the lightness on the lower side is the minimum 0.0, the hue is matched with the upper side, and the chroma is set to 0.0
+		// When the lightness on the lower side is the minimum 0, the hue is matched with the upper side, and the chroma is set to 0
 		if (vi_l == -1) {
-			hc_l[0] = hc_u[0]; hc_l[1] = 0.0;
+			hc_l[0] = hc_u[0]; hc_l[1] = 0;
 		}
-		const v_l = ((vi_l == -1) ? 0.0 : this._TBL_V[vi_l]), v_h = this._TBL_V[vi_u];
+		const v_l = ((vi_l == -1) ? 0 : this._TBL_V[vi_l]), v_h = this._TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
 		if (this._MAX_HUE <= h) h -= this._MAX_HUE;
 		let c = (hc_u[1] - hc_l[1]) * r + hc_l[1];
-		if (c < this._MONO_LIMIT_C) c = 0.0;
+		if (c < this._MONO_LIMIT_C) c = 0;
 		return [h, v, c];
 	}
 
@@ -120,18 +120,18 @@ class Munsell {
 			return [0, 0];
 		}
 		if (h10_u == 0) h10_u = 1000;
-		return [((h10_u - h10_l) * hv[0] + h10_l) / 10.0, (c_u - c_l) * hv[1] + c_l];
+		return [((h10_u - h10_l) * hv[0] + h10_l) / 10, (c_u - c_l) * hv[1] + c_l];
 	}
 
 	// Whether a point (x, y) exists within the interior (including the boundary) of the clockwise triangle abc
 	// in the mathematical coordinate system (positive on the y axis is upward)
 	static _isInside(a, b, c, x, y) {
 		// If x, y are on the right side of ab, the point is outside the triangle
-		if (this._cross(x - a[0], y - a[1], b[0] - a[0], b[1] - a[1]) < 0.0) return false;
+		if (this._cross(x - a[0], y - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
 		// If x, y are on the right side of bc, the point is outside the triangle
-		if (this._cross(x - b[0], y - b[1], c[0] - b[0], c[1] - b[1]) < 0.0) return false;
+		if (this._cross(x - b[0], y - b[1], c[0] - b[0], c[1] - b[1]) < 0) return false;
 		// If x, y are on the right side of ca, the point is outside the triangle
-		if (this._cross(x - c[0], y - c[1], a[0] - c[0], a[1] - c[1]) < 0.0) return false;
+		if (this._cross(x - c[0], y - c[1], a[0] - c[0], a[1] - c[1]) < 0) return false;
 		return true;
 	}
 
@@ -148,7 +148,7 @@ class Munsell {
 	 */
 	static _interpolationRatio(x, y, a, d, b, c) {
 		// Find the ratio in the vertical direction
-		let v = -1.0;
+		let v = -1;
 
 		// Solve a v^2 + b v + c = 0
 		const ea = (a[0] - d[0]) * (a[1] + c[1] - b[1] - d[1]) - (a[0] + c[0] - b[0] - d[0]) * (a[1] - d[1]);
@@ -158,30 +158,30 @@ class Munsell {
 		if (this._eq0(ea)) {
 			if (!this._eq0(eb)) v = -ec / eb;
 		} else {
-			const rt = Math.sqrt(eb * eb - 4.0 * ea * ec);
-			const v1 = (-eb + rt) / (2.0 * ea), v2 = (-eb - rt) / (2.0 * ea);
+			const rt = Math.sqrt(eb * eb - 4 * ea * ec);
+			const v1 = (-eb + rt) / (2 * ea), v2 = (-eb - rt) / (2 * ea);
 
 			if (a[0] == b[0] && a[1] == b[1]) {  // In this case, v1 is always 0, but this is not a solution.
-				if (0.0 <= v2 && v2 <= 1.0) v = v2;
+				if (0 <= v2 && v2 <= 1) v = v2;
 			} else {
-				if     (0.0 <= v1 && v1 <= 1.0) v = v1;
-				else if (0.0 <= v2 && v2 <= 1.0) v = v2;
+				if      (0 <= v1 && v1 <= 1) v = v1;
+				else if (0 <= v2 && v2 <= 1) v = v2;
 			}
 		}
-		if (v < 0.0) return null;
+		if (v < 0) return null;
 
 		// Find the ratio in the horizontal direction
-		let h = -1.0, h1 = -1.0, h2 = -1.0;
+		let h = -1, h1 = -1, h2 = -1;
 		const deX = (a[0] - d[0] - b[0] + c[0]) * v - a[0] + b[0];
 		const deY = (a[1] - d[1] - b[1] + c[1]) * v - a[1] + b[1];
 
 		if (!this._eq0(deX)) h1 = ((a[0] - d[0]) * v + x - a[0]) / deX;
 		if (!this._eq0(deY)) h2 = ((a[1] - d[1]) * v + y - a[1]) / deY;
 
-		if      (0.0 <= h1 && h1 <= 1.0) h = h1;
-		else if (0.0 <= h2 && h2 <= 1.0) h = h2;
+		if      (0 <= h1 && h1 <= 1) h = h1;
+		else if (0 <= h2 && h2 <= 1) h = h2;
 
-		if (h < 0.0) return null;
+		if (h < 0) return null;
 
 		return [h, v];
 	}
@@ -193,7 +193,7 @@ class Munsell {
 	 * @return Hue value
 	 */
 	static hueNameToHueValue(hueName) {
-		if (hueName.length == 1) return -1.0;  // In case of achromatic color N
+		if (hueName.length == 1) return -1;  // In case of achromatic color N
 
 		function isDigit(s) { return Number.isInteger(parseInt(s)); }
 		const slen = isDigit(hueName.charAt(hueName.length - 2)) ? 1 : 2;  // Length of color name
@@ -207,18 +207,21 @@ class Munsell {
 
 	/**
 	 * Convert hue value to name-based hue expression.
-	 * If the hue value is -1.0, or if the chroma value is 0.0, N is returned.
+	 * If the hue value is -1.0, or if the chroma value is 0, N is returned.
 	 * @param hue Hue value
 	 * @param chroma Chroma value
 	 * @return Name-based hue expression
 	 */
 	static hueValueToHueName(hue, chroma) {
-		if (hue == -1.0 || this._eq0(chroma)) return 'N';
-		if (hue < 0) hue += this._MAX_HUE;
-		let c = 0 | (hue / 10.0);
-		if (10 <= c) c -= 10;
-		const n = this._HUE_NAMES[c];
-		return (Math.round(hue - c * 10 * 10) / 10) + n;
+		if (hue == -1 || this._eq0(chroma)) return 'N';
+		if (hue <= 0) hue += this._MAX_HUE;
+		let h10 = (0 | hue * 10) % 100;
+		let c = 0 | (hue / 10);
+		if (h10 === 0) {
+			h10 = 100;
+			c -= 1;
+		}
+		return (Math.round(h10 * 10) / 100) + this._HUE_NAMES[c];
 	}
 
 	/**
@@ -245,12 +248,12 @@ class Munsell {
 		this.isSaturated = false;
 
 		// When the lightness is 0 or achromatic (check this first)
-		if (this._eq(v, 0.0) || h < 0.0 || c < this._MONO_LIMIT_C) {
+		if (this._eq0(v) || h < 0 || c < this._MONO_LIMIT_C) {
 			dest[1] = this._ILLUMINANT_C[0]; dest[2] = this._ILLUMINANT_C[1];
-			this.isSaturated = this._eq(v, 0.0) && 0.0 < c;
+			this.isSaturated = this._eq0(v) && 0 < c;
 			return XYZ.fromIlluminantC(...Yxy.toXYZ(...dest));
 		}
-		// When the lightness is the maximum value 10.0 or more
+		// When the lightness is the maximum value 10 or more
 		if (this._TBL_V[this._TBL_V.length - 1] <= v) {
 			const xy = this._interpolateXY(h, c, this._TBL_V.length - 1);
 			dest[1] = xy[0]; dest[2] = xy[1];
@@ -266,7 +269,7 @@ class Munsell {
 		if (vi_l != -1) {
 			xy_l = this._interpolateXY(h, c, vi_l);
 			if (!xy_l[2]) this.isSaturated = true;
-		} else {  // When the lightness of the lower side is the minimum 0.0, use standard illuminant.
+		} else {  // When the lightness of the lower side is the minimum 0, use standard illuminant.
 			xy_l[0] = this._ILLUMINANT_C[0]; xy_l[1] = this._ILLUMINANT_C[1];
 			this.isSaturated = true;
 		}
@@ -274,7 +277,7 @@ class Munsell {
 		const xy_u = this._interpolateXY(h, c, vi_u);
 		if (!xy_u[2]) this.isSaturated = true;
 
-		const v_l = ((vi_l == -1) ? 0.0 : this._TBL_V[vi_l]), v_h = this._TBL_V[vi_u];
+		const v_l = ((vi_l == -1) ? 0 : this._TBL_V[vi_l]), v_h = this._TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 		const x = (xy_u[0] - xy_l[0]) * r + xy_l[0], y = (xy_u[1] - xy_l[1]) * r + xy_l[1];
 		dest[1] = x; dest[2] = y;
@@ -285,9 +288,9 @@ class Munsell {
 	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
 	// Return false if it is out of the range of the table.
 	static _interpolateXY(h, c, vi) {
-		const h10 = h * 10.0;
-		const h10_l = 0 | Math.floor(h10 / 25.0) * 25, h10_u = h10_l + 25;
-		const c_l = 0 | Math.floor(c / 2.0) * 2, c_u = c_l + 2;
+		const h10 = h * 10;
+		let h10_l = 0 | Math.floor(h10 / 25) * 25, h10_u = h10_l + 25;
+		const c_l = 0 | Math.floor(c / 2) * 2, c_u = c_l + 2;
 
 		const rh = (h10 - h10_l) / (h10_u - h10_l);
 		const rc = (c - c_l) / (c_u - c_l);
@@ -296,7 +299,7 @@ class Munsell {
 		const maxC_hl = this._TBL_MAX_C[vi][h10_l / 25], maxC_hu = this._TBL_MAX_C[vi][h10_u / 25];
 
 		if (maxC_hl <= c_l || maxC_hu <= c_l) {
-			const xy_hl = [0, 0], xy_hu = [0, 0];
+			let xy_hl = [0, 0], xy_hu = [0, 0];
 
 			if (c_l < maxC_hl) {
 				const a = this._getXy(vi, h10_l, c_l), d = this._getXy(vi, h10_l, c_u);
@@ -354,15 +357,17 @@ class Munsell {
 
 Munsell.isSaturated = false;
 
-Munsell._MIN_HUE = 0.0;
-Munsell._MAX_HUE = 100.0;  // Same as MIN_HUE
+const _TBL_V_REAL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const _TBL_V_ALL = [0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+Munsell._TBL_V = _TBL_V_REAL;
+Munsell._MIN_HUE = 0;
+Munsell._MAX_HUE = 100;  // Same as MIN_HUE
 Munsell._MONO_LIMIT_C = 0.05;
 Munsell._HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
 Munsell._EP = 0.0000000000001;
 Munsell._ILLUMINANT_C = [0.3101, 0.3162];  // Standard illuminant C, white point
-Munsell._TBL_V     = [0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
 Munsell._TBL_MAX_C = new Array(Munsell._TBL_V.length);
-Munsell._TBL       = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
+Munsell._TBL = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 
 function _initTable() {
 	for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
@@ -371,12 +376,14 @@ function _initTable() {
 		Munsell._TBL[vi] = new Array(1000 / 25);
 		for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell._TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
 
-		const src = Munsell._TBL_SRC_MIN[vi];
-		for (const [c0, c23] of Object.entries(src)) {
-			for (let i = 0; i < c23.length; i += 2) {
+		for (const cs of Munsell._TBL_SRC_MIN[vi]) {
+			const c0 = cs.shift();
+			_integrate(cs);
+			_integrate(cs);
+			for (let i = 0; i < cs.length; i += 2) {
 				const c1 = i / 2 + 1;
-				const c2 = c23[i + 0] / 1000;
-				const c3 = c23[i + 1] / 1000;
+				const c2 = cs[i + 0] / 1000;
+				const c3 = cs[i + 1] / 1000;
 				Munsell._TBL[vi][c0][c1] = [c2, c3];
 				if (Munsell._TBL_MAX_C[vi][c0] < c1 * 2) {
 					Munsell._TBL_MAX_C[vi][c0] = c1 * 2;
@@ -384,9 +391,19 @@ function _initTable() {
 			}
 		}
 	}
+	function _integrate(cs) {
+		let c2_ = 0, c3_ = 0;
+		for (let i = 0; i < cs.length; i += 2) {
+			const c2 = cs[i], c3 = cs[i + 1];
+			cs[i]     = c2 + c2_;
+			cs[i + 1] = c3 + c3_;
+			c2_ += c2;
+			c3_ += c3;
+		}
+	}
 }
 
 //=
-//=include table/_hc2xy-min.js
+//=include table/_hc2xy-real-min.js
 
 _initTable();
