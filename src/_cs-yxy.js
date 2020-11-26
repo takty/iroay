@@ -3,7 +3,7 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2019-10-13
+ * @version 2020-11-27
  *
  */
 
@@ -34,7 +34,7 @@ class Yxy {
 		const d0 = sx * y / sy;
 		if (Number.isNaN(d0)) {
 			Yxy.isSaturated = false;
-			return [0.0, 0.0, 0.0];
+			return [0, 0, 0];
 		}
 		const d1 = y;
 		const d2 = (1 - sx - sy) * y / sy;

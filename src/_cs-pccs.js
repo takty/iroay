@@ -1,13 +1,13 @@
 /**
  *
  * This class converts the PCCS color system.
- * Colors where h is -1.0 are handled especially as an achromatic color (n).
+ * Colors where h is -1 are handled especially as an achromatic color (n).
  * Reference: KOBAYASHI Mituo and YOSIKI Kayoko,
  * Mathematical Relation among PCCS Tones, PCCS Color Attributes and Munsell Color Attributes,
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2020-11-26
+ * @version 2020-11-27
  *
  */
 
@@ -34,8 +34,8 @@ class PCCS {
 
 	static _calcPccsS(V, C, h) {
 		const a = PCCS._calcInterpolatedCoefficients(h);
-		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12.0 * Math.PI);
-		const a0 = -C / (1.0 - Math.exp(-g * V));
+		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
+		const a0 = -C / (1 - Math.exp(-g * V));
 		return PCCS._solveEquation(PCCS._simplyCalcPccsS(V, C, h), a[3], a[2], a[1], a0);
 	}
 
@@ -57,7 +57,7 @@ class PCCS {
 		let x = x0;
 		while (true) {
 			const y = a3 * x * x * x + a2 * x * x + a1 * x + a0;
-			const yp = 3.0 * a3 * x * x + 2.0 * a2 * x + a1;
+			const yp = 3 * a3 * x * x + 2 * a2 * x + a1;
 			const x1 = -y / yp + x;
 			if (Math.abs(x1 - x) < 0.001) break;
 			x = x1;
@@ -72,14 +72,14 @@ class PCCS {
 	static _calcMunsellH(h) {
 		const h1 = 0 | Math.floor(h), h2 = h1 + 1;
 		let H1 = PCCS._MUNSELL_H[h1], H2 = PCCS._MUNSELL_H[h2];
-		if (H1 > H2) H2 = 100.0;
+		if (H1 > H2) H2 = 100;
 		return H1 + (H2 - H1) * (h - h1) / (h2 - h1);
 	}
 
 	static _calcMunsellS(h, l, s) {
 		const a = PCCS._calcInterpolatedCoefficients(h);
-		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12.0 * Math.PI);
-		return (a[3] * s * s * s + a[2] * s * s + a[1] * s) * (1.0 - Math.exp(-g * l));
+		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
+		return (a[3] * s * s * s + a[2] * s * s + a[1] * s) * (1 - Math.exp(-g * l));
 	}
 
 
@@ -87,17 +87,17 @@ class PCCS {
 
 
 	static _simplyCalcPccsH(H) {
-		const y = H * Math.PI / 50.0;
-		return 24.0 * y / (2.0 * Math.PI) + 1.24
-				+ 0.02 * Math.cos(y) - 0.10 * Math.cos(2.0 * y) - 0.11 * Math.cos(3.0 * y)
-				+ 0.68 * Math.sin(y) - 0.30 * Math.sin(2.0 * y) + 0.013 * Math.sin(3.0 * y);
+		const y = H * Math.PI / 50;
+		return 24 * y / (2 * Math.PI) + 1.24
+				+ 0.02 * Math.cos(y) - 0.1 * Math.cos(2 * y) - 0.11  * Math.cos(3 * y)
+				+ 0.68 * Math.sin(y) - 0.3 * Math.sin(2 * y) + 0.013 * Math.sin(3 * y);
 	}
 
 	static _simplyCalcPccsS(V, C, h) {
-		const Ct = 12.0 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12.0);
-		const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12.0);
-		const e2 = 0.0040, e1 = 0.077, e0 = -C / (Ct * (1.0 - Math.exp(-gt * V)));
-		return (-e1 + Math.sqrt(e1 * e1 - 4.0 * e2 * e0)) / (2.0 * e2);
+		const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
+		const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
+		const e2 = 0.004, e1 = 0.077, e0 = -C / (Ct * (1 - Math.exp(-gt * V)));
+		return (-e1 + Math.sqrt(e1 * e1 - 4 * e2 * e0)) / (2 * e2);
 	}
 
 
@@ -105,16 +105,16 @@ class PCCS {
 
 
 	static _simplyCalcMunsellH(h) {
-		const x = (h - 1.0) * Math.PI / 12.0;
-		return 100.0 * x / (2.0 * Math.PI) - 1.0
-				+ 0.12 * Math.cos(x) + 0.34 * Math.cos(2.0 * x) + 0.40 * Math.cos(3.0 * x)
-				- 2.7 * Math.sin(x) + 1.5 * Math.sin(2.0 * x) - 0.4 * Math.sin(3.0 * x);
+		const x = (h - 1) * Math.PI / 12;
+		return 100 * x / (2 * Math.PI) - 1
+				+ 0.12 * Math.cos(x) + 0.34 * Math.cos(2 * x) + 0.4 * Math.cos(3 * x)
+				- 2.7  * Math.sin(x) + 1.5  * Math.sin(2 * x) - 0.4 * Math.sin(3 * x);
 	}
 
 	static _simplyCalcMunsellS(h, l, s) {
-		const Ct = 12.0 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12.0);
-		const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12.0);
-		return Ct * (0.077 * s + 0.0040 * s * s) * (1.0 - Math.exp(-gt * l));
+		const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
+		const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
+		return Ct * (0.077 * s + 0.0040 * s * s) * (1 - Math.exp(-gt * l));
 	}
 
 	/**
@@ -126,7 +126,7 @@ class PCCS {
 	 */
 	static fromMunsell(H, V, C) {
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
-		let h = 0.0, l = V, s = 0.0;
+		let h = 0, l = V, s = 0;
 
 		if (C < Munsell.MONO_LIMIT_C) {
 			switch (PCCS.conversionMethod) {
@@ -157,7 +157,7 @@ class PCCS {
 	 * @return Munsell color
 	 */
 	static toMunsell(h, l, s) {
-		let H = 0.0, V = l, C = 0.0;
+		let H = 0, V = l, C = 0;
 
 		if (s < PCCS._MONO_LIMIT_S) {
 			switch (PCCS.conversionMethod) {
@@ -176,7 +176,7 @@ class PCCS {
 					break;
 			}
 		}
-		if (H < 0.0) H += Munsell.MAX_HUE;
+		if (H < 0) H += Munsell.MAX_HUE;
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 		return [H, V, C];
 	}
@@ -188,25 +188,25 @@ class PCCS {
 	 * @param s Saturation of PCCS color
 	 * @return Tone
 	 */
-	tone(h, l, s) {
+	static tone(h, l, s) {
 		const t = PCCS.relativeLightness(h, l, s);
-		const tu = s * -3.0 / 10.0 + 8.5, td = s * 3.0 / 10.0 + 2.5;
+		const tu = s * -3 / 10 + 8.5, td = s * 3 / 10 + 2.5;
 
-		if (s < 1.0) {
+		if (s < 1) {
 			return PCCS.Tone.none;
-		} else if (1.0 <= s && s < 4.0) {
+		} else if (1 <= s && s < 4) {
 			if (t < td)  return PCCS.Tone.dkg;
 			if (t < 5.5) return PCCS.Tone.g;
 			if (t < tu)  return PCCS.Tone.ltg;
 			if (s < 2.5) return PCCS.Tone.p;
 			return PCCS.Tone.p_p;
-		} else if (4.0 <= s && s < 7.0) {
+		} else if (4 <= s && s < 7) {
 			if (t < td)  return PCCS.Tone.dk;
 			if (t < 5.5) return PCCS.Tone.d;
 			if (t < tu)  return PCCS.Tone.sf;
 			if (s < 5.5) return PCCS.Tone.lt;
 			return PCCS.Tone.lt_p;
-		} else if (7.0 <= s && s < 8.5) {
+		} else if (7 <= s && s < 8.5) {
 			if (t < td) return PCCS.Tone.dp;
 			if (t < tu) return PCCS.Tone.s;
 			return PCCS.Tone.b;
@@ -222,8 +222,8 @@ class PCCS {
 	 * @param s Saturation of PCCS color
 	 * @return Relative lightness l
 	 */
-	relativeLightness(h, l, s) {
-		return l - (0.25 - 0.34 * Math.sqrt(1.0 - Math.sin((h - 2.0) * Math.PI / 12.0))) * s;
+	static relativeLightness(h, l, s) {
+		return l - (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
 	}
 
 	/**
@@ -231,8 +231,8 @@ class PCCS {
 	 * @param hLs Tone coordinate color
 	 * @return Absolute lightness l
 	 */
-	absoluteLightness(h, L, s) {
-		return L + (0.25 - 0.34 * Math.sqrt(1.0 - Math.sin((h - 2.0) * Math.PI / 12.0))) * s;
+	static absoluteLightness(h, L, s) {
+		return L + (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
 	}
 
 	/**
@@ -262,7 +262,7 @@ class PCCS {
 	 * @param s Saturation of PCCS color
 	 * @return String representation
 	 */
-	toString(h, l, s) {
+	static toString(h, l, s) {
 		const l_str = (Math.round(l * 10) / 10);
 		if (s < PCCS._MONO_LIMIT_S) {
 			if (9.5 <= l) return 'W N-' + l_str;
@@ -278,12 +278,12 @@ class PCCS {
 			if (t == PCCS.Tone.none) {
 				return h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + s_str + 's';
 			} else {
-				return PCCS._TONE_NAMES[t.ordinal()] + h_str + ' ' + h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + s_str + 's';
+				return PCCS._TONE_NAMES[t] + h_str + ' ' + h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + s_str + 's';
 			}
 		}
 	}
 
-	toHueString(h, l, s) {
+	static toHueString(h, l, s) {
 		if (s < PCCS._MONO_LIMIT_S) {
 			return 'N';
 		} else {
@@ -294,22 +294,22 @@ class PCCS {
 		}
 	}
 
-	toToneString(h, l, s) {
+	static toToneString(h, l, s) {
 		if (s < PCCS._MONO_LIMIT_S) {
 			if (9.5 <= l) return 'W';
 			if (l <= 1.5) return 'Bk';
 			return 'Gy';
 		} else {
 			const t = PCCS.tone(h, l, s);
-			return PCCS._TONE_NAMES[t.ordinal()];
+			return PCCS._TONE_NAMES[t];
 		}
 	}
 
 }
 
-// Hue [0.0, 24.0), 24.0 is also acceptable
-PCCS._MIN_HUE = 0.0;
-PCCS._MAX_HUE = 24.0;  // same as MIN_HUE
+// Hue [0, 24), 24 is also acceptable
+PCCS._MIN_HUE = 0;
+PCCS._MAX_HUE = 24;  // same as MIN_HUE
 PCCS._MONO_LIMIT_S = 0.01;
 PCCS._HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
 PCCS._TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];

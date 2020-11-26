@@ -4,7 +4,7 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2019-10-14
+ * @version 2020-11-27
  *
  */
 
@@ -29,7 +29,7 @@ class RGB {
 
 	// Convert Linear RGB to sRGB (inverse gamma correction).
 	static _invFunc(x) {
-		x = (x > 0.00304) ? (Math.pow(x, 1.0 / 2.4) * 1.055 - 0.055) : (x * 12.92);
+		x = (x > 0.00304) ? (Math.pow(x, 1 / 2.4) * 1.055 - 0.055) : (x * 12.92);
 		return x;
 	}
 
@@ -42,9 +42,9 @@ class RGB {
 	 */
 	static toLRGB(r, g, b) {
 		return [
-			this._func(r / 255.0),
-			this._func(g / 255.0),
-			this._func(b / 255.0),
+			RGB._func(r / 255),
+			RGB._func(g / 255),
+			RGB._func(b / 255),
 		];
 	}
 
@@ -57,11 +57,11 @@ class RGB {
 	 */
 	static fromLRGB(lr, lg, lb) {
 		const dest = [
-			this._invFunc(lr) * 255 | 0,
-			this._invFunc(lg) * 255 | 0,
-			this._invFunc(lb) * 255 | 0,
+			RGB._invFunc(lr) * 255 | 0,
+			RGB._invFunc(lg) * 255 | 0,
+			RGB._invFunc(lb) * 255 | 0,
 		];
-		this.isSaturated = this._checkRange(dest, 0, 255);
+		RGB.isSaturated = RGB._checkRange(dest, 0, 255);
 		return dest;
 	}
 

@@ -24,3 +24,6 @@
 
 //=
 //=include _cs-pccs.js
+
+//=
+//=include _cs-function.js

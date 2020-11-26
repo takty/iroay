@@ -3,7 +3,7 @@
  * This class simulates color vision characteristics.
  *
  * @author Takuto Yanagida
- * @version 2019-10-14
+ * @version 2020-11-27
  *
  */
 
@@ -41,7 +41,7 @@ class ColorVisionSimulation {
 		const dp0 = l2 / base[0];
 		const dp1 = m2 / base[1];
 		const dp2 = s2 / base[2];
-		const k = this.BETA * sp1 / (this.ALPHA * dp0 + this.BETA * dp1);
+		const k = ColorVisionSimulation.BETA * sp1 / (ColorVisionSimulation.ALPHA * dp0 + ColorVisionSimulation.BETA * dp1);
 		return [
 			(k * dp0) * base[0],
 			(k * dp1) * base[1],
@@ -54,7 +54,7 @@ class ColorVisionSimulation {
 		const dp0 = l2 / base[0];
 		const dp1 = m2 / base[1];
 		const dp2 = s2 / base[2];
-		const k = this.ALPHA * sp0 / (this.ALPHA * dp0 + this.BETA * dp1);
+		const k = ColorVisionSimulation.ALPHA * sp0 / (ColorVisionSimulation.ALPHA * dp0 + ColorVisionSimulation.BETA * dp1);
 		return [
 			(k * dp0) * base[0],
 			(k * dp1) * base[1],
@@ -75,9 +75,9 @@ class ColorVisionSimulation {
 	 * @return LMS color in protanopia
 	 */
 	static lmsToProtanopia(l, m, s, doCorrection = false) {
-		const ds = this.brettelP(l, m, s);
+		const ds = ColorVisionSimulation.brettelP(l, m, s);
 		if (!doCorrection) return ds;
-		return this.okajimaCorrectionP(m, ...ds, this.LMS_BASE);
+		return ColorVisionSimulation.okajimaCorrectionP(m, ...ds, ColorVisionSimulation.LMS_BASE);
 	}
 
 	/**
@@ -89,9 +89,9 @@ class ColorVisionSimulation {
 	 * @return LMS color in deuteranopia
 	 */
 	static lmsToDeuteranopia(l, m, s, doCorrection = false) {
-		const ds = this.brettelD(l, m, s);
+		const ds = ColorVisionSimulation.brettelD(l, m, s);
 		if (!doCorrection) return ds;
-		return this.okajimaCorrectionD(l, ...ds, this.LMS_BASE);
+		return ColorVisionSimulation.okajimaCorrectionD(l, ...ds, ColorVisionSimulation.LMS_BASE);
 	}
 
 
@@ -112,11 +112,11 @@ class ColorVisionSimulation {
 		const lb2 = 0.992052 * lb + 0.003974;
 
 		const [l, m, s] = LMS.fromXYZ(...XYZ.fromLRGB(lr2, lg2, lb2));
-		const [l2, m2, s2] = this.brettelP(l, m, s);
+		const [l2, m2, s2] = ColorVisionSimulation.brettelP(l, m, s);
 
 		let l3, m3, s3;
 		if (doCorrection) {
-			[l3, m3, s3] = this.okajimaCorrectionP(m, l2, m2, s2, this.LMS_BASE2);
+			[l3, m3, s3] = ColorVisionSimulation.okajimaCorrectionP(m, l2, m2, s2, ColorVisionSimulation.LMS_BASE2);
 		} else {
 			[l3, m3, s3] = [l2, m2, s2];
 		}
@@ -137,11 +137,11 @@ class ColorVisionSimulation {
 		const lb2 = 0.957237 * lb + 0.0213814;
 
 		const [l, m, s] = LMS.fromXYZ(...XYZ.fromLRGB(lr2, lg2, lb2));
-		const [l2, m2, s2] = this.brettelD(l, m, s);
+		const [l2, m2, s2] = ColorVisionSimulation.brettelD(l, m, s);
 
 		let l3, m3, s3;
 		if (doCorrection) {
-			[l3, m3, s3] = this.okajimaCorrectionD(l, l2, m2, s2, this.LMS_BASE2);
+			[l3, m3, s3] = ColorVisionSimulation.okajimaCorrectionD(l, l2, m2, s2, ColorVisionSimulation.LMS_BASE2);
 		} else {
 			[l3, m3, s3] = [l2, m2, s2];
 		}
@@ -150,8 +150,8 @@ class ColorVisionSimulation {
 
 }
 
-ColorVisionSimulation.LMS_BASE  = LMS.fromXYZ(1.0, 1.0, 1.0);
-ColorVisionSimulation.LMS_BASE2 = LMS.fromXYZ(...XYZ.fromLRGB(1.0, 1.0, 1.0));
+ColorVisionSimulation.LMS_BASE  = LMS.fromXYZ(1, 1, 1);
+ColorVisionSimulation.LMS_BASE2 = LMS.fromXYZ(...XYZ.fromLRGB(1, 1, 1));
 
-ColorVisionSimulation.ALPHA = 1.0;
-ColorVisionSimulation.BETA  = 1.0;
+ColorVisionSimulation.ALPHA = 1;
+ColorVisionSimulation.BETA  = 1;

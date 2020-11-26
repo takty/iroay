@@ -3,7 +3,7 @@
  * This class performs various simulations of color space.
  *
  * @author Takuto Yanagida
- * @version 2019-10-14
+ * @version 2020-11-27
  *
  */
 
@@ -18,12 +18,12 @@ class AgeSimulation {
 
 	static _hueDiff(a, b) {
 		const p = (b > 0) ? Math.atan2(b, a) : (Math.atan2(-b, -a) + Math.PI);
-		return 4.5 * Math.cos(2.0 * Math.PI * (p - 28.8) / 50.9) + 4.4;
+		return 4.5 * Math.cos(2 * Math.PI * (p - 28.8) / 50.9) + 4.4;
 	}
 
 	static _chromaRatio(a, b) {
 		const c = Math.sqrt(a * a + b * b);
-		return 0.83 * Math.exp(-c / 13.3) - (1.0 / 8.0) * Math.exp(-(c - 50) * (c - 50) / (3000 * 3000)) + 1;
+		return 0.83 * Math.exp(-c / 13.3) - (1 / 8) * Math.exp(-(c - 50) * (c - 50) / (3000 * 3000)) + 1;
 	}
 
 	/**
@@ -34,8 +34,8 @@ class AgeSimulation {
 	 * @return CIELAB color in color vision of elderly people
 	 */
 	static labToElderlyAB(ls, as, bs) {
-		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) + this._hueDiff(as, bs);
-		const c = Math.sqrt(as * as + bs * bs) * this._chromaRatio(as, bs);
+		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) + AgeSimulation._hueDiff(as, bs);
+		const c = Math.sqrt(as * as + bs * bs) * AgeSimulation._chromaRatio(as, bs);
 		return [
 			ls,
 			Math.cos(h) * c,
@@ -51,8 +51,8 @@ class AgeSimulation {
 	 * @return CIELAB color in color vision of young people
 	 */
 	static labToYoungAB(ls, as, bs) {
-		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) - this._hueDiff(as, bs);
-		const c = Math.sqrt(as * as + bs * bs) / this._chromaRatio(as, bs);
+		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) - AgeSimulation._hueDiff(as, bs);
+		const c = Math.sqrt(as * as + bs * bs) / AgeSimulation._chromaRatio(as, bs);
 		return [
 			ls,
 			Math.cos(h) * c,
