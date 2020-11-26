@@ -1,41 +1,63 @@
-// @need dist/color-space.min
-// @need dist/color-eval.min
-// @need dist/color-sim.min
+// @need ../dist/color-space.min
+// @need ../dist/color-util.min
 
 const orig = [255, 127, 127];
 let cs, ics;
 
-cs = XYZ.fromLRGB(...LRGB.fromRGB(...orig));
-console.log('XYZ', cs);
-ics = RGB.fromLRGB(...LRGB.fromXYZ(...cs));
+function round(vs) {
+	vs[0] = Math.round(vs[0] * 1000) / 1000;
+	vs[1] = Math.round(vs[1] * 1000) / 1000;
+	vs[2] = Math.round(vs[2] * 1000) / 1000;
+	return vs;
+}
+
+console.log('--------------------------------');
+
+console.log('XYZ');
+cs = convert(orig, 'RGB', 'XYZ');
+ics = convert(cs, 'XYZ', 'RGB');
+console.log(round(cs));
 console.log(ics);
 
-cs = Lab.fromXYZ(...XYZ.fromLRGB(...LRGB.fromRGB(...orig)));
-console.log('Lab', cs);
-ics = RGB.fromLRGB(...LRGB.fromXYZ(...XYZ.fromLab(...cs)));
+console.log('--------------------------------');
+
+console.log('Lab');
+cs = convert(orig, 'RGB', 'Lab');
+ics = convert(cs, 'Lab', 'RGB');
+console.log(round(cs));
 console.log(ics);
 
-cs = LMS.fromXYZ(...XYZ.fromLRGB(...LRGB.fromRGB(...orig)));
-console.log('LMS', cs);
-ics = RGB.fromLRGB(...LRGB.fromXYZ(...XYZ.fromLMS(...cs)));
+console.log('--------------------------------');
+
+console.log('LMS');
+cs = convert(orig, 'RGB', 'LMS');
+ics = convert(cs, 'LMS', 'RGB');
+console.log(round(cs));
 console.log(ics);
 
-cs = Yxy.fromXYZ(...XYZ.fromLRGB(...LRGB.fromRGB(...orig)));
-console.log('Yxy', cs);
-console.log(BasicCategoricalColor.categoryOfYxy(...cs));
-ics = RGB.fromLRGB(...LRGB.fromXYZ(...XYZ.fromYxy(...cs)));
-console.log(ics);
+console.log('--------------------------------');
 
-cs = Munsell.fromXYZ(...XYZ.fromLRGB(...LRGB.fromRGB(...orig)));
-console.log('Munsell', cs);
-console.log(Munsell.hueValueToHueName(cs[0], cs[2]));
-ics = RGB.fromLRGB(...LRGB.fromXYZ(...Munsell.toXYZ(...cs)));
+console.log('Yxy');
+cs = convert(orig, 'RGB', 'Yxy');
+ics = convert(cs, 'Yxy', 'RGB');
+console.log(round(cs));
 console.log(ics);
+console.log(CategoricalColor.categoryOfYxy(...cs));
 
-cs = PCCS.fromMunsell(...cs);
-console.log('PCCS', cs);
-ics = PCCS.toMunsell(...cs);
-console.log(ics);
+console.log('--------------------------------');
 
-ics = RGB.fromLRGB(...LRGB.fromXYZ(...Munsell.toXYZ(50, 5, 50)));
+console.log('Munsell');
+cs = convert(orig, 'RGB', 'Munsell');
+ics = convert(cs, 'Munsell', 'RGB');
+console.log(round(cs));
 console.log(ics);
+console.log(Munsell.toString(cs));
+
+console.log('--------------------------------');
+
+console.log('PCCS');
+cs = convert(orig, 'RGB', 'PCCS');
+ics = convert(cs, 'PCCS', 'RGB');
+console.log(round(cs));
+console.log(ics);
+console.log(PCCS.toString(...cs));
