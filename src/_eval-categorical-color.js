@@ -3,11 +3,11 @@
  * Basic Categorical Colors
  *
  * @author Takuto Yanagida
- * @version 2020-11-24
+ * @version 2020-11-27
  */
 
 
-class BasicCategoricalColor {
+class CategoricalColor {
 
 	/**
 	 * Find the Basic categorical color of the specified color.
@@ -17,18 +17,18 @@ class BasicCategoricalColor {
 	 * @return Basic categorical color
 	 */
 	static categoryOfYxy(y, sx, sy) {
-		const lum = Math.pow(y * this._Y_TO_LUM, 0.9);  // magic number
+		const lum = Math.pow(y * CategoricalColor._Y_TO_LUM, 0.9);  // magic number
 
 		let diff = Number.MAX_VALUE;
 		let clum = 0;
-		for (let l of this._LUM_TABLE) {
+		for (let l of CategoricalColor._LUM_TABLE) {
 			const d = Math.abs(lum - l);
 			if (d < diff) {
 				diff = d;
 				clum = l;
 			}
 		}
-		const t = this._CC_TABLE[clum];
+		const t = CategoricalColor._CC_TABLE[clum];
 		sx *= 1000;
 		sy *= 1000;
 		let dis = Number.MAX_VALUE;
@@ -44,18 +44,18 @@ class BasicCategoricalColor {
 			}
 		}
 		const ci = (cc === 'a') ? 10 : parseInt(cc);
-		return this.COLORS[ci];
+		return CategoricalColor.COLORS[ci];
 	}
 
 }
 
-BasicCategoricalColor.COLORS = [
+CategoricalColor.COLORS = [
 	'white', 'black', 'red', 'green',
 	'yellow', 'blue', 'brown', 'purple',
 	'pink', 'orange', 'gray',
 ];
-BasicCategoricalColor._Y_TO_LUM = 60.0;
-BasicCategoricalColor._LUM_TABLE = [2, 5, 10, 20, 30, 40];
+CategoricalColor._Y_TO_LUM = 60;
+CategoricalColor._LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
 //=
 //=include table/_cc-min.js
