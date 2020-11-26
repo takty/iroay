@@ -285,6 +285,28 @@ class Munsell {
 		return XYZ.fromIlluminantC(...Yxy.toXYZ(...dest));
 	}
 
+	/**
+	 * Convert Munsell (HVC) to PCCS (hls).
+	 * @param H Hue of Munsell color
+	 * @param V Value of Munsell color
+	 * @param C Chroma of Munsell color
+	 * @return PCCS color
+	 */
+	static toPCCS(H, V, C) {
+		return PCCS.fromMunsell(H, V, C);
+	}
+
+	/**
+	 * Convert PCCS (hls) to Munsell (HVC).
+	 * @param h Hue of PCCS color
+	 * @param l Lightness of PCCS color
+	 * @param s Saturation of PCCS color
+	 * @return Munsell color
+	 */
+	static fromPCCS(h, l, s) {
+		return PCCS.toMunsell(h, l, s);
+	}
+
 	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
 	// Return false if it is out of the range of the table.
 	static _interpolateXY(h, c, vi) {

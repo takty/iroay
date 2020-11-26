@@ -3,7 +3,7 @@
  * This class converts the CIE 1931 XYZ color system.
  *
  * @author Takuto Yanagida
- * @version 2019-10-13
+ * @version 2020-11-26
  *
  */
 
@@ -100,6 +100,28 @@ class XYZ {
 	 */
 	static fromLMS(l, m, s) {
 		return LMS.toXYZ(l, m, s);
+	}
+
+	/**
+	 * Convert CIE 1931 XYZ to Munsell (HVC).
+	 * @param x X of XYZ color (standard illuminant D65)
+	 * @param y Y of XYZ color (standard illuminant D65)
+	 * @param z Z of XYZ color (standard illuminant D65)
+	 * @return Munsell color
+	 */
+	static toMunsell(x, y, z) {
+		return Munsell.fromXYZ(x, y, z);
+	}
+
+	/**
+	 * Convert Munsell (HVC) to CIE 1931 XYZ.
+	 * @param h Hue of Munsell color
+	 * @param v Value of Munsell color
+	 * @param c Chroma of Munsell color
+	 * @return XYZ color
+	 */
+	static fromMunsell(h, v, c) {
+		return Munsell.toXYZ(h, v, c);
 	}
 
 
