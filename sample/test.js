@@ -36,3 +36,6 @@ cs = PCCS.fromMunsell(...cs);
 console.log('PCCS', cs);
 ics = PCCS.toMunsell(...cs);
 console.log(ics);
+
+ics = RGB.fromLRGB(...LRGB.fromXYZ(...Munsell.toXYZ(50, 5, 50)));
+console.log(ics);

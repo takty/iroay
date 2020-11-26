@@ -1,8 +1,4 @@
 /node_modules/
 /dist/
-/dist-ja/
-/package/
-/.temp/
 npm-debug.log
-/sample/
-/.sample.backup/
+/sample/.*
