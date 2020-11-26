@@ -23,10 +23,10 @@ const draw = function (p, sl) {
 // 	drawChartRGB(p, value / 100);
 // 	drawChartLRGB(p, value / 100);
 // 	drawChartXYZ(p, value / 100);
-// 	drawChartLab(p, value / 100);
+	drawChartLab(p, value / 100);
 // 	drawChartYxy(p, value / 100);
 // 	drawChartMunsell(p, value / 100);
-	drawChartPCCS(p, value / 100);
+// 	drawChartPCCS(p, value / 100);
 };
 
 const drawChartRGB = function (p, value) {
