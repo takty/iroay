@@ -7,7 +7,7 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2020-11-25
+ * @version 2020-11-26
  *
  */
 
@@ -119,7 +119,9 @@ class PCCS {
 
 	/**
 	 * Convert Munsell (HVC) to PCCS (hls).
-	 * @param src Munsell color
+	 * @param H Hue of Munsell color
+	 * @param V Value of Munsell color
+	 * @param C Chroma of Munsell color
 	 * @return PCCS color
 	 */
 	static fromMunsell(H, V, C) {
@@ -149,7 +151,9 @@ class PCCS {
 
 	/**
 	 * Convert PCCS (hls) to Munsell (HVC).
-	 * @param src PCCS color
+	 * @param h Hue of PCCS color
+	 * @param l Lightness of PCCS color
+	 * @param s Saturation of PCCS color
 	 * @return Munsell color
 	 */
 	static toMunsell(h, l, s) {
@@ -179,7 +183,9 @@ class PCCS {
 
 	/**
 	 * Calculate tone.
-	 * @param hls PCCS color
+	 * @param h Hue of PCCS color
+	 * @param l Lightness of PCCS color
+	 * @param s Saturation of PCCS color
 	 * @return Tone
 	 */
 	tone(h, l, s) {
@@ -211,7 +217,9 @@ class PCCS {
 
 	/**
 	 * Return relative lightness (lightness in tone coordinate system).
-	 * @param hls PCCS color
+	 * @param h Hue of PCCS color
+	 * @param l Lightness of PCCS color
+	 * @param s Saturation of PCCS color
 	 * @return Relative lightness l
 	 */
 	relativeLightness(h, l, s) {
@@ -229,7 +237,9 @@ class PCCS {
 
 	/**
 	 * Convert PCCS color to tone coordinate color.
-	 * @param src PCCS color
+	 * @param h Hue of PCCS color
+	 * @param l Lightness of PCCS color
+	 * @param s Saturation of PCCS color
 	 * @return Tone coordinate color
 	 */
 	static toToneCoordinate(h, l, s) {
@@ -247,32 +257,34 @@ class PCCS {
 
 	/**
 	 * Returns the string representation of PCCS numerical representation.
-	 * @param hlc PCCS color
+	 * @param h Hue of PCCS color
+	 * @param l Lightness of PCCS color
+	 * @param s Saturation of PCCS color
 	 * @return String representation
 	 */
-	toString(h, l, c) {
+	toString(h, l, s) {
 		const l_str = (Math.round(l * 10) / 10);
-		if (c < PCCS._MONO_LIMIT_S) {
+		if (s < PCCS._MONO_LIMIT_S) {
 			if (9.5 <= l) return 'W N-' + l_str;
 			if (l <= 1.5) return 'Bk N-' + l_str;
 			return 'Gy-' + l_str + ' N-' + l_str;
 		} else {
-			const t = PCCS.tone(h, l, c);
+			const t = PCCS.tone(h, l, s);
 			let tn = Math.round(h);
 			if (tn <= 0) tn = PCCS._MAX_HUE;
 			if (PCCS._MAX_HUE < tn) tn -= PCCS._MAX_HUE;
 			const h_str = (Math.round(h * 10) / 10);
-			const c_str = (Math.round(c * 10) / 10);
+			const s_str = (Math.round(s * 10) / 10);
 			if (t == PCCS.Tone.none) {
-				return h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + c_str + 's';
+				return h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + s_str + 's';
 			} else {
-				return PCCS._TONE_NAMES[t.ordinal()] + h_str + ' ' + h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + c_str + 's';
+				return PCCS._TONE_NAMES[t.ordinal()] + h_str + ' ' + h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + s_str + 's';
 			}
 		}
 	}
 
-	toHueString(h, l, c) {
-		if (c < PCCS._MONO_LIMIT_S) {
+	toHueString(h, l, s) {
+		if (s < PCCS._MONO_LIMIT_S) {
 			return 'N';
 		} else {
 			let tn = Math.round(h);
@@ -282,13 +294,13 @@ class PCCS {
 		}
 	}
 
-	toToneString(h, l, c) {
-		if (c < PCCS._MONO_LIMIT_S) {
+	toToneString(h, l, s) {
+		if (s < PCCS._MONO_LIMIT_S) {
 			if (9.5 <= l) return 'W';
 			if (l <= 1.5) return 'Bk';
 			return 'Gy';
 		} else {
-			const t = PCCS.tone(h, l, c);
+			const t = PCCS.tone(h, l, s);
 			return PCCS._TONE_NAMES[t.ordinal()];
 		}
 	}
