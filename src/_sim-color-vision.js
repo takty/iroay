@@ -111,7 +111,7 @@ class ColorVisionSimulation {
 		const lg2 = 0.992052 * lg + 0.003974;
 		const lb2 = 0.992052 * lb + 0.003974;
 
-		const [l, m, s] = LMS.fromXYZ(...XYZ.fromLRGB(lr2, lg2, lb2));
+		const [l, m, s] = COLOR_SPACE_NS.LMS.fromXYZ(...COLOR_SPACE_NS.XYZ.fromLRGB(lr2, lg2, lb2));
 		const [l2, m2, s2] = ColorVisionSimulation.brettelP(l, m, s);
 
 		let l3, m3, s3;
@@ -120,7 +120,7 @@ class ColorVisionSimulation {
 		} else {
 			[l3, m3, s3] = [l2, m2, s2];
 		}
-		return LRGB.fromXYZ(...XYZ.fromLMS(l3, s3, m3));
+		return COLOR_SPACE_NS.LRGB.fromXYZ(...COLOR_SPACE_NS.XYZ.fromLMS(l3, s3, m3));
 	}
 
 	/**
@@ -136,7 +136,7 @@ class ColorVisionSimulation {
 		const lg2 = 0.957237 * lg + 0.0213814;
 		const lb2 = 0.957237 * lb + 0.0213814;
 
-		const [l, m, s] = LMS.fromXYZ(...XYZ.fromLRGB(lr2, lg2, lb2));
+		const [l, m, s] = COLOR_SPACE_NS.LMS.fromXYZ(...COLOR_SPACE_NS.XYZ.fromLRGB(lr2, lg2, lb2));
 		const [l2, m2, s2] = ColorVisionSimulation.brettelD(l, m, s);
 
 		let l3, m3, s3;
@@ -145,13 +145,13 @@ class ColorVisionSimulation {
 		} else {
 			[l3, m3, s3] = [l2, m2, s2];
 		}
-		return LRGB.fromXYZ(...XYZ.fromLMS(l3, s3, m3));
+		return ColorVisionSimulation.LRGB.fromXYZ(...COLOR_SPACE_NS.XYZ.fromLMS(l3, s3, m3));
 	}
 
 }
 
-ColorVisionSimulation.LMS_BASE  = LMS.fromXYZ(1, 1, 1);
-ColorVisionSimulation.LMS_BASE2 = LMS.fromXYZ(...XYZ.fromLRGB(1, 1, 1));
+ColorVisionSimulation.LMS_BASE  = COLOR_SPACE_NS.LMS.fromXYZ(1, 1, 1);
+ColorVisionSimulation.LMS_BASE2 = COLOR_SPACE_NS.LMS.fromXYZ(...COLOR_SPACE_NS.XYZ.fromLRGB(1, 1, 1));
 
 ColorVisionSimulation.ALPHA = 1;
 ColorVisionSimulation.BETA  = 1;
