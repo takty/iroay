@@ -3,7 +3,7 @@
  * Converter of original hc2xy data for minimizing
  *
  * @author Takuto Yanagida
- * @version 2020-11-26
+ * @version 2020-11-27
  *
  */
 
@@ -18,12 +18,12 @@ Munsell = {};
 Munsell._TBL_V = _TBL_V_REAL;
 Munsell._TBL_SRC = new Array(Munsell._TBL_V.length);
 
-// require('./src/table/orig/_hc2xy-all.js');
-require('./src/table/orig/_hc2xy-real.js');
+// require('../src/table/orig/_hc2xy-all.js');
+require('../src/table/orig/_hc2xy-real.js');
 convert();
 
-// require('./src/table/_hc2xy-all-min.js');
-// require('./src/table/_hc2xy-real-min.js');
+// require('../src/table/_hc2xy-all-min.js');
+// require('../src/table/_hc2xy-real-min.js');
 // invert();
 
 function convert() {
