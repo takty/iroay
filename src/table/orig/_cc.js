@@ -1,4 +1,4 @@
-CategoricalColor._CC_TABLE = [  // [Lum, x, y, Category]
+Evaluation._CC_TABLE = [  // [Lum, x, y, Category]
 	[2, 0.175, 0.100, 5],
 	[2, 0.175, 0.125, 5],
 
