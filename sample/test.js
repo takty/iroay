@@ -42,7 +42,7 @@ cs = convert(orig, 'RGB', 'Yxy');
 ics = convert(cs, 'Yxy', 'RGB');
 console.log(round(cs));
 console.log(ics);
-console.log(CategoricalColor.categoryOfYxy(...cs));
+console.log(Evaluation.categoryOfYxy(...cs));
 
 console.log('--------------------------------');
 
