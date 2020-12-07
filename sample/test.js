@@ -42,7 +42,7 @@ cs = convert(orig, 'RGB', 'Yxy');
 ics = convert(cs, 'Yxy', 'RGB');
 console.log(round(cs));
 console.log(ics);
-console.log(Evaluation.categoryOfYxy(...cs));
+console.log(Evaluation.categoryOfYxy(cs));
 
 console.log('--------------------------------');
 
@@ -60,4 +60,4 @@ cs = convert(orig, 'RGB', 'PCCS');
 ics = convert(cs, 'PCCS', 'RGB');
 console.log(round(cs));
 console.log(ics);
-console.log(PCCS.toString(...cs));
+console.log(PCCS.toString(cs));
