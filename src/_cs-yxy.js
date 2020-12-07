@@ -3,7 +3,7 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2020-12-07
  *
  */
 
@@ -12,12 +12,10 @@ class Yxy {
 
 	/**
 	 * Convert CIE 1931 XYZ to Yxy.
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return Yxy color
+	 * @param {number[]} xyz XYZ color
+	 * @return {number[]} Yxy color
 	 */
-	static fromXYZ(x, y, z) {
+	static fromXYZ([x, y, z]) {
 		const sum = x + y + z;
 		if (sum === 0) return [y, 0.31273, 0.32902];  // White point D65
 		return [y, x / sum, y / sum];
@@ -25,12 +23,10 @@ class Yxy {
 
 	/**
 	 * Convert Yxy to CIE 1931 XYZ.
-	 * @param y Y of Yxy color
-	 * @param sx Small x of Yxy color
-	 * @param sy Small y of Yxy color
-	 * @return XYZ color
+	 * @param {number[]} yxy Yxy color
+	 * @return {number[]} XYZ color
 	 */
-	static toXYZ(y, sx, sy) {
+	static toXYZ([y, sx, sy]) {
 		const d0 = sx * y / sy;
 		if (Number.isNaN(d0)) {
 			Yxy.isSaturated = false;
@@ -48,13 +44,11 @@ class Yxy {
 
 	/**
 	 * Calculate the basic categorical color of the specified color.
-	 * @param y Y of Yxy color
-	 * @param sx Small x of Yxy color
-	 * @param sy Small y of Yxy color
-	 * @return Basic categorical color
+	 * @param {number[]} yxy Yxy color
+	 * @return {string} Basic categorical color
 	 */
-	static categoryOf(y, sx, sy) {
-		return Evaluation.categoryOfYxy(y, sx, sy);
+	static categoryOf(yxy) {
+		return Evaluation.categoryOfYxy(yxy);
 	}
 
 }

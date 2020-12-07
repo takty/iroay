@@ -3,7 +3,7 @@
  * Evaluation Methods
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2020-12-07
  *
  */
 
@@ -18,13 +18,11 @@ class Evaluation {
 	 * Calculate the conspicuity degree.
 	 * Reference: Effective use of color conspicuity for Re-Coloring system,
 	 * Correspondences on Human interface Vol. 12, No. 1, SIG-DE-01, 2010.
-	 * @param ls L* of CIELAB color
-	 * @param as a* of CIELAB color
-	 * @param bs b* of CIELAB color
-	 * @return Conspicuity degree [0, 180]
+	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @return {number} Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
-	static conspicuityOfLab(ls, as, bs) {
+	static conspicuityOfLab([ls, as, bs]) {
 		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
 		const H = rad / (Math.PI * 2) * 360;
 		const a = 35;  // Constant
@@ -38,15 +36,11 @@ class Evaluation {
 
 	/**
 	 * Color difference calculation method by CIE 76
-	 * @param ls1 L* of CIELAB color 1
-	 * @param as1 a* of CIELAB color 1
-	 * @param bs1 b* of CIELAB color 1
-	 * @param ls2 L* of CIELAB color 2
-	 * @param as2 a* of CIELAB color 2
-	 * @param bs2 b* of CIELAB color 2
-	 * @return Color difference
+	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @return {number} Color difference
 	 */
-	static CIE76(ls1, as1, bs1, ls2, as2, bs2) {
+	static CIE76([ls1, as1, bs1], [ls2, as2, bs2]) {
 		return Math.sqrt((ls1 - ls2) * (ls1 - ls2) + (as1 - as2) * (as1 - as2) + (bs1 - bs2) * (bs1 - bs2));
 	}
 
@@ -54,15 +48,11 @@ class Evaluation {
 	* Color difference calculation method by CIEDE2000
 	* Reference: http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
 	* http://d.hatena.ne.jp/yoneh/20071227/1198758604
-	 * @param ls1 L* of CIELAB color 1
-	 * @param as1 a* of CIELAB color 1
-	 * @param bs1 b* of CIELAB color 1
-	 * @param ls2 L* of CIELAB color 2
-	 * @param as2 a* of CIELAB color 2
-	 * @param bs2 b* of CIELAB color 2
-	 * @return Color difference
+	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @return {number} Color difference
 	*/
-	static CIEDE2000(ls1, as1, bs1, ls2, as2, bs2) {
+	static CIEDE2000([ls1, as1, bs1], [ls2, as2, bs2]) {
 		const C1 = Math.sqrt(as1 * as1 + bs1 * bs1), C2 = Math.sqrt(as2 * as2 + bs2 * bs2);
 		const Cb = (C1 + C2) / 2;
 		const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + Math.pow(25, 7))));
@@ -116,20 +106,16 @@ class Evaluation {
 
 	/**
 	 * Calculate the color difference between the two colors.
-	 * @param ls1 L* of CIELAB color 1
-	 * @param as1 a* of CIELAB color 1
-	 * @param bs1 b* of CIELAB color 1
-	 * @param ls2 L* of CIELAB color 2
-	 * @param as2 a* of CIELAB color 2
-	 * @param bs2 b* of CIELAB color 2
-	 * @param method Method of calculation
-	 * @return Color difference
+	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @param {string} method Method of calculation
+	 * @return {number} Color difference
 	 */
-	static differenceBetweenLab(ls1, as1, bs1, ls2, as2, bs2, method = 'cie76') {
+	static differenceBetweenLab(lab1, lab2, method = 'cie76') {
 		if (method === 'cie76') {
-			return Evaluation.CIE76(ls1, as1, bs1, ls2, as2, bs2);
+			return Evaluation.CIE76(lab1, lab2);
 		} else {
-			return Evaluation.CIEDE2000(ls1, as1, bs1, ls2, as2, bs2);
+			return Evaluation.CIEDE2000(lab1, lab2);
 		}
 	}
 
@@ -139,12 +125,10 @@ class Evaluation {
 
 	/**
 	 * Find the basic categorical color of the specified color.
-	 * @param y Y of Yxy color
-	 * @param sx Small x of Yxy color
-	 * @param sy Small y of Yxy color
-	 * @return Basic categorical color
+	 * @param {number[]} yxy Yxy color
+	 * @return {string} Basic categorical color
 	 */
-	static categoryOfYxy(y, sx, sy) {
+	static categoryOfYxy([y, sx, sy]) {
 		const lum = Math.pow(y * Evaluation._Y_TO_LUM, 0.9);  // magic number
 
 		let diff = Number.MAX_VALUE;

@@ -4,7 +4,7 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2020-12-07
  *
  */
 
@@ -35,12 +35,10 @@ class RGB {
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to Linear RGB.
-	 * @param r R of sRGB color
-	 * @param g G of sRGB color
-	 * @param b B of sRGB color
-	 * @return Linear RGB color
+	 * @param {number[]} rgb sRGB color
+	 * @return {number[]} Linear RGB color
 	 */
-	static toLRGB(r, g, b) {
+	static toLRGB([r, g, b]) {
 		return [
 			RGB._func(r / 255),
 			RGB._func(g / 255),
@@ -50,12 +48,10 @@ class RGB {
 
 	/**
 	 * Convert Linear RGB to sRGB (Gamma 2.2).
-	 * @param lr R of Linear RGB color
-	 * @param lg G of Linear RGB color
-	 * @param lb B of Linear RGB color
-	 * @return sRGB color
+	 * @param {number[]} lrgb Linear RGB color
+	 * @return {number[]} sRGB color
 	 */
-	static fromLRGB(lr, lg, lb) {
+	static fromLRGB([lr, lg, lb]) {
 		const dest = [
 			RGB._invFunc(lr) * 255 | 0,
 			RGB._invFunc(lg) * 255 | 0,
@@ -71,25 +67,23 @@ class RGB {
 
 	/**
 	 * Convert color integer to sRGB.
-	 * @param src Color integer
-	 * @return Color vector
+	 * @param {number} v Color integer
+	 * @return {number[]} Color vector
 	 */
-	static fromColorInteger(src) {
+	static fromColorInteger(v) {
 		return [
-			(src >> 16) & 0xFF,
-			(src >>  8) & 0xFF,
-			(src      ) & 0xFF,
+			(v >> 16) & 0xFF,
+			(v >>  8) & 0xFF,
+			(v      ) & 0xFF,
 		];
 	}
 
 	/**
 	 * Convert sRGB to color integer.
-	 * @param r Red
-	 * @param g Green
-	 * @param b Blue
-	 * @return Color integer
+	 * @param {number[]} rgb RGB
+	 * @return {number} Color integer
 	 */
-	static toColorInteger(r, g, b) {
+	static toColorInteger([r, g, b]) {
 		return (r << 16) | (g << 8) | b | 0xff000000;
 	}
 
@@ -99,68 +93,56 @@ class RGB {
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to CIELAB (L*a*b*).
-	 * @param r R of sRGB color
-	 * @param g G of sRGB color
-	 * @param b B of sRGB color
-	 * @return CIELAB color
+	 * @param {number[]} rgb sRGB color
+	 * @return {number[]} CIELAB color
 	 */
-	static toLab(r, g, b) {
-		return Lab.fromXYZ(...XYZ.fromLRGB(...LRGB.fromRGB(r, g, b)));
+	static toLab(rgb) {
+		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 	}
 
 	/**
 	 * Convert CIELAB (L*a*b*) to sRGB (Gamma 2.2).
-	 * @param ls L* of CIELAB color
-	 * @param as a* of CIELAB color
-	 * @param bs b* of CIELAB color
-	 * @return sRGB color
+	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @return {number[]} sRGB color
 	 */
-	static fromLab(ls, as, bs) {
-		return RGB.fromLRGB(...LRGB.fromXYZ(...XYZ.fromLab(ls, as, bs)));
+	static fromLab(lab) {
+		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(lab)));
 	}
 
 	/**
 	 * Convert sRGB to CIE 1931 XYZ.
-	 * @param r R of sRGB color
-	 * @param g G of sRGB color
-	 * @param b B of sRGB color
-	 * @return XYZ color
+	 * @param {number[]} rgb sRGB color
+	 * @return {number[]} XYZ color
 	 */
-	static toXYZ(r, g, b) {
-		return LRGB.toXYZ(...LRGB.fromRGB(r, g, b));
+	static toXYZ(rgb) {
+		return LRGB.toXYZ(LRGB.fromRGB(rgb));
 	}
 
 	/**
 	 * Convert CIE 1931 XYZ to sRGB.
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return sRGB color
+	 * @param {number[]} xyz XYZ color
+	 * @return {number[]} sRGB color
 	 */
-	static fromXYZ(x, y, z) {
-		return RGB.fromLRGB(...LRGB.fromXYZ(x, y, z));
+	static fromXYZ(xyz) {
+		return RGB.fromLRGB(LRGB.fromXYZ(xyz));
 	}
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to Yxy.
-	 * @param r R of sRGB color
-	 * @param g G of sRGB color
-	 * @param b B of sRGB color
-	 * @return Yxy color
+	 * @param {number[]} rgb sRGB color
+	 * @return {number[]} Yxy color
 	 */
-	static toYxy(r, g, b) {
-		return Yxy.fromXYZ(...XYZ.fromLRGB(...LRGB.fromRGB(r, g, b)));
+	static toYxy(rgb) {
+		return Yxy.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 	}
 
 	/**
 	 * Convert Yxy to sRGB (Gamma 2.2).
-	 * @param y Y of Yxy color
-	 * @param sx Small x of Yxy color
-	 * @param sy Small y of Yxy color
-	 * @return sRGB color
+	 * @param {number[]} yxy Yxy color
+	 * @return {number[]} sRGB color
 	 */
-	static fromYxy(y, sx, sy) {
-		return RGB.fromLRGB(...LRGB.fromXYZ(...XYZ.fromYxy(y, sx, sy)));
+	static fromYxy(yxy) {
+		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromYxy(yxy)));
 	}
 
 
@@ -169,14 +151,12 @@ class RGB {
 
 	/**
 	 * Convert sRGB to Lightness-only sRGB.
-	 * @param r R of sRGB color
-	 * @param g G of sRGB color
-	 * @param b B of sRGB color
-	 * @return Lightness-only sRGB color
+	 * @param {number[]} rgb sRGB color
+	 * @return {number[]} Lightness-only sRGB color
 	 */
-	static toLightness(r, g, b) {
-		const l = Lab.lightnessFromXYZ(...XYZ.fromLRGB(...LRGB.fromRGB(r, g, b)));
-		return RGB.fromLRGB(...LRGB.fromXYZ(...XYZ.fromLab(l, 0, 0)));
+	static toLightness(rgb) {
+		const l = Lab.lightnessFromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
+		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab([l, 0, 0])));
 	}
 
 }

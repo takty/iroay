@@ -119,12 +119,10 @@ class PCCS {
 
 	/**
 	 * Convert Munsell (HVC) to PCCS (hls).
-	 * @param H Hue of Munsell color
-	 * @param V Value of Munsell color
-	 * @param C Chroma of Munsell color
-	 * @return PCCS color
+	 * @param {number[]} hvc Hue, value, chroma of Munsell color
+	 * @return {number[]} PCCS color
 	 */
-	static fromMunsell(H, V, C) {
+	static fromMunsell([H, V, C]) {
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 		let h = 0, l = V, s = 0;
 
@@ -151,12 +149,10 @@ class PCCS {
 
 	/**
 	 * Convert PCCS (hls) to Munsell (HVC).
-	 * @param h Hue of PCCS color
-	 * @param l Lightness of PCCS color
-	 * @param s Saturation of PCCS color
-	 * @return Munsell color
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {number[]} Munsell color
 	 */
-	static toMunsell(h, l, s) {
+	static toMunsell([h, l, s]) {
 		let H = 0, V = l, C = 0;
 
 		if (s < PCCS._MONO_LIMIT_S) {
@@ -183,13 +179,12 @@ class PCCS {
 
 	/**
 	 * Calculate tone.
-	 * @param h Hue of PCCS color
-	 * @param l Lightness of PCCS color
-	 * @param s Saturation of PCCS color
-	 * @return Tone
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {number} Tone
 	 */
-	static tone(h, l, s) {
-		const t = PCCS.relativeLightness(h, l, s);
+	static tone(hls) {
+		const [h, l, s] = hls;
+		const t = PCCS.relativeLightness(hls);
 		const tu = s * -3 / 10 + 8.5, td = s * 3 / 10 + 2.5;
 
 		if (s < 1) {
@@ -217,73 +212,72 @@ class PCCS {
 
 	/**
 	 * Return relative lightness (lightness in tone coordinate system).
-	 * @param h Hue of PCCS color
-	 * @param l Lightness of PCCS color
-	 * @param s Saturation of PCCS color
-	 * @return Relative lightness l
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {number[]} Relative lightness L
 	 */
-	static relativeLightness(h, l, s) {
+	static relativeLightness([h, l, s]) {
 		return l - (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
 	}
 
 	/**
 	 * Return absolute lightness (lightness in PCCS).
-	 * @param hLs Tone coordinate color
-	 * @return Absolute lightness l
+	 * @param {number[]} hLs Tone coordinate color
+	 * @return {number[]} Absolute lightness l
 	 */
-	static absoluteLightness(h, L, s) {
+	static absoluteLightness([h, L, s]) {
 		return L + (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
 	}
 
 	/**
 	 * Convert PCCS color to tone coordinate color.
-	 * @param h Hue of PCCS color
-	 * @param l Lightness of PCCS color
-	 * @param s Saturation of PCCS color
-	 * @return Tone coordinate color
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {number[]} Tone coordinate color
 	 */
-	static toToneCoordinate(h, l, s) {
-		return [h, relativeLightness(h, l, s), s];
+	static toToneCoordinate(hls) {
+		return [hls[0], relativeLightness(hls), hls[2]];
 	}
 
 	/**
 	 * Convert tone coordinate color to PCCS color.
-	 * @param src Tone coordinate color
-	 * @return PCCS color
+	 * @param {number[]} hLs Tone coordinate color
+	 * @return {number[]} PCCS color
 	 */
-	static toNormalCoordinate(h, L, s) {
-		return [h, absoluteLightness(h, L, s), s];
+	static toNormalCoordinate(hLs) {
+		return [hLs[0], absoluteLightness(hLs), hLs[2]];
 	}
 
 	/**
 	 * Returns the string representation of PCCS numerical representation.
-	 * @param h Hue of PCCS color
-	 * @param l Lightness of PCCS color
-	 * @param s Saturation of PCCS color
-	 * @return String representation
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {string} String representation
 	 */
-	static toString(h, l, s) {
-		const l_str = (Math.round(l * 10) / 10);
-		if (s < PCCS._MONO_LIMIT_S) {
-			if (9.5 <= l) return 'W N-' + l_str;
-			if (l <= 1.5) return 'Bk N-' + l_str;
-			return 'Gy-' + l_str + ' N-' + l_str;
+	static toString(hls) {
+		const lstr = Math.round(hls[1] * 10) / 10;
+		if (hls[2] < PCCS._MONO_LIMIT_S) {
+			if (9.5 <= hls[1]) return `W N-${lstr}`;
+			if (hls[1] <= 1.5) return `Bk N-${lstr}`;
+			return `Gy-${lstr} N-${lstr}`;
 		} else {
-			const t = PCCS.tone(h, l, s);
-			let tn = Math.round(h);
+			const hstr = Math.round(hls[0] * 10) / 10;
+			const sstr = Math.round(hls[2] * 10) / 10;
+
+			let tn = Math.round(hls[0]);
 			if (tn <= 0) tn = PCCS._MAX_HUE;
 			if (PCCS._MAX_HUE < tn) tn -= PCCS._MAX_HUE;
-			const h_str = (Math.round(h * 10) / 10);
-			const s_str = (Math.round(s * 10) / 10);
-			if (t == PCCS.Tone.none) {
-				return h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + s_str + 's';
-			} else {
-				return PCCS._TONE_NAMES[t] + h_str + ' ' + h_str + ':' + PCCS._HUE_NAMES[tn] + '-' + l_str + '-' + s_str + 's';
-			}
+			const hue = PCCS._HUE_NAMES[tn];
+			const tone = PCCS._TONE_NAMES[PCCS.tone(hls)];
+
+			if (tone == 'none') return `${hstr}:${hue}-${lstr}-${sstr}s`;
+			return `${tone}${hstr} ${hstr}:${hue}-${lstr}-${sstr}s`;
 		}
 	}
 
-	static toHueString(h, l, s) {
+	/**
+	 * Returns the string representation of PCCS hues.
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {string} String representation of hues
+	 */
+	static toHueString([h, l, s]) {
 		if (s < PCCS._MONO_LIMIT_S) {
 			return 'N';
 		} else {
@@ -294,14 +288,18 @@ class PCCS {
 		}
 	}
 
-	static toToneString(h, l, s) {
-		if (s < PCCS._MONO_LIMIT_S) {
-			if (9.5 <= l) return 'W';
-			if (l <= 1.5) return 'Bk';
+	/**
+	 * Returns the string representation of PCCS tones.
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {string} String representation of tones
+	 */
+	static toToneString(hls) {
+		if (hls[2] < PCCS._MONO_LIMIT_S) {
+			if (9.5 <= hls[1]) return 'W';
+			if (hls[1] <= 1.5) return 'Bk';
 			return 'Gy';
 		} else {
-			const t = PCCS.tone(h, l, s);
-			return PCCS._TONE_NAMES[t];
+			return PCCS._TONE_NAMES[PCCS.tone(hls)];
 		}
 	}
 

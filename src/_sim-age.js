@@ -3,7 +3,7 @@
  * This class performs various simulations of color space.
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2020-12-08
  *
  */
 
@@ -28,12 +28,10 @@ class AgeSimulation {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of elderly people (70 years old) (conversion other than lightness).
-	 * @param ls L* of CIELAB color (young person)
-	 * @param as a* of CIELAB color (young person)
-	 * @param bs b* of CIELAB color (young person)
-	 * @return CIELAB color in color vision of elderly people
+	 * @param {number[]} lab L*, a*, b* of CIELAB color (young person)
+	 * @return {number[]} CIELAB color in color vision of elderly people
 	 */
-	static labToElderlyAB(ls, as, bs) {
+	static labToElderlyAB([ls, as, bs]) {
 		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) + AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) * AgeSimulation._chromaRatio(as, bs);
 		return [
@@ -45,12 +43,10 @@ class AgeSimulation {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of young people (20 years old) (conversion other than lightness).
-	 * @param ls L* of CIELAB color (elderly person)
-	 * @param as a* of CIELAB color (elderly person)
-	 * @param bs b* of CIELAB color (elderly person)
-	 * @return CIELAB color in color vision of young people
+	 * @param {number[]} lab L*, a*, b* of CIELAB color (elderly person)
+	 * @return {number[]} CIELAB color in color vision of young people
 	 */
-	static labToYoungAB(ls, as, bs) {
+	static labToYoungAB([ls, as, bs]) {
 		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) - AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) / AgeSimulation._chromaRatio(as, bs);
 		return [

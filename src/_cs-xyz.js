@@ -3,7 +3,7 @@
  * This class converts the CIE 1931 XYZ color system.
  *
  * @author Takuto Yanagida
- * @version 2020-11-26
+ * @version 2020-12-07
  *
  */
 
@@ -16,9 +16,7 @@ class XYZ {
 
 	/**
 	 * Convert CIE 1931 XYZ to Linear RGB.
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
+	 * @param {number[]} xyz XYZ color
 	 * @return Linear RGB color
 	 */
 	static toLRGB(x, y, z) {
@@ -27,101 +25,83 @@ class XYZ {
 
 	/**
 	 * Convert Linear RGB to CIE 1931 XYZ.
-	 * @param lr R of Linear RGB color
-	 * @param lg G of Linear RGB color
-	 * @param lb B of Linear RGB color
-	 * @return XYZ color
+	 * @param {number[]} lrgb Linear RGB color
+	 * @return {number[]} XYZ color
 	 */
-	static fromLRGB(lr, lg, lb) {
-		return LRGB.toXYZ(lr, lg, lb);
+	static fromLRGB(lrgb) {
+		return LRGB.toXYZ(lrgb);
 	}
 
 	/**
 	 * Convert CIE 1931 XYZ to Yxy.
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return Yxy color
+	 * @param {number[]} xyz XYZ color
+	 * @return {number[]} Yxy color
 	 */
-	static toYxy(x, y, z) {
-		return Yxy.fromXYZ(x, y, z);
+	static toYxy(xyz) {
+		return Yxy.fromXYZ(xyz);
 	}
 
 	/**
 	 * Convert Yxy to CIE 1931 XYZ.
-	 * @param y Y of Yxy color
-	 * @param sx Small x of Yxy color
-	 * @param sy Small y of Yxy color
-	 * @return XYZ color
+	 * @param {number[]} yxy Yxy color
+	 * @return {number[]} XYZ color
 	 */
-	static fromYxy(y, sx, sy) {
-		return Yxy.toXYZ(y, sx, sy);
+	static fromYxy(yxy) {
+		return Yxy.toXYZ(yxy);
 	}
 
 	/**
 	 * Convert CIE 1931 XYZ to CIE 1976 (L*, a*, b*).
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return CIELAB color
+	 * @param {number[]} xyz XYZ color
+	 * @return {number[]} CIELAB color
 	 */
-	static toLab(x, y, z) {
-		return Lab.fromXYZ(x, y, z);
+	static toLab(xyz) {
+		return Lab.fromXYZ(xyz);
 	}
 
 	/**
 	 * Convert CIE 1976 (L*, a*, b*) to CIE 1931 XYZ.
-	 * @param ls L* of CIELAB color
-	 * @param as a* of CIELAB color
-	 * @param bs b* of CIELAB color
-	 * @return XYZ color
+	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @return {number[]} XYZ color
 	 */
-	static fromLab(ls, as, bs) {
-		return Lab.toXYZ(ls, as, bs);
+	static fromLab(lab) {
+		return Lab.toXYZ(lab);
 	}
 
 	/**
 	 * Convert CIE 1931 XYZ to LMS.
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return LMS color
+	 * @param {number[]} xyz XYZ color
+	 * @return {number[]} LMS color
 	 */
-	static toLMS(x, y, z) {
-		return LMS.fromXYZ(x, y, z);
+	static toLMS(xyz) {
+		return LMS.fromXYZ(xyz);
 	}
 
 	/**
 	 * Convert LMS to CIE 1931 XYZ.
-	 * @param l L of LMS color
-	 * @param m M of LMS color
-	 * @param s S of LMS color
-	 * @return XYZ color
+	 * @param {number[]} lms LMS color
+	 * @return {number[]} XYZ color
 	 */
-	static fromLMS(l, m, s) {
-		return LMS.toXYZ(l, m, s);
+	static fromLMS(lms) {
+		return LMS.toXYZ(lms);
 	}
 
 	/**
 	 * Convert CIE 1931 XYZ to Munsell (HVC).
-	 * @param x X of XYZ color (standard illuminant D65)
-	 * @param y Y of XYZ color (standard illuminant D65)
-	 * @param z Z of XYZ color (standard illuminant D65)
-	 * @return Munsell color
+	 * @param {number[]} xyz XYZ color (standard illuminant D65)
+	 * @return {number[]} Munsell color
 	 */
-	static toMunsell(x, y, z) {
-		return Munsell.fromXYZ(x, y, z);
+	static toMunsell(xyz) {
+		return Munsell.fromXYZ(xyz);
 	}
 
 	/**
 	 * Convert Munsell (HVC) to CIE 1931 XYZ.
-	 * @param h Hue of Munsell color
-	 * @param v Value of Munsell color
-	 * @param c Chroma of Munsell color
-	 * @return XYZ color
+	 * @param {number[]} hvc Hue, value, chroma of Munsell color
+	 * @return {number[]} XYZ color
 	 */
-	static fromMunsell(h, v, c) {
-		return Munsell.toXYZ(h, v, c);
+	static fromMunsell(hvc) {
+		return Munsell.toXYZ(hvc);
 	}
 
 
@@ -131,12 +111,10 @@ class XYZ {
 	/**
 	 * Convert CIE 1931 XYZ of standard illuminant C to CIE 1931 XYZ of standard illuminant D65.
 	 * Reference: http://www.brucelindbloom.com/index.html?MunsellCalculator.html (Von Kries method)
-	 * @param x X of XYZ color (standard illuminant C)
-	 * @param y Y of XYZ color (standard illuminant C)
-	 * @param z Z of XYZ color (standard illuminant C)
-	 * @return XYZ of standard illuminant D65
+	 * @param {number[]} xyz XYZ color (standard illuminant C)
+	 * @return {number[]} XYZ of standard illuminant D65
 	 */
-	static fromIlluminantC(x, y, z) {
+	static fromIlluminantC([x, y, z]) {
 		return [
 			 0.9972812 * x + -0.0093756 * y + -0.0154171 * z,
 			-0.0010298 * x +  1.0007636 * y +  0.0002084 * z,
@@ -147,12 +125,10 @@ class XYZ {
 	/**
 	 * Convert CIE 1931 XYZ of standard illuminant D65 to CIE 1931 XYZ of standard illuminant C.
 	 * Reference: http://www.brucelindbloom.com/index.html?MunsellCalculator.html (Von Kries method)
-	 * @param x X of XYZ color (standard illuminant D65)
-	 * @param y Y of XYZ color (standard illuminant D65)
-	 * @param z Z of XYZ color (standard illuminant D65)
-	 * @return XYZ of standard illuminant C
+	 * @param {number[]} xyz XYZ color (standard illuminant D65)
+	 * @return {number[]} XYZ of standard illuminant C
 	 */
-	static toIlluminantC(x, y, z) {
+	static toIlluminantC([x, y, z]) {
 		return [
 			1.0027359 * x +  0.0093941 * y +  0.0167846 * z,
 			0.0010319 * x +  0.9992466 * y + -0.0002089 * z,

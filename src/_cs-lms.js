@@ -3,7 +3,7 @@
  * This class converts the LMS color system.
  *
  * @author Takuto Yanagida
- * @version 2019-10-13
+ * @version 2020-12-07
  *
  */
 
@@ -12,12 +12,10 @@ class LMS {
 
 	/**
 	 * Convert CIE 1931 XYZ to LMS.
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return LMS color
+	 * @param {number[]} xyz XYZ color
+	 * @return {number[]} LMS color
 	 */
-	static fromXYZ(x, y, z) {
+	static fromXYZ([x, y, z]) {
 		return [
 			LMS.matrix[0][0] * x + LMS.matrix[0][1] * y + LMS.matrix[0][2] * z,
 			LMS.matrix[1][0] * x + LMS.matrix[1][1] * y + LMS.matrix[1][2] * z,
@@ -27,12 +25,10 @@ class LMS {
 
 	/**
 	 * Convert LMS to CIE 1931 XYZ.
-	 * @param l L of LMS color
-	 * @param m M of LMS color
-	 * @param s S of LMS color
-	 * @return XYZ color
+	 * @param {number[]} lms LMS color
+	 * @return {number[]} XYZ color
 	 */
-	static toXYZ(l, m, s) {
+	static toXYZ([l, m, s]) {
 		return [
 			LMS.matrixInverse[0][0] * l + LMS.matrixInverse[0][1] * m + LMS.matrixInverse[0][2] * s,
 			LMS.matrixInverse[1][0] * l + LMS.matrixInverse[1][1] * m + LMS.matrixInverse[1][2] * s,

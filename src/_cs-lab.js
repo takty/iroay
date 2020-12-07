@@ -5,7 +5,7 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2020-12-07
  *
  */
 
@@ -24,12 +24,10 @@ class Lab {
 
 	/**
 	 * Convert CIE 1931 XYZ to CIE 1976 (L*, a*, b*).
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return CIELAB color
+	 * @param {number[]} xyz XYZ color
+	 * @return {number[]} CIELAB color
 	 */
-	static fromXYZ(x, y, z) {
+	static fromXYZ([x, y, z]) {
 		const fy = Lab._func(y / Lab.XYZ_TRISTIMULUS_VALUES[1]);
 		return [
 			116 * fy - 16,
@@ -40,24 +38,20 @@ class Lab {
 
 	/**
 	 * Convert CIE 1931 XYZ to L* of CIE 1976 (L*, a*, b*).
-	 * @param x X of XYZ color
-	 * @param y Y of XYZ color
-	 * @param z Z of XYZ color
-	 * @return L*
+	 * @param {number[]} xyz XYZ color
+	 * @return {number} L*
 	 */
-	static lightnessFromXYZ(x, y, z) {
+	static lightnessFromXYZ([x, y, z]) {
 		const fy = Lab._func(y / Lab.XYZ_TRISTIMULUS_VALUES[1]);
 		return 116 * fy - 16;
 	}
 
 	/**
 	 * Convert CIE 1976 (L*, a*, b*) to CIE 1931 XYZ.
-	 * @param ls L* of CIELAB color
-	 * @param as a* of CIELAB color
-	 * @param bs b* of CIELAB color
-	 * @return XYZ color
+	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @return {number[]} XYZ color
 	 */
-	static toXYZ(ls, as, bs) {
+	static toXYZ([ls, as, bs]) {
 		const fy = (ls + 16) / 116;
 		return [
 			Lab._invFunc(fy + as / 500) * Lab.XYZ_TRISTIMULUS_VALUES[0],
@@ -74,28 +68,22 @@ class Lab {
 	 * Calculate the conspicuity degree.
 	 * Reference: Effective use of color conspicuity for Re-Coloring system,
 	 * Correspondences on Human interface Vol. 12, No. 1, SIG-DE-01, 2010.
-	 * @param ls L* of CIELAB color
-	 * @param as a* of CIELAB color
-	 * @param bs b* of CIELAB color
-	 * @return Conspicuity degree [0, 180]
+	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @return {number} Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
-	static conspicuityOf(ls, as, bs) {
-		return Evaluation.conspicuityOfLab(ls, as, bs);
+	static conspicuityOf(lab) {
+		return Evaluation.conspicuityOfLab(lab);
 	}
 
 	/**
 	 * Calculate the color difference between the two colors.
-	 * @param ls1 L* of CIELAB color 1
-	 * @param as1 a* of CIELAB color 1
-	 * @param bs1 b* of CIELAB color 1
-	 * @param ls2 L* of CIELAB color 2
-	 * @param as2 a* of CIELAB color 2
-	 * @param bs2 b* of CIELAB color 2
-	 * @return Color difference
+	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @return {number} Color difference
 	 */
-	static differenceBetween(ls1, as1, bs1, ls2, as2, bs2) {
-		return Evaluation.differenceBetweenLab(ls1, as1, bs1, ls2, as2, bs2);
+	static differenceBetween(lab1, lab2) {
+		return Evaluation.differenceBetweenLab(lab1, lab2);
 	}
 
 
@@ -104,34 +92,28 @@ class Lab {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to sRGB (Gamma 2.2).
-	 * @param ls L* of CIELAB color
-	 * @param as a* of CIELAB color
-	 * @param bs b* of CIELAB color
-	 * @return sRGB color
+	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @return {number[]} sRGB color
 	 */
-	static toRGB(ls, as, bs) {
-		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(ls, as, bs)));
+	static toRGB(lab) {
+		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(lab)));
 	}
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to CIELAB (L*a*b*).
-	 * @param r R of sRGB color
-	 * @param g G of sRGB color
-	 * @param b B of sRGB color
-	 * @return CIELAB color
+	 * @param {number[]} rgb sRGB color
+	 * @return {number[]} CIELAB color
 	 */
-	static fromRGB(r, g, b) {
-		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(r, g, b)));
+	static fromRGB(rgb) {
+		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 	}
 
 	/**
 	 * Convert CIELAB (L*a*b*) from rectangular coordinate format to polar coordinate format.
-	 * @param ls L* of rectangular coordinate format (CIELAB)
-	 * @param as a* of rectangular coordinate format (CIELAB)
-	 * @param bs b* of rectangular coordinate format (CIELAB)
-	 * @return  Color in polar format
+	 * @param {number[]} lab L*, a*, b* of rectangular coordinate format (CIELAB)
+	 * @return {number[]} Color in polar format
 	 */
-	static toPolarCoordinate(ls, as, bs) {
+	static toPolarCoordinate([ls, as, bs]) {
 		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
 		const cs = Math.sqrt(as * as + bs * bs);
 		const h = rad * 360 / (Math.PI * 2);
@@ -140,12 +122,10 @@ class Lab {
 
 	/**
 	 * Convert CIELAB (L*a*b*) from polar coordinate format to rectangular coordinate format.
-	 * @param ls L* of polar format (CIELAB)
-	 * @param cs C* of polar format (CIELAB)
-	 * @param h h of polar format (CIELAB)
-	 * @return Color in rectangular coordinate format
+	 * @param {number[]} lab L*, C*, h of polar format (CIELAB)
+	 * @return {number[]} Color in rectangular coordinate format
 	 */
-	static toOrthogonalCoordinate(ls, cs, h) {
+	static toOrthogonalCoordinate([ls, cs, h]) {
 		const rad = h * (Math.PI * 2) / 360;
 		const as = Math.cos(rad) * cs;
 		const bs = Math.sin(rad) * cs;

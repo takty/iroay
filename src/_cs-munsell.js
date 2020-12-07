@@ -7,7 +7,7 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2020-12-07
  *
  */
 
@@ -50,7 +50,7 @@ class Munsell {
 	}
 
 	// Find the Munsell value from xyY (standard illuminant C).
-	static _yxy2mun(Y, x, y) {
+	static _yxy2mun([Y, x, y]) {
 		const v = Munsell._y2v(Y);  // Find Munsell lightness
 
 		// When the lightness is maximum 10
@@ -189,8 +189,8 @@ class Munsell {
 	/**
 	 * Convert name-based hue expression to hue value.
 	 * If the Name-based hue expression is N, -1 is returned.
-	 * @param hueName Name-based hue expression
-	 * @return Hue value
+	 * @param {string} hueName Name-based hue expression
+	 * @return {number} Hue value
 	 */
 	static hueNameToHueValue(hueName) {
 		if (hueName.length == 1) return -1;  // In case of achromatic color N
@@ -208,9 +208,9 @@ class Munsell {
 	/**
 	 * Convert hue value to name-based hue expression.
 	 * If the hue value is -1, or if the chroma value is 0, N is returned.
-	 * @param hue Hue value
-	 * @param chroma Chroma value
-	 * @return Name-based hue expression
+	 * @param {number} hue Hue value
+	 * @param {number} chroma Chroma value
+	 * @return {string} Name-based hue expression
 	 */
 	static hueValueToHueName(hue, chroma) {
 		if (hue == -1 || Munsell._eq0(chroma)) return 'N';
@@ -226,23 +226,19 @@ class Munsell {
 
 	/**
 	 * Convert CIE 1931 XYZ to Munsell (HVC).
-	 * @param x X of XYZ color (standard illuminant D65)
-	 * @param y Y of XYZ color (standard illuminant D65)
-	 * @param z Z of XYZ color (standard illuminant D65)
-	 * @return Munsell color
+	 * @param {number[]} xyz XYZ color (standard illuminant D65)
+	 * @return {number[]} Munsell color
 	 */
-	static fromXYZ(x, y, z) {
-		return Munsell._yxy2mun(...Yxy.fromXYZ(...XYZ.toIlluminantC(x, y, z)));
+	static fromXYZ(xyz) {
+		return Munsell._yxy2mun(Yxy.fromXYZ(XYZ.toIlluminantC(xyz)));
 	}
 
 	/**
 	 * Convert Munsell (HVC) to CIE 1931 XYZ.
-	 * @param h Hue of Munsell color
-	 * @param v Value of Munsell color
-	 * @param c Chroma of Munsell color
-	 * @return XYZ color
+	 * @param {number[]} hvc Hue, value, chroma of Munsell color
+	 * @return {number[]} XYZ color
 	 */
-	static toXYZ(h, v, c) {
+	static toXYZ([h, v, c]) {
 		if (Munsell._MAX_HUE <= h) h -= Munsell._MAX_HUE;
 		const dest = [Munsell._v2y(v), 0, 0];
 		Munsell.isSaturated = false;
@@ -251,14 +247,14 @@ class Munsell {
 		if (Munsell._eq0(v) || h < 0 || c < Munsell._MONO_LIMIT_C) {
 			dest[1] = Munsell._ILLUMINANT_C[0]; dest[2] = Munsell._ILLUMINANT_C[1];
 			Munsell.isSaturated = Munsell._eq0(v) && 0 < c;
-			return XYZ.fromIlluminantC(...Yxy.toXYZ(...dest));
+			return XYZ.fromIlluminantC(Yxy.toXYZ(dest));
 		}
 		// When the lightness is the maximum value 10 or more
 		if (Munsell._TBL_V[Munsell._TBL_V.length - 1] <= v) {
 			const xy = Munsell._interpolateXY(h, c, Munsell._TBL_V.length - 1);
 			dest[1] = xy[0]; dest[2] = xy[1];
 			Munsell.isSaturated = (Munsell._TBL_V[Munsell._TBL_V.length - 1] < v);
-			return XYZ.fromIlluminantC(...Yxy.toXYZ(...dest));
+			return XYZ.fromIlluminantC(Yxy.toXYZ(dest));
 		}
 		let vi_l = -1;
 		while (Munsell._TBL_V[vi_l + 1] <= v) ++vi_l;
@@ -282,29 +278,25 @@ class Munsell {
 		const x = (xy_u[0] - xy_l[0]) * r + xy_l[0], y = (xy_u[1] - xy_l[1]) * r + xy_l[1];
 		dest[1] = x; dest[2] = y;
 
-		return XYZ.fromIlluminantC(...Yxy.toXYZ(...dest));
+		return XYZ.fromIlluminantC(Yxy.toXYZ(dest));
 	}
 
 	/**
 	 * Convert Munsell (HVC) to PCCS (hls).
-	 * @param H Hue of Munsell color
-	 * @param V Value of Munsell color
-	 * @param C Chroma of Munsell color
-	 * @return PCCS color
+	 * @param {number[]} hvc Hue, value, chroma of Munsell color
+	 * @return {number[]} PCCS color
 	 */
-	static toPCCS(H, V, C) {
-		return PCCS.fromMunsell(H, V, C);
+	static toPCCS(hvc) {
+		return PCCS.fromMunsell(hvc);
 	}
 
 	/**
 	 * Convert PCCS (hls) to Munsell (HVC).
-	 * @param h Hue of PCCS color
-	 * @param l Lightness of PCCS color
-	 * @param s Saturation of PCCS color
-	 * @return Munsell color
+	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @return {number[]} Munsell color
 	 */
-	static fromPCCS(h, l, s) {
-		return PCCS.toMunsell(h, l, s);
+	static fromPCCS(hls) {
+		return PCCS.toMunsell(hls);
 	}
 
 	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
@@ -364,14 +356,17 @@ class Munsell {
 
 	/**
 	 * Returns the string representation of Munsell numerical representation.
-	 * @param hvc Munsell color
-	 * @return String representation
+	 * @param {number[]} hvc Hue, value, chroma of Munsell color
+	 * @return {string} String representation
 	 */
-	static toString(hvc) {
-		if (hvc[2] < Munsell._MONO_LIMIT_C) {
-			return 'N ' + (Math.round(hvc[1] * 10) / 10);
+	static toString([h, v, c]) {
+		const vstr = Math.round(v * 10) / 10;
+		if (c < Munsell._MONO_LIMIT_C) {
+			return `N ${vstr}`;
 		} else {
-			return Munsell.hueValueToHueName(hvc[0], hvc[2]) + ' ' + (Math.round(hvc[1] * 10) / 10) + '/' + (Math.round(hvc[2] * 10) / 10);
+			const hue = Munsell.hueValueToHueName(h, c);
+			const cstr = Math.round(c * 10) / 10;
+			return `${hue} ${vstr}/${cstr}`;
 		}
 	}
 
