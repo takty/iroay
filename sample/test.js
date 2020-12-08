@@ -61,3 +61,5 @@ ics = convert(cs, 'PCCS', 'RGB');
 console.log(round(cs));
 console.log(ics);
 console.log(PCCS.toString(cs));
+const ics2 = convert(cs, 'PCCS', 'Munsell');
+console.log(Munsell.toString(ics2));
