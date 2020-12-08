@@ -7,7 +7,7 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2020-12-08
  *
  */
 
@@ -76,7 +76,7 @@ class PCCS {
 		return H1 + (H2 - H1) * (h - h1) / (h2 - h1);
 	}
 
-	static _calcMunsellS(h, l, s) {
+	static _calcMunsellC(h, l, s) {
 		const a = PCCS._calcInterpolatedCoefficients(h);
 		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
 		return (a[3] * s * s * s + a[2] * s * s + a[1] * s) * (1 - Math.exp(-g * l));
@@ -111,7 +111,7 @@ class PCCS {
 				- 2.7  * Math.sin(x) + 1.5  * Math.sin(2 * x) - 0.4 * Math.sin(3 * x);
 	}
 
-	static _simplyCalcMunsellS(h, l, s) {
+	static _simplyCalcMunsellC(h, l, s) {
 		const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
 		const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
 		return Ct * (0.077 * s + 0.0040 * s * s) * (1 - Math.exp(-gt * l));
@@ -126,22 +126,9 @@ class PCCS {
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 		let h = 0, l = V, s = 0;
 
-		if (C < Munsell.MONO_LIMIT_C) {
-			switch (PCCS.conversionMethod) {
-				case PCCS.ConversionMethod.CONCISE:  h = PCCS._simplyCalcPccsH(H); break;
-				case PCCS.ConversionMethod.ACCURATE: h = PCCS._calcPccsH(H); break;
-			}
-		} else {
-			switch (PCCS.conversionMethod) {
-				case PCCS.ConversionMethod.CONCISE:
-					h = PCCS._simplyCalcPccsH(H);        // Hue
-					s = PCCS._simplyCalcPccsS(V, C, h);  // Saturation
-					break;
-				case PCCS.ConversionMethod.ACCURATE:
-					h = PCCS._calcPccsH(H);        // Hue
-					s = PCCS._calcPccsS(V, C, h);  // Saturation
-					break;
-			}
+		h = PCCS.conversionMethod._calcPccsH(H);
+		if (Munsell.MONO_LIMIT_C <= C) {
+			s = PCCS.conversionMethod._calcPccsS(V, C, h);
 		}
 		if (PCCS._MAX_HUE <= h) h -= PCCS._MAX_HUE;
 		return [h, l, s];
@@ -155,22 +142,9 @@ class PCCS {
 	static toMunsell([h, l, s]) {
 		let H = 0, V = l, C = 0;
 
-		if (s < PCCS._MONO_LIMIT_S) {
-			switch (PCCS.conversionMethod) {
-				case PCCS.ConversionMethod.CONCISE:  H = PCCS._simplyCalcMunsellH(h); break;
-				case PCCS.ConversionMethod.ACCURATE: H = PCCS._calcMunsellH(h); break;
-			}
-		} else {
-			switch (PCCS.conversionMethod) {
-				case PCCS.ConversionMethod.CONCISE:
-					H = PCCS._simplyCalcMunsellH(h);
-					C = PCCS._simplyCalcMunsellS(h, l, s);
-					break;
-				case PCCS.ConversionMethod.ACCURATE:
-					H = PCCS._calcMunsellH(h);
-					C = PCCS._calcMunsellS(h, l, s);
-					break;
-			}
+		H = PCCS.conversionMethod._calcMunsellH(h);
+		if (PCCS._MONO_LIMIT_S <= s) {
+			C = PCCS.conversionMethod._calcMunsellC(h, l, s);
 		}
 		if (H < 0) H += Munsell.MAX_HUE;
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
@@ -183,7 +157,7 @@ class PCCS {
 	 * @return {number} Tone
 	 */
 	static tone(hls) {
-		const [h, l, s] = hls;
+		const s = hls[2];
 		const t = PCCS.relativeLightness(hls);
 		const tu = s * -3 / 10 + 8.5, td = s * 3 / 10 + 2.5;
 
@@ -339,12 +313,22 @@ PCCS.ConversionMethod = Object.freeze({
 	/**
 	 * Concise conversion
 	 */
-	CONCISE: 0,
+	CONCISE: {
+		_calcMunsellH: PCCS._simplyCalcMunsellH,
+		_calcMunsellS: PCCS._simplyCalcMunsellC,
+		_calcPccsH: PCCS._simplyCalcPccsH,
+		_calcPccsS: PCCS._simplyCalcPccsS,
+	},
 
 	/**
 	 * Accurate conversion
 	 */
-	ACCURATE: 1
+	ACCURATE: {
+		_calcMunsellH: PCCS._calcMunsellH,
+		_calcMunsellC: PCCS._calcMunsellC,
+		_calcPccsH: PCCS._calcPccsH,
+		_calcPccsS: PCCS._calcPccsS,
+	}
 });
 
 /**

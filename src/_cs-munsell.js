@@ -7,7 +7,7 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2020-12-07
+ * @version 2020-12-08
  *
  */
 
@@ -81,7 +81,7 @@ class Munsell {
 		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
 		if (Munsell._MAX_HUE <= h) h -= Munsell._MAX_HUE;
 		let c = (hc_u[1] - hc_l[1]) * r + hc_l[1];
-		if (c < Munsell._MONO_LIMIT_C) c = 0;
+		if (c < Munsell.MONO_LIMIT_C) c = 0;
 		return [h, v, c];
 	}
 
@@ -244,7 +244,7 @@ class Munsell {
 		Munsell.isSaturated = false;
 
 		// When the lightness is 0 or achromatic (check this first)
-		if (Munsell._eq0(v) || h < 0 || c < Munsell._MONO_LIMIT_C) {
+		if (Munsell._eq0(v) || h < 0 || c < Munsell.MONO_LIMIT_C) {
 			dest[1] = Munsell._ILLUMINANT_C[0]; dest[2] = Munsell._ILLUMINANT_C[1];
 			Munsell.isSaturated = Munsell._eq0(v) && 0 < c;
 			return XYZ.fromIlluminantC(Yxy.toXYZ(dest));
@@ -361,7 +361,7 @@ class Munsell {
 	 */
 	static toString([h, v, c]) {
 		const vstr = Math.round(v * 10) / 10;
-		if (c < Munsell._MONO_LIMIT_C) {
+		if (c < Munsell.MONO_LIMIT_C) {
 			return `N ${vstr}`;
 		} else {
 			const hue = Munsell.hueValueToHueName(h, c);
@@ -374,12 +374,12 @@ class Munsell {
 
 Munsell.isSaturated = false;
 
+Munsell.MONO_LIMIT_C = 0.05;
 const _TBL_V_REAL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const _TBL_V_ALL = [0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 Munsell._TBL_V = _TBL_V_REAL;
 Munsell._MIN_HUE = 0;
 Munsell._MAX_HUE = 100;  // Same as MIN_HUE
-Munsell._MONO_LIMIT_C = 0.05;
 Munsell._HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
 Munsell._EP = 0.0000000000001;
 Munsell._ILLUMINANT_C = [0.3101, 0.3162];  // Standard illuminant C, white point

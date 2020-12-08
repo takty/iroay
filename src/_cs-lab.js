@@ -5,7 +5,7 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2020-12-07
+ * @version 2020-12-08
  *
  */
 
@@ -89,24 +89,6 @@ class Lab {
 
 	// Conversion Functions ----------------------------------------------------
 
-
-	/**
-	 * Convert CIELAB (L*a*b*) to sRGB (Gamma 2.2).
-	 * @param {number[]} lab L*, a*, b* of CIELAB color
-	 * @return {number[]} sRGB color
-	 */
-	static toRGB(lab) {
-		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(lab)));
-	}
-
-	/**
-	 * Convert sRGB (Gamma 2.2) to CIELAB (L*a*b*).
-	 * @param {number[]} rgb sRGB color
-	 * @return {number[]} CIELAB color
-	 */
-	static fromRGB(rgb) {
-		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
-	}
 
 	/**
 	 * Convert CIELAB (L*a*b*) from rectangular coordinate format to polar coordinate format.

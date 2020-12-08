@@ -34,7 +34,7 @@ class ColorVisionSimulation {
 	 * @param {number[]} lms LMS color
 	 * @return {number[]} LMS color in deuteranopia
 	 */
-	static brettelD(l, m, s) {
+	static brettelD([l, m, s]) {
 		return [
 			1.0      * l + 0.0 * m + 0.0     * s,
 			0.494207 * l + 0.0 * m + 1.24827 * s,
@@ -48,7 +48,7 @@ class ColorVisionSimulation {
 	 * IEICE technical report 107(117), 107-110, 2007-06-21.
 	 */
 
-	 /**
+	/**
 	 * Correct simulation of protanopia
 	 * @param {number} m Original M of LMS color
 	 * @param {number[]} lms LMS color of protanopia simulation
@@ -127,11 +127,12 @@ class ColorVisionSimulation {
 	 * @return {number[]} LMS color in protanopia
 	 */
 	static lrgbToProtanopia([lr, lg, lb], doCorrection = false) {
-		const lr2 = 0.992052 * lr + 0.003974;
-		const lg2 = 0.992052 * lg + 0.003974;
-		const lb2 = 0.992052 * lb + 0.003974;
-
-		const lms = COLOR_SPACE_NS.LMS.fromXYZ(COLOR_SPACE_NS.XYZ.fromLRGB([lr2, lg2, lb2]));
+		const lrgb2 = [
+			0.992052 * lr + 0.003974,
+			0.992052 * lg + 0.003974,
+			0.992052 * lb + 0.003974,
+		];
+		const lms = COLOR_SPACE_NS.LMS.fromXYZ(COLOR_SPACE_NS.XYZ.fromLRGB(lrgb2));
 		const lms2 = ColorVisionSimulation.brettelP(lms);
 
 		let lms3;
@@ -150,11 +151,12 @@ class ColorVisionSimulation {
 	 * @return {number[]} LMS color in deuteranopia
 	 */
 	static lrgbToDeuteranopia([lr, lg, lb], doCorrection = false) {
-		const lr2 = 0.957237 * lr + 0.0213814;
-		const lg2 = 0.957237 * lg + 0.0213814;
-		const lb2 = 0.957237 * lb + 0.0213814;
-
-		const lms = COLOR_SPACE_NS.LMS.fromXYZ(COLOR_SPACE_NS.XYZ.fromLRGB([lr2, lg2, lb2]));
+		const lrgb2 = [
+			0.957237 * lr + 0.0213814,
+			0.957237 * lg + 0.0213814,
+			0.957237 * lb + 0.0213814,
+		];
+		const lms = COLOR_SPACE_NS.LMS.fromXYZ(COLOR_SPACE_NS.XYZ.fromLRGB(lrgb2));
 		const lms2 = ColorVisionSimulation.brettelD(lms);
 
 		let lms3;
