@@ -3,7 +3,7 @@
  * Evaluation Methods
  *
  * @author Takuto Yanagida
- * @version 2020-12-07
+ * @version 2020-12-16
  *
  */
 
@@ -99,9 +99,9 @@ class Evaluation {
 		return DE;
 
 		function sq(v) { return v * v; }
-		function atan(y, x) { const v = Math.toDegrees(Math.atan2(y, x)); return (v < 0) ? (v + 360) : v; }
-		function sin(deg) { return Math.sin(Math.toRadians(deg)); }
-		function cos(deg) { return Math.cos(Math.toRadians(deg)); }
+		function atan(y, x) { const v = Math.atan2(y, x) * 180 / Math.PI; return (v < 0) ? (v + 360) : v; }
+		function sin(deg) { return Math.sin(deg * Math.PI / 180); }
+		function cos(deg) { return Math.cos(deg * Math.PI / 180); }
 	}
 
 	/**
