@@ -7,7 +7,7 @@
 // @need ../dist/color-util.min
 
 const setup = function () {
-	const sl = new WIDGET.Slider(0, 100, 0);
+	const sl = new WIDGET.Slider(0, 255, 0);
 	const p = new CROQUJS.Paper(256, 256);
 	STYLE.augment(p);
 
@@ -19,7 +19,7 @@ const setup = function () {
 
 const draw = function (p, sl) {
 	p.styleClear().color('White').draw();
-	const v = sl.value() / 100;
+	const v = sl.value() / 255;
 // 	drawChartRGB(p, v);
 // 	drawChartLRGB(p, v);
 // 	drawChartXYZ(p, v);
