@@ -35,6 +35,16 @@ class Evaluation {
 
 
 	/**
+	 * Calculate distance of two vectors
+	 * @param {number[]} vs1 vector 1
+	 * @param {number[]} vs2 vector 2
+	 * @return {number} Distance
+	 */
+	static distance([v11, v12, v13], [v21, v22, v23]) {
+		return Math.sqrt((v11 - v21) * (v11 - v21) + (v12 - v22) * (v12 - v22) + (v13 - v23) * (v13 - v23));
+	}
+
+	/**
 	 * Color difference calculation method by CIE 76
 	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
 	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
@@ -63,7 +73,7 @@ class Evaluation {
 		const DLp = ls2 - ls1;
 		const DCp = Cp2 - Cp1;
 		let Dhp = 0;
-		if (Cp1 * Cp2 == 0) {
+		if (Cp1 * Cp2 < 1e-10) {
 			Dhp = 0;
 		} else if (Math.abs(hp2 - hp1) <= 180) {
 			Dhp = hp2 - hp1;
@@ -77,7 +87,7 @@ class Evaluation {
 		const Lbp = (ls1 + ls2) / 2;
 		const Cbp = (Cp1 + Cp2) / 2;
 		let hbp = 0;
-		if (Cp1 * Cp2 == 0) {
+		if (Cp1 * Cp2 < 1e-10) {
 			hbp = hp1 + hp2;
 		} else if (Math.abs(hp2 - hp1) <= 180) {
 			hbp = (hp1 + hp2) / 2;
