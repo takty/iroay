@@ -16,7 +16,7 @@ const setup = function () {
 	draw(p);
 
 	for (const p of pairs) {
-		console.log(Evaluation.CIE76(p[0], p[1]));
+		console.log(Evaluation.distance(p[0], p[1]));
 		const lab0 = convert(p[0], 'rgb', 'lab');
 		const lab1 = convert(p[1], 'rgb', 'lab');
 		console.log(Evaluation.CIE76(lab0, lab1));
