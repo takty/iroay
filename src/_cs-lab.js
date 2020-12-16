@@ -5,7 +5,7 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2020-12-08
+ * @version 2020-12-16
  *
  */
 
@@ -13,13 +13,13 @@
 class Lab {
 
 	// Conversion function
-	static _func(x) {
-		return (x > Lab._C1) ? Math.pow(x, 1 / 3) : (Lab._C2 * x + 16 / 116);
+	static _func(v) {
+		return (v > Lab._C1) ? Math.pow(v, 1 / 3) : (v / Lab._C2 + 4 / 29);
 	}
 
 	// Inverse conversion function
-	static _invFunc(x) {
-		return (x > Lab._C3) ? Math.pow(x, 3) : ((x - 16 / 116) * Lab._C4);
+	static _invFunc(v) {
+		return (v > Lab._C3) ? Math.pow(v, 3) : ((v - 4 / 29) * Lab._C2);
 	}
 
 	/**
@@ -28,11 +28,13 @@ class Lab {
 	 * @return {number[]} CIELAB color
 	 */
 	static fromXYZ([x, y, z]) {
+		const fx = Lab._func(x / Lab.XYZ_TRISTIMULUS_VALUES[0]);
 		const fy = Lab._func(y / Lab.XYZ_TRISTIMULUS_VALUES[1]);
+		const fz = Lab._func(z / Lab.XYZ_TRISTIMULUS_VALUES[2]);
 		return [
 			116 * fy - 16,
-			500 * (Lab._func(x / Lab.XYZ_TRISTIMULUS_VALUES[0]) - fy),
-			200 * (fy - Lab._func(z / Lab.XYZ_TRISTIMULUS_VALUES[2])),
+			500 * (fx - fy),
+			200 * (fy - fz),
 		];
 	}
 
@@ -53,10 +55,12 @@ class Lab {
 	 */
 	static toXYZ([ls, as, bs]) {
 		const fy = (ls + 16) / 116;
+		const fx = fy + as / 500;
+		const fz = fy - bs / 200;
 		return [
-			Lab._invFunc(fy + as / 500) * Lab.XYZ_TRISTIMULUS_VALUES[0],
+			Lab._invFunc(fx) * Lab.XYZ_TRISTIMULUS_VALUES[0],
 			Lab._invFunc(fy) * Lab.XYZ_TRISTIMULUS_VALUES[1],
-			Lab._invFunc(fy - bs / 200) * Lab.XYZ_TRISTIMULUS_VALUES[2],
+			Lab._invFunc(fz) * Lab.XYZ_TRISTIMULUS_VALUES[2],
 		];
 	}
 
@@ -118,9 +122,8 @@ class Lab {
 
 // Constants for simplification of calculation
 Lab._C1 = Math.pow(6, 3) / Math.pow(29, 3);      // (6/29)^3 = 0.0088564516790356308171716757554635
-Lab._C2 = Math.pow(29, 2) / Math.pow(6, 2) / 3;  // (1/3)*(29/6)^2 = 7.787037037037037037037037037037
+Lab._C2 = 3 * Math.pow(6, 2) / Math.pow(29, 2);  // 3*(6/29)^2 = 0.12841854934601664684898929845422
 Lab._C3 = 6 / 29;                                // 6/29 = 0.20689655172413793103448275862069
-Lab._C4 = Math.pow(6, 2) / Math.pow(29, 2) * 3;  // 3*(6/29)^2 = 0.12841854934601664684898929845422
 
 /**
  * D50 tristimulus value
