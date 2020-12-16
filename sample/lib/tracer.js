@@ -1,7 +1,7 @@
 /**
- * トレーサー・ライブラリ（TRACER）
+ * Tracer library (TRACER)
  *
- * 座標を持ったオブジェクトを移動させるライブラリです。
+ * A library to move an object with coordinates.
  *
  * @author Takuto Yanagida
  * @version 2019-05-12
@@ -9,29 +9,29 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const TRACER = (function () {
 
 	'use strict';
 
 
-	// ライブラリ中だけで使用するユーティリティ --------------------------------
+	// Utilities used only in the library --------------------------------------
 
 
 	/**
-	 * 角度をラジアンにする
-	 * @param {number} deg 角度
-	 * @return {number} ラジアン
+	 * Convert degree to radian
+	 * @param {number} deg Degree
+	 * @return {number} Radian
 	 */
 	const rad = function (deg) {
 		return deg * Math.PI / 180.0;
 	};
 
 	/**
-	 * 角度を0～360度の範囲にする
-	 * @param {number} deg 角度
-	 * @return {number} 角度
+	 * Make an angle between 0 to 360 degrees
+	 * @param {number} deg Degree
+	 * @return {number} Degree
 	 */
 	const checkDegRange = function (deg) {
 		deg %= 360;
@@ -41,24 +41,24 @@ const TRACER = (function () {
 
 
 	/**
-	 * トレーサー
+	 * Tracer
 	 * @version 2020-05-05
 	 */
 	class Tracer {
 
 		/**
-		 * トレーサーを作る
+		 * Make a tracer
 		 * @constructor
 		 */
 		constructor() {
-			if (typeof PATH === 'undefined') throw new Error('Pathライブラリが必要です。');
+			if (typeof PATH === 'undefined') throw new Error('Path library is needed.');
 
 			this._cmdQueue = [];
 			this._remainTime = 0;
 
 			this._stack = [];
 
-			// 以下の変数は値を直接変えないこと
+			// Do not change the following variables directly
 			this._x       = 0;
 			this._y       = 0;
 			this._dir     = 0;
@@ -84,8 +84,8 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 今の状態を保存する
-		 * @return {Tracer} このトレーサー
+		 * Save the current state
+		 * @return {Tracer} This tracer
 		 */
 		save() {
 			const t = this._getState();
@@ -94,8 +94,8 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 前の状態を復元する
-		 * @return {Tracer} このトレーサー
+		 * Restore previous state
+		 * @return {Tracer} This tracer
 		 */
 		restore() {
 			const t = this._stack.pop();
@@ -104,9 +104,9 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 状態を取得する（ライブラリ内だけで使用）
+		 * Get state (used only in the library)
 		 * @private
-		 * @return {Array} 状態
+		 * @return {Array} State
 		 */
 		_getState() {
 			return [
@@ -118,9 +118,9 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 状態を設定する（ライブラリ内だけで使用）
+		 * Set state (used only in the library)
 		 * @private
-		 * @param {Array} t 状態
+		 * @param {Array} t State
 		 */
 		_setState(t) {
 			this._changePos(t[0], t[1], t[2]);  // 以下、順番に依存関係あり
@@ -130,11 +130,11 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 場所や方向を変える時に呼ばれる（ライブラリ内だけで使用）
+		 * Called when changing places and directions (used only in the library)
 		 * @private
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @param {number=} opt_deg 方向（オプション）
+		 * @param {number} x x coordinate
+		 * @param {number} y y coordinate
+		 * @param {number=} opt_deg Degree (optional)
 		 */
 		_changePos(x, y, opt_deg) {
 			this._x = x;
@@ -143,13 +143,13 @@ const TRACER = (function () {
 		}
 
 
-		// 場所か方向の変化 --------------------------------------------------------
+		// Change of place or direction --------------------------------------------
 
 
 		/**
-		 * 前に進む
-		 * @param {number} step 歩数
-		 * @return {Tracer} このトレーサー
+		 * Go forward
+		 * @param {number} step Number of steps
+		 * @return {Tracer} This tracer
 		 */
 		go(step) {
 			this._addCommand((limit) => {
@@ -159,18 +159,18 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 後ろに戻る
-		 * @param {number} step 歩数
-		 * @return {Tracer} このトレーサー
+		 * Go back
+		 * @param {number} step Number of steps
+		 * @return {Tracer} This tracer
 		 */
 		back(step) {
 			return this.go(-step);  // 前に進むことの逆
 		}
 
 		/**
-		 * 右に回る
-		 * @param {number} deg 角度
-		 * @return {Tracer} このトレーサー
+		 * Turn right
+		 * @param {number} deg Degree
+		 * @return {Tracer} This tracer
 		 */
 		turnRight(deg) {
 			this._addCommand((limit) => {
@@ -179,21 +179,16 @@ const TRACER = (function () {
 			return this;
 		}
 
-		/**
-		 * 左に回る
-		 * @param {number} deg 角度
-		 * @return {Tracer} このトレーサー
-		 */
 		turnLeft(deg) {
 			return this.turnRight(-deg);  // 右に回ることの逆
 		}
 
 		/**
-		 * 実際に方向を変える（ライブラリ内だけで使用）
+		 * Actually change direction (used only in the library)
 		 * @private
-		 * @param {number} deg 角度
-		 * @param {number} limit 制限
-		 * @return {number} 実際に動いた量
+		 * @param {number} deg Degree
+		 * @param {number} limit Limitation
+		 * @return {number} Amount actually moved
 		 */
 		_doTurn(deg, limit) {
 			const sign = deg < 0 ? -1 : 1;
@@ -208,9 +203,9 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * x座標（横の場所）
-		 * @param {number=} val 値
-		 * @return x座標／このトレーサー
+		 * X coordinate
+		 * @param {number=} val Value
+		 * @return X coordinate, or this tracer
 		 */
 		x(val) {
 			if (val === undefined) return this._x;
@@ -219,9 +214,9 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * y座標（たての場所）
-		 * @param {number=} val 値
-		 * @return y座標／このトレーサー
+		 * Y coordinate
+		 * @param {number=} val Value
+		 * @return Y coordinate, or this tracer
 		 */
 		y(val) {
 			if (val === undefined) return this._y;
@@ -230,9 +225,9 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 方向
-		 * @param {number=} deg 角度
-		 * @return 角度／このトレーサー
+		 * Direction
+		 * @param {number=} deg Degree
+		 * @return Degree, or this tracer
 		 */
 		direction(deg) {
 			if (deg === undefined) return this._dir;
@@ -241,11 +236,11 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 移動する
-		 * @param {number} x x座標（横の場所）
-		 * @param {number} y y座標（たての場所）
-		 * @param {number=} opt_dir 方向（オプション）
-		 * @return {Tracer} このトレーサー
+		 * Move to
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number=} opt_dir Direction (optional)
+		 * @return {Tracer} This tracer
 		 */
 		moveTo(x, y, opt_dir) {
 			this._addCommand((limit) => {
@@ -256,16 +251,16 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * ホームに帰る（最初の場所と方向に戻る）
-		 * @return {Tracer} このトレーサー
+		 * Go back to home (Return to the first place and direction)
+		 * @return {Tracer} This tracer
 		 */
 		home() {
 			return this.moveTo(this._homeX, this._homeY, this._homeDir);
 		}
 
 		/**
-		 * 今の場所をホームに
-		 * @return {Tracer} このトレーサー
+		 * Set your current location to 'home'
+		 * @return {Tracer} This tracer
 		 */
 		setHome() {
 			this._addCommand(() => {
@@ -277,17 +272,17 @@ const TRACER = (function () {
 		}
 
 
-		// 場所と方向の変化 --------------------------------------------------------
+		// Change of place and direction -------------------------------------------
 
 
 		/**
-		 * 右にカーブする
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @return {Tracer} このトレーサー
+		 * Curve to the right
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @return {Tracer} This tracer
 		 */
 		curveRight(step0, deg, step1, opt_deg, opt_step) {
 			this._addCommand((limit) => {
@@ -297,13 +292,13 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 左にカーブする
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @return {Tracer} このトレーサー
+		 * Curve to the left
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @return {Tracer} This tracer
 		 */
 		curveLeft(step0, deg, step1, opt_deg, opt_step) {
 			if (opt_deg === undefined) {
@@ -314,15 +309,15 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 実際にカーブする（ライブラリ内だけで使用）
+		 * Actually curve (used only in the library)
 		 * @private
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @param {number} limit 制限
-		 * @return {number} 実際に動いた量
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @param {number} limit Limitation
+		 * @return {number} Amount actually moved
 		 */
 		_doCurve(step0, deg, step1, opt_deg, opt_step, limit) {
 			const s = this._step;
@@ -334,10 +329,10 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 右に曲がる弧をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @return {Tracer} このトレーサー
+		 * Draw an arc that turns to the right
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @return {Tracer} This tracer
 		 */
 		arcRight(r, deg) {
 			this._arcPrep(r, deg, false);
@@ -345,10 +340,10 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 左に曲がる弧をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @return {Tracer} このトレーサー
+		 * Draw an arc that turns to the left
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @return {Tracer} This tracer
 		 */
 		arcLeft(r, deg) {
 			this._arcPrep(r, deg, true);
@@ -356,12 +351,12 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 弧をかく（ライブラリ内だけで使用）
+		 * Draw an arc (used only in the library)
 		 * @private
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @param {boolean} isLeft 左かどうか
-		 * @return {Tracer} このトレーサー
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @param {boolean} isLeft Whether it is left
+		 * @return {Tracer} This tracer
 		 */
 		_arcPrep(r, deg, isLeft) {
 			this._addCommand((limit) => {
@@ -370,13 +365,13 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 実際に弧をかく（ライブラリ内だけで使用）
+		 * Actually draw an arc (used only in the library)
 		 * @private
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @param {boolean} isLeft 左かどうか
-		 * @param {number} limit 制限
-		 * @return {number} 実際に動いた量
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @param {boolean} isLeft Whether it is left
+		 * @param {number} limit Limitation
+		 * @return {number} Amount actually moved
 		 */
 		_doArc(r, deg, isLeft, limit) {
 			const p = PATH.arrangeArcParams(r, deg, this._step);
@@ -388,7 +383,7 @@ const TRACER = (function () {
 			} else {
 				p.deg0 = p.deg0 + 180;
 				p.deg1 = p.deg1 + 180;
-				// 時計回りの接線の傾きなのでPIを足す（逆向きにする）
+				// Since it is the inclination of the tangent in the clockwise direction, add PI
 				rev = Math.PI;
 			}
 			const r0 = rad(p.deg0);
@@ -404,13 +399,13 @@ const TRACER = (function () {
 		}
 
 
-		// その他 ------------------------------------------------------------------
+		// Others ------------------------------------------------------------------
 
 
 		/**
-		 * 1歩の長さ
-		 * @param {number=} val 値
-		 * @return {number|Tracer} 1歩の長さ／このトレーサー
+		 * Length per step
+		 * @param {number=} val Value
+		 * @return {number|Tracer} Length per step, or this tracer
 		 */
 		step(val) {
 			if (val === undefined) return this._step;
@@ -419,9 +414,9 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * エッジ
-		 * @param {function=} func エッジを決める関数
-		 * @return {function|Tracer} エッジ／このトレーサー
+		 * Edge
+		 * @param {function=} func Function to determine the edge
+		 * @return {function|Tracer} Edge, or this tracer
 		 */
 		edge(func, ...fs) {
 			if (func === undefined) return this._liner.edge();
@@ -430,24 +425,24 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 今の場所から見て、ある場所がどの角度かを返す
-		 * @param {number} x ある場所のx座標（横の場所）
-		 * @param {number} y ある場所のy座標（たての場所）
-		 * @return {number} 角度
+		 * Seeing from the current location, what direction is there
+		 * @param {number} x X coordinate of a place
+		 * @param {number} y Y coordinate of a place
+		 * @return {number} Degree
 		 */
 		getDirectionOf(x, y) {
 			return (Math.atan2(y - this._y, x - this._x) * 180.0 / Math.PI - this._dir - 90);
 		}
 
 
-		// アニメーション ----------------------------------------------------------
+		// Animation ---------------------------------------------------------------
 
 
 		/**
-		 * 後で実行する
-		 * @param {function} func 関数
-		 * @param {Array=} args_array 関数に渡す引数
-		 * @return {Tracer} このトレーサー
+		 * Run later
+		 * @param {function} func Function
+		 * @param {Array=} args_array Arguments to pass to the function
+		 * @return {Tracer} This tracer
 		 */
 		doLater(func, args_array) {
 			const fn = function () { func.apply(this, args_array); };
@@ -456,10 +451,10 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 直ぐに実行する
-		 * @param {function} func 関数
-		 * @param {Array=} args_array 関数に渡す引数
-		 * @return {Tracer} このトレーサー
+		 * Run immediately
+		 * @param {function} func Function
+		 * @param {Array=} args_array Arguments to pass to the function
+		 * @return {Tracer} This tracer
 		 */
 		doNow(func, args_array) {
 			const fn = function () { func.apply(this, args_array); };
@@ -479,29 +474,29 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * コマンドを追加する（ライブラリ内だけで使用）
+		 * Add command (used only in the library)
 		 * @private
-		 * @param {function} func 関数
+		 * @param {function} func Function
 		 */
 		_addCommand(func) {
 			this._cmdQueue.push(new Command(func));
 		}
 
 		/**
-		 * アニメーションを次に進める
-		 * @param {number} num フレーム数
+		 * Step the animation next
+		 * @param {number} num Number of frames
 		 */
 		stepNext(num) {
 			this.update(this._x, this._y, this._dir, num);
 		}
 
 		/**
-		 * スピードに合わせて座標を更新する
-		 * @param {number} x x座標（横の場所）
-		 * @param {number} y y座標（たての場所）
-		 * @param {number} dir 方向
-		 * @param {number} unitTime 単位時間
-		 * @return {Array<number>} 座標
+		 * Update coordinates according to the speed
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number} dir Direction
+		 * @param {number} unitTime Unit time
+		 * @return {Array<number>} Coordinate
 		 */
 		update(x, y, dir, unitTime) {
 			if (this._x !== x || this._y !== y || this._dir !== dir) {
@@ -529,8 +524,8 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * 現在の動きをキャンセルする
-		 * @return {Tracer} このトレーサー
+		 * Cancel the current motion
+		 * @return {Tracer} This tracer
 		 */
 		cancel() {
 			if (0 < this._cmdQueue.length) {
@@ -545,8 +540,8 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * すべての動きを止める
-		 * @return {Tracer} このトレーサー
+		 * Stop all motion
+		 * @return {Tracer} This tracer
 		 */
 		stop() {
 			this._cmdQueue.length = 0;
@@ -558,16 +553,16 @@ const TRACER = (function () {
 
 
 	/**
-	 * コマンド
+	 * Command
 	 * @version 2020-05-05
 	 */
 	class Command {
 
 		/**
-		 * コマンドを作る（ライブラリ内だけで使用）
+		 * Make a command (used only in the library)
 		 * @private
 		 * @constructor
-		 * @param {function} func 関数
+		 * @param {function} func Function
 		 */
 		constructor(func) {
 			this._func = func;
@@ -575,9 +570,9 @@ const TRACER = (function () {
 		}
 
 		/**
-		 * コマンドを実行する（ライブラリ内だけで使用）
-		 * @param {number} deltaT 進める時間
-		 * @return {number} パワー消費
+		 * Run the command (used only in the library)
+		 * @param {number} deltaT Time to advance
+		 * @return {number} Power consumption
 		 */
 		run(deltaT) {
 			const pc = this._func(deltaT);
@@ -587,10 +582,10 @@ const TRACER = (function () {
 	}
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
-	// 関数の別名
+	// Function alias
 	const aliases = {
 		go            : ['forward', 'fd'],
 		back          : ['bk', 'backward'],
@@ -605,7 +600,7 @@ const TRACER = (function () {
 		getDirectionOf: ['towards'],
 	};
 
-	// 関数の別名を登録する
+	// Register function alias
 	Object.keys(aliases).forEach((p) => {
 		aliases[p].forEach((a) => {
 			Tracer.prototype[a] = Tracer.prototype[p];

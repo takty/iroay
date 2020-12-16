@@ -1,7 +1,7 @@
 /**
- * スタイル・ライブラリ（STYLE）
+ * Style library (STYLE)
  *
- * 絵をかくときの線やぬりのスタイルを簡単に設定することができるようにするためのライブラリです。
+ * A library to make it easy to set the style of strokes and filling when painting
  *
  * @author Takuto Yanagida
  * @version 2020-04-21
@@ -9,7 +9,7 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const STYLE = (function () {
 
@@ -17,15 +17,15 @@ const STYLE = (function () {
 
 
 	/**
-	 * スタイル・ベース（ストローク・フィル共通）
+	 * Style base (Common to stroke and fill)
 	 * @version 2020-04-22
 	 */
 	class StyleBase {
 
 		/**
-		 * スタイルを作る
-		 * @param {Stroke=} base 元になるスタイル
-		 * @param {string=} color 標準の色
+		 * Make a style
+		 * @param {Stroke=} base Original style
+		 * @param {string=} color Default color
 		 */
 		constructor(base, color) {
 			this._style       = base ? base._style              : color;
@@ -41,9 +41,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * リセットする
-		 * @param {string} color 色
-		 * @return {StyleBase} このスタイル
+		 * Reset
+		 * @param {string} color Color
+		 * @return {StyleBase} This style
 		 */
 		reset(color) {
 			this._style       = color;
@@ -60,10 +60,10 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 色の名前を設定する
-		 * @param {string=} color 色の名前
-		 * @param {number=} [opt_alpha=1] アルファ 0-1
-		 * @return {string|StyleBase} 色かこのスタイル
+		 * Set the color name
+		 * @param {string=} color Color name
+		 * @param {number=} [opt_alpha=1] Alpha 0-1
+		 * @return {string|StyleBase} Color or this style
 		 */
 		color(color, opt_alpha = 1) {
 			if (arguments.length === 0) return this._color;
@@ -73,7 +73,7 @@ const STYLE = (function () {
 				this._color = color;
 				this._style = this._color;
 			} else {
-				if (Number.isNaN(opt_alpha)) throw new RangeError('STYLE::color: アルファの数値に間違いがあるようです。');
+				if (Number.isNaN(opt_alpha)) throw new RangeError('STYLE::color: The alpha value seem to be wrong.');
 				const vs = convertColorToRgb(color, opt_alpha);
 				this.rgb(...vs);
 			}
@@ -81,29 +81,29 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * RGB(A)を設定する
-		 * @param {number=} r 赤 0-255
-		 * @param {number=} g 緑 0-255
-		 * @param {number=} b 青 0-255
-		 * @param {number=} [opt_alpha=1] アルファ 0-1
-		 * @return {Array<number>|StyleBase} RGBかこのスタイル
+		 * Set RGB(A)
+		 * @param {number=} r Red 0-255
+		 * @param {number=} g Green 0-255
+		 * @param {number=} b Blue 0-255
+		 * @param {number=} [opt_alpha=1] Alpha 0-1
+		 * @return {Array<number>|StyleBase} RGB or this style
 		 */
 		rgb(r, g, b, opt_alpha = 1) {
 			if (arguments.length === 0) return this._rgb;
 			this._clear();
-			// rとgとbを四捨五入して整数に
+			// Round r and g and b to integers
 			this._rgb = [Math.round(r), Math.round(g), Math.round(b), opt_alpha];
 			this._style = `rgba(${this._rgb.join(', ')})`;
 			return this;
 		}
 
 		/**
-		 * HSL(A)を設定する
-		 * @param {number=} h 色相 0-360
-		 * @param {number=} s 彩度 0-100
-		 * @param {number=} l 明度 0-100
-		 * @param {number=} [opt_alpha=1] アルファ 0-1
-		 * @return {Array<number>|StyleBase} HSLかこのスタイル
+		 * Set HSL(A)
+		 * @param {number=} h Hue 0-360
+		 * @param {number=} s Saturation 0-100
+		 * @param {number=} l Lightness 0-100
+		 * @param {number=} [opt_alpha=1] Alpha 0-1
+		 * @return {Array<number>|StyleBase} HSL or this style
 		 */
 		hsl(h, s, l, opt_alpha = 1) {
 			if (arguments.length === 0) return this._hsl;
@@ -114,9 +114,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 色を明るくする
-		 * @param {number} [opt_rate=10] 割合 %
-		 * @return {StyleBase} このスタイル
+		 * Lighten the color
+		 * @param {number} [opt_rate=10] Rate %
+		 * @return {StyleBase} This style
 		 */
 		lighten(opt_rate = 10) {
 			if (this._color) {
@@ -138,9 +138,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 色を暗くする
-		 * @param {number} [opt_rate=10] 割合 %
-		 * @return {StyleBase} このスタイル
+		 * Darken the color
+		 * @param {number} [opt_rate=10] Rate %
+		 * @return {StyleBase} This style
 		 */
 		darken(opt_rate = 10) {
 			if (this._color) {
@@ -162,22 +162,22 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * グラデーションを設定する
-		 * - 線形の場合（'linear'、[開始座標x、y]、[終了座標x, y]）
-		 * - 円形の場合（'radial'、[中心座標1 x、y]、[開始半径、終了半径]、<[中心座標2 x、y]>）
-		 * - その他（'種類'）
-		 * @param {string} type 種類（'linear', 'radial', その他）
-		 * @param {Array<number>} xy1_dir [開始座標x, y]，または[中心座標1 x、y]
-		 * @param {Array<number>} xy2_rs [終了座標x, y]，または[開始半径、終了半径]
-		 * @param {Array<number>=} xy2 [中心座標2 x、y]
-		 * @return {Array|StyleBase} グラデーションの設定かこのスタイル
+		 * Set the gradation
+		 * - Linear ('linear', [Start coordinates x, y], [End coordinates x, y])
+		 * - Radial ('radial', [1st center coordinates x、y], [Start radius, End radius], <[2nd center coordinates x, y]>)
+		 * - Others ('type')
+		 * @param {string} type Type ('linear', 'radial', Others)
+		 * @param {Array<number>} xy1_dir [Start coordinates x, y], or [1st center coordinates x、y]
+		 * @param {Array<number>} xy2_rs [End coordinates x, y], or [Start radius, End radius]
+		 * @param {Array<number>=} xy2 [2nd center coordinates x、y]
+		 * @return {Array|StyleBase} Gradation setting or this style
 		 */
 		gradation(type, xy1_dir, xy2_rs, xy2) {
 			if (arguments.length === 0) {
 				return this._gradParams ? [this._gradType, ...this._gradParams] : [this._gradType];
 			}
 			if (!['linear', 'radial', 'vertical', 'horizontal', 'vector', 'inner', 'outer', 'diameter', 'radius'].includes(type)) {
-				throw new Error('STYLE::gradation: グラデーションの種類が間違っています。');
+				throw new Error('STYLE::gradation: The type of gradation is incorrect.');
 			}
 			this._clear();
 			this._gradType = type;
@@ -194,19 +194,19 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * グラデーションに色の名前を追加する
-		 * @param {string} color 色の名前
-		 * @param {number=} [opt_alpha=1] アルファ 0-1
-		 * @return {StyleBase} このスタイル
+		 * Add a color name to the gradation
+		 * @param {string} color Color name
+		 * @param {number=} [opt_alpha=1] Alpha 0-1
+		 * @return {StyleBase} This style
 		 */
 		addColor(color, opt_alpha = 1) {
-			// キャッシュを無効に
+			// Disable caching
 			this._style = null;
 			checkColor(color);
 			if (opt_alpha === 1) {
 				this._gradColors.push(color);
 			} else {
-				if (Number.isNaN(opt_alpha)) throw new RangeError('STYLE::addColor: アルファの数値に間違いがあるようです。');
+				if (Number.isNaN(opt_alpha)) throw new RangeError('STYLE::addColor: The alpha value seem to be wrong.');
 				const vs = convertColorToRgb(color, opt_alpha);
 				this.addRgb(...vs);
 			}
@@ -214,19 +214,19 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * グラデーションにRGB(A)を追加する
-		 * @param {number} r 赤 0-255
-		 * @param {number} g 緑 0-255
-		 * @param {number} b 青 0-255
-		 * @param {number=} [opt_alpha=1] アルファ 0-1
-		 * @return {StyleBase} このスタイル
+		 * Add RGB(A) to the gradation
+		 * @param {number} r Red 0-255
+		 * @param {number} g Green 0-255
+		 * @param {number} b Blue 0-255
+		 * @param {number=} [opt_alpha=1] Alpha 0-1
+		 * @return {StyleBase} This style
 		 */
 		addRgb(r, g, b, opt_alpha = 1) {
-			// キャッシュを無効に
+			// Disable caching
 			this._style = null;
-			// rとgとbを四捨五入して整数に
+			// Round r and g and b to integers
 			r = Math.round(r), g = Math.round(g), b = Math.round(b);
-			// アルファが無かったら
+			// If the alpha is not assigned
 			if (opt_alpha === 1) {
 				this._gradColors.push(`rgb(${r}, ${g}, ${b})`);
 			} else {
@@ -236,17 +236,17 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * グラデーションにHSL(A)を追加する
-		 * @param {number} h 色相 0-360
-		 * @param {number} s 彩度 0-100
-		 * @param {number} l 明度 0-100
-		 * @param {number=} [opt_alpha=1] アルファ 0-1
-		 * @return {StyleBase} このスタイル
+		 * Add HSL(A) to the gradation
+		 * @param {number} h Hue 0-360
+		 * @param {number} s Saturation 0-100
+		 * @param {number} l Lightness 0-100
+		 * @param {number=} [opt_alpha=1] Alpha 0-1
+		 * @return {StyleBase} This style
 		 */
 		addHsl(h, s, l, opt_alpha = 1) {
-			// キャッシュを無効に
+			// Disable caching
 			this._style = null;
-			// アルファが無かったら
+			// If the alpha is not assigned
 			if (opt_alpha === 1) {
 				this._gradColors.push(`hsl(${h}, ${s}%, ${l}%)`);
 			} else {
@@ -256,10 +256,10 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * アルファをセットする
-		 * @param {number=} alpha アルファ
-		 * @param {string=} op 四則演算記号
-		 * @return {number|StyleBase} アルファかこのスタイル
+		 * Set alpha
+		 * @param {number=} alpha Alpha
+		 * @param {string=} op Arithmetic symbol
+		 * @return {number|StyleBase} Alpha or this style
 		 */
 		alpha(alpha, op) {
 			if (alpha === undefined) return this._alpha;
@@ -277,9 +277,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * コンポジション（合成方法）をセットする
-		 * @param {string=} composition コンポジション
-		 * @return {string|StyleBase} コンポジションかこのスタイル
+		 * Set composition (composition method)
+		 * @param {string=} composition Composition
+		 * @return {string|StyleBase} Composition or this style
 		 */
 		composition(composition) {
 			if (composition === undefined) return this._composition;
@@ -288,12 +288,12 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 影をセットする
-		 * @param {number?} blur ぼかし量
-		 * @param {string?} color 色
-		 * @param {number?} x 影のずれx
-		 * @param {number?} y 影のずれy
-		 * @return {Shadow|StyleBase} 影かこのスタイル
+		 * Set shadow
+		 * @param {number?} blur Blur amount
+		 * @param {string?} color Color
+		 * @param {number?} x Shadow offset x
+		 * @param {number?} y Shadow offset y
+		 * @return {Shadow|StyleBase} Shadow or this style
 		 */
 		shadow(blur, color, x, y) {
 			if (blur === undefined) return this._shadow.get();
@@ -306,7 +306,7 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 設定をクリアする（ライブラリ内だけで使用）
+		 * Clear settings (used only in the library)
 		 * @private
 		 */
 		_clear() {
@@ -321,15 +321,15 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * スタイルを作る（ライブラリ内だけで使用）
+		 * Make the style (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array<number>} gradArea グラデーション範囲
-		 * @return {string} スタイル文字列
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array<number>} gradArea Gradation area
+		 * @return {string} Style string
 		 */
 		_makeStyle(ctx, gradArea) {
 			this._gradOpt = {};
-			// グラデーションの時
+			// When gradation
 			if (this._gradType !== null) {
 				if (this._style === null || (this._gradType !== 'linear' && this._gradType !== 'radial')) {
 					this._style = this._makeGrad(ctx, gradArea, this._gradType, this._gradParams, this._gradColors, this._gradOpt);
@@ -339,15 +339,15 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * グラデーションを作る（ライブラリ内だけで使用）
+		 * Make a gradation (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {dict} bs 範囲
-		 * @param {string} type 種類
-		 * @param {Array} params パラメター
-		 * @param {Array<string>} cs 色の配列
-		 * @param {dict} opt オプション
-		 * @return {string} スタイル文字列
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {dict} bs Bounds
+		 * @param {string} type Type
+		 * @param {Array} params Parameters
+		 * @param {Array<string>} cs Colors
+		 * @param {dict} opt Options
+		 * @return {string} String of style
 		 */
 		_makeGrad(ctx, bs, type, params, cs, opt) {
 			if (cs.length === 0) return 'Black';
@@ -375,15 +375,15 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 線形グラデーションのパラメターを作る（ライブラリ内だけで使用）
+		 * Make linear gradation parameters (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {string} type 種類
-		 * @param {dict} bs 範囲
-		 * @return {Array<number>} 線形グラデーションのパラメター
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {string} type Type
+		 * @param {dict} bs Bounds
+		 * @return {Array<number>} Linear gradation parameters
 		 */
 		_makeLinearGradParams(ctx, type, bs) {
-			const ERROR_STR = 'STYLE::_makeLinerGradParams: グラデーションの範囲が正しくありません。';
+			const ERROR_STR = 'STYLE::_makeLinerGradParams: Gradation bounds are not correct.';
 			if (type === 'vertical') {
 				if (bs && (bs.left == null || bs.top == null || bs.right == null || bs.bottom == null)) throw new Error(ERROR_STR);
 				if (bs) return [bs.left, bs.top, bs.left, bs.bottom];
@@ -400,13 +400,13 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 円形グラデーションのパラメターを作る（ライブラリ内だけで使用）
+		 * Make radial gradation parameters (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {string} type 種類
-		 * @param {dict} bs 範囲
-		 * @param {dict} opt オプション
-		 * @return {Array<number>} 円形グラデーションのパラメター
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {string} type Type
+		 * @param {dict} bs Bounds
+		 * @param {dict} opt Options
+		 * @return {Array<number>} Radial gradation parameters
 		 */
 		_makeRadialGradParams(ctx, type, bs, opt) {
 			const SQRT2 = 1.41421356237;
@@ -435,10 +435,10 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 円形グラデーションのオプションをセットする（ライブラリ内だけで使用）
+		 * Set radial gradation options (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array<number>} opt オプション
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array<number>} opt Options
 		 */
 		_setGradOpt(ctx, opt) {
 			ctx.translate(opt.center[0], opt.center[1]);
@@ -452,14 +452,14 @@ const STYLE = (function () {
 
 
 	/**
-	 * 影
+	 * Shadow
 	 * @version 2020-04-21
 	 */
 	class Shadow {
 
 		/**
-		 * 影を作る
-		 * @param {Shadow=} base 元になる影
+		 * Make a shadow
+		 * @param {Shadow=} base Original shadow
 		 */
 		constructor(shadow) {
 			this._blur    = shadow ? shadow._blur    : 0;
@@ -469,22 +469,22 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 設定を配列でもらう
-		 * @return {Array} 設定
+		 * Get the setting as an array
+		 * @return {Array} Setting
 		 */
 		get() {
 			return [this._blur, this._color, this._offsetX, this._offsetY];
 		}
 
 		/**
-		 * 設定する
-		 * @param {number?} blur ぼかし量
-		 * @param {string?} color 色
-		 * @param {number?} x 影のずれx
-		 * @param {number?} y 影のずれy
+		 * Set
+		 * @param {number?} blur Blur amount
+		 * @param {string?} color Color
+		 * @param {number?} x Shadow offset x
+		 * @param {number?} y Shadow offset y
 		 */
 		set(blur, color, x, y) {
-			// 値がセットされているか!=でチェック
+			// Check if the value is set with !=
 			if (blur  != null) this._blur    = blur;
 			if (color != null) this._color   = color;
 			if (x     != null) this._offsetX = x;
@@ -492,7 +492,7 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * クリアする
+		 * Clear
 		 */
 		clear() {
 			this._blur    = 0;
@@ -502,8 +502,8 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 影の設定を適用する
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+		 * Assign the shadow settings
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 		 */
 		assign(ctx) {
 			ctx.shadowBlur    = this._blur;
@@ -516,24 +516,24 @@ const STYLE = (function () {
 
 
 	/**
-	 * 塗りスタイル（フィル）
+	 * Filling style (Fill)
 	 * @extends {StyleBase}
 	 * @version 2020-04-21
 	 */
 	class Fill extends StyleBase {
 
 		/**
-		 * ぬりスタイルを作る
-		 * @param {Fill=} base 元になるぬりスタイル
+		 * Make a filling style
+		 * @param {Fill=} base Original filling style
 		 */
 		constructor(base) {
 			super(base, 'White');
 		}
 
 		/**
-		 * リセットする
-		 * @param {string} color 色
-		 * @return {Fill} このぬりスタイル
+		 * Reset
+		 * @param {string} color Color
+		 * @return {Fill} This filling style
 		 */
 		reset(color) {
 			super.reset(color);
@@ -543,9 +543,9 @@ const STYLE = (function () {
 		// gradArea = {fromX, fromY, toX, toY, left, top, right, bottom}
 
 		/**
-		 * 紙にぬりスタイルを設定する
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array<number>} gradArea グラデーション範囲
+		 * Set the filling style on the paper
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array<number>} gradArea Gradation area
 		 */
 		assign(ctx, gradArea) {
 			ctx.fillStyle = this._makeStyle(ctx, gradArea);
@@ -556,9 +556,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * ぬりスタイルを使って形をかく
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array<number>} gradArea グラデーション範囲
+		 * Draw shape using the filling style
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array<number>} gradArea Gradation area
 		 */
 		draw(ctx, gradArea) {
 			ctx.save();
@@ -571,15 +571,15 @@ const STYLE = (function () {
 
 
 	/**
-	 * 線スタイル（ストローク）
+	 * Stroke style (Stroke)
 	 * @extends {StyleBase}
 	 * @version 2020-04-21
 	 */
 	class Stroke extends StyleBase {
 
 		/**
-		 * 線スタイルを作る
-		 * @param {Stroke=} base 元になる線スタイル
+		 * Make a stroke style
+		 * @param {Stroke=} base Original stroke style
 		 */
 		constructor(base) {
 			super(base, 'Black');
@@ -593,9 +593,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * リセットする
-		 * @param {string} color 色
-		 * @return {Fill} このぬりスタイル
+		 * Reset
+		 * @param {string} color Color
+		 * @return {Fill} This filling style
 		 */
 		reset(color) {
 			super.reset(color);
@@ -610,9 +610,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 線の太さを設定する
-		 * @param {number=} width 線の太さ
-		 * @return {number|Stroke} 線の太さかこのストローク
+		 * Set the line width
+		 * @param {number=} width Line width
+		 * @return {number|Stroke} Line width or this stroke
 		 */
 		width(width) {
 			if (width === undefined) return this._width;
@@ -621,9 +621,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 線のはしを設定する
-		 * @param {string=} cap 線のはし
-		 * @return {string|Stroke} 線のはしかこのストローク
+		 * Set the line cap
+		 * @param {string=} cap Line cap
+		 * @return {string|Stroke} Line cap or this stroke
 		 */
 		cap(cap) {
 			if (cap === undefined) return this._cap;
@@ -632,9 +632,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 線のつなぎを設定する
-		 * @param {string=} join 線のつなぎ
-		 * @return {string|Stroke} 線のつなぎかこのストローク
+		 * Set the line join
+		 * @param {string=} join Line join
+		 * @return {string|Stroke} Line join or this stroke
 		 */
 		join(join) {
 			if (join === undefined) return this._join;
@@ -643,9 +643,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 線の角の出っ張りの上限を設定する
-		 * @param {number=} miterLimit 線の角の出っ張りの上限
-		 * @return {number|Stroke} 線の角の出っ張りの上限かこのストローク
+		 * Set the upper limit of miter
+		 * @param {number=} miterLimit Upper limit of miter
+		 * @return {number|Stroke} Upper limit of miter or this stroke
 		 */
 		miterLimit(miterLimit) {
 			if (miterLimit === undefined) return this._miterLimit;
@@ -654,9 +654,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 点線のパターンを設定する
-		 * @param {Array<number>=} dash 点線のパターン
-		 * @return {Array<number>|Stroke} 点線パターンかこのストローク
+		 * Set a dash pattern
+		 * @param {Array<number>=} dash Dash pattern
+		 * @return {Array<number>|Stroke} Dash pattern or this stroke
 		 */
 		dash(...dash) {
 			if (dash === undefined) return this._dash.concat();
@@ -669,9 +669,9 @@ const STYLE = (function () {
 		}
 
 		/**
-		 * 点線のパターンのずれを設定する
-		 * @param {number=} dashOffset 点線のパターンのずれ
-		 * @return {number|Stroke} 点線のパターンのずれかこのストローク
+		 * Set the offset of dash pattern
+		 * @param {number=} dashOffset The offset of dash pattern
+		 * @return {number|Stroke} The offset of dash pattern or this stroke
 		 */
 		dashOffset(dashOffset) {
 			if (dashOffset === undefined) return this._dashOffset;
@@ -682,9 +682,9 @@ const STYLE = (function () {
 		// gradArea = {fromX, fromY, toX, toY, left, top, right, bottom}
 
 		/**
-		 * 紙に線スタイルを設定する
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array<number>} gradArea グラデーション範囲
+		 * Assign the stroke style in the paper
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array<number>} gradArea Gradation area
 		 */
 		assign(ctx, gradArea) {
 			ctx.strokeStyle = this._makeStyle(ctx, gradArea);
@@ -702,6 +702,11 @@ const STYLE = (function () {
 			ctx.lineDashOffset = this._dashOffset;
 		}
 
+		/**
+		 * Draw lines using the stroke style
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array<number>} gradArea Gradation area
+		 */
 		draw(ctx, gradArea) {
 			ctx.save();
 			this.assign(ctx, gradArea);
@@ -712,12 +717,12 @@ const STYLE = (function () {
 	}
 
 
-	// ユーティリティ関数 ------------------------------------------------------
+	// Utility functions -------------------------------------------------------
 
 
 	/**
-	 * 紙を拡張する
-	 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+	 * Augment papers
+	 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 	 */
 	const augment = (ctx) => {
 		if (ctx['styleFill'] && ctx['styleStroke'] && ctx['styleClear']) return;
@@ -759,26 +764,26 @@ const STYLE = (function () {
 
 
 	/**
-	 * 色テーブル
+	 * Color table
 	 * @author Takuto Yanagida
 	 * @version 2019-10-12
 	 */
 
 
 	/**
-	 * 色の名前が正しいかどうかをチェックします
-	 * @param {string} color 色の名前
+	 * Check if the color name is correct
+	 * @param {string} color Color name
 	 */
 	const checkColor = (color) => {
 		if (COLOR_TO_RGB[color.toLowerCase()] === undefined) {
-			throw new Error('色の名前が間違っています。');
+			throw new Error('The color name is incorrect.');
 		}
 	};
 
 	/**
-	 * 色の名前をRGBに直します
-	 * @param {string} color 色の名前
-	 * @param {number=} [alpha=1] アルファ
+	 * Convert color name to RGB
+	 * @param {string} color Color name
+	 * @param {number=} [alpha=1] Alpha
 	 * @return {Array<number>} RGB(A)
 	 */
 	const convertColorToRgb = (color, alpha = 1) => {
@@ -873,7 +878,7 @@ const STYLE = (function () {
 	};
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
 	return { Shadow, Fill, Stroke, augment };

@@ -1,5 +1,5 @@
 /**
- * モーション・ライブラリ（MOTION）
+ * Motion library (MOTION)
  *
  * @author Takuto Yanagida
  * @version 2019-05-12
@@ -7,20 +7,20 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const MOTION = (function () {
 
 	'use strict';
 
 
-	// ライブラリ中だけで使用するユーティリティ --------------------------------
+	// Utilities used only in the library --------------------------------------
 
 
 	/**
-	 * 角度を0～360度の範囲にする
-	 * @param {number} deg 角度
-	 * @return {number} 角度
+	 * Make an angle between 0 to 360 degrees
+	 * @param {number} deg Degree
+	 * @return {number} Degree
 	 */
 	const checkDegRange = function (deg) {
 		deg %= 360;
@@ -29,10 +29,10 @@ const MOTION = (function () {
 	};
 
 	/**
-	 * 値なら返し、関数なら関数を呼び出す
-	 * @param {number|function(): number} vf 値か関数
-	 * @param {number=} unitTime 単位時間
-	 * @return {number} 値
+	 * If a value is given, return it, and if a function is given, call it
+	 * @param {number|function(): number} vf Value or function
+	 * @param {number=} unitTime Unit time
+	 * @return {number} Value
 	 */
 	const valueFunction = function (vf, unitTime = 1) {
 		if (typeof vf === 'function') {
@@ -43,11 +43,11 @@ const MOTION = (function () {
 	};
 
 	/**
-	 * 範囲をチェックする関数を作る
-	 * @param {number} min 最小値
-	 * @param {number} max 最大値
-	 * @param {boolean=} isLoop ループする？
-	 * @return {function(number): number} 範囲をチェックする関数
+	 * Make a function to check the range
+	 * @param {number} min Minimum value
+	 * @param {number} max Maximum value
+	 * @param {boolean=} isLoop Whether to loop
+	 * @return {function(number): number} Function to check the range
 	 */
 	const makeRangeChecker = function (min, max, isLoop) {
 		if (isLoop) {
@@ -67,16 +67,16 @@ const MOTION = (function () {
 
 
 	/**
-	 * 直交座標モーション
+	 * Axis coordinate motion
 	 * @version 2020-05-05
 	 */
 	class AxisMotion {
 
 		/**
-		 * 直交座標モーションを作る
+		 * Make an axis coordinate motion
 		 * @constructor
-		 * @param {number=} [speedX=0] 横方向のスピード
-		 * @param {number=} [speedY=0] たて方向のスピード
+		 * @param {number=} [speedX=0] Horizontal speed
+		 * @param {number=} [speedY=0] Vertical speed
 		 */
 		constructor(speedX = 0, speedY = 0) {
 			this._speedX = speedX;
@@ -86,9 +86,9 @@ const MOTION = (function () {
 		}
 
 		/**
-		 * 横方向のスピード
-		 * @param {number=} val 値
-		 * @return {number|AxisMotion} 値／このモーション
+		 * Horizontal speed
+		 * @param {number=} val Value
+		 * @return {number|AxisMotion} Value, or this motion
 		 */
 		speedX(val) {
 			if (val === undefined) return this._speedX;
@@ -97,9 +97,9 @@ const MOTION = (function () {
 		}
 
 		/**
-		 * たて方向のスピード
-		 * @param {number=} val 値
-		 * @return {number|AxisMotion} 値／このモーション
+		 * Vertical speed
+		 * @param {number=} val Value
+		 * @return {number|AxisMotion} Value, or this motion
 		 */
 		speedY(val) {
 			if (val === undefined) return this._speedY;
@@ -108,32 +108,32 @@ const MOTION = (function () {
 		}
 
 		/**
-		 * 横方向の範囲をセットする
-		 * @param {number} min 始まり
-		 * @param {number} max 終わり
-		 * @param {boolean} isLoop ループする？
+		 * Set the horizontal range
+		 * @param {number} min Beginning
+		 * @param {number} max End
+		 * @param {boolean} isLoop Whether to loop
 		 */
 		setRangeX(min, max, isLoop) {
 			this._checkRangeX = makeRangeChecker(min, max, isLoop);
 		}
 
 		/**
-		 * たて方向の範囲をセットする
-		 * @param {number} min 始まり
-		 * @param {number} max 終わり
-		 * @param {boolean} isLoop ループする？
+		 * Set the vertical range
+		 * @param {number} min Beginning
+		 * @param {number} max End
+		 * @param {boolean} isLoop Whether to loop
 		 */
 		setRangeY(min, max, isLoop) {
 			this._checkRangeY = makeRangeChecker(min, max, isLoop);
 		}
 
 		/**
-		 * スピードに合わせて座標を更新する
-		 * @param {number} x x座標（横の場所）
-		 * @param {number} y y座標（たての場所）
-		 * @param {number} dir 方向
-		 * @param {number} unitTime 単位時間
-		 * @return {Array<number>} 座標
+		 * Update coordinates according to the speed
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number} dir Direction
+		 * @param {number} unitTime Unit time
+		 * @return {Array<number>} Coordinate
 		 */
 		update(x, y, dir, unitTime) {
 			x += valueFunction(this._speedX, unitTime);
@@ -147,17 +147,17 @@ const MOTION = (function () {
 
 
 	/**
-	 * 極座標モーション
+	 * Polar coordinate motion
 	 * @version 2020-05-05
 	 */
 	class PolarMotion {
 
 		/**
-		 * 極座標モーションを作る
+		 * Make a polar coordinate motion
 		 * @constructor
-		 * @param {number=} [speedA=0] 角度方向のスピード
-		 * @param {number=} [speedR=0] 半径方向のスピード
-		 * @param {boolean=} [proportionalAngularSpeed=false] 角度方向のスピードが半径に比例する？
+		 * @param {number=} [speedA=0] Angular speed
+		 * @param {number=} [speedR=0] Radius speed
+		 * @param {boolean=} [proportionalAngularSpeed=false] Whether angular speed is proportional to radius
 		 */
 		constructor(speedA = 0, speedR = 0, proportionalAngularSpeed = false) {
 			this._speedA = speedA;
@@ -167,9 +167,9 @@ const MOTION = (function () {
 		}
 
 		/**
-		 * 角度方向のスピード
-		 * @param {number=} val 値
-		 * @return {number|PolarMotion} 値／このモーション
+		 * Angular speed
+		 * @param {number=} val Value
+		 * @return {number|PolarMotion} Value, or this motion
 		 */
 		speedA(val) {
 			if (val === undefined) return this._speedA;
@@ -178,9 +178,9 @@ const MOTION = (function () {
 		}
 
 		/**
-		 * 半径方向のスピード
-		 * @param {number=} val 値
-		 * @return {number|PolarMotion} 値／このモーション
+		 * Radius speed
+		 * @param {number=} val Value
+		 * @return {number|PolarMotion} Value, or this motion
 		 */
 		speedR(val) {
 			if (val === undefined) return this._speedR;
@@ -189,19 +189,19 @@ const MOTION = (function () {
 		}
 
 		/**
-		 * 半径方向の範囲をセットする
-		 * @param {number} min 始まり
-		 * @param {number} max 終わり
-		 * @param {boolean} isLoop ループする？
+		 * Set the radius range
+		 * @param {number} min Beginning
+		 * @param {number} max End
+		 * @param {boolean} isLoop Whether to loop
 		 */
 		setRangeR(min, max, isLoop) {
 			this._checkRangeR = makeRangeChecker(min, max, isLoop);
 		}
 
 		/**
-		 * 角度方向のスピードが半径に比例する？
-		 * @param {boolean} val 値
-		 * @return {boolean|PolarMotion} 値／このモーション
+		 * Whether angular speed is proportional to radius
+		 * @param {boolean} val Value
+		 * @return {boolean|PolarMotion} Value, or this motion
 		 */
 		proportionalAngularSpeed(val) {
 			if (val === undefined) return this._propSpeedA;
@@ -210,12 +210,12 @@ const MOTION = (function () {
 		}
 
 		/**
-		 * スピードに合わせて座標を更新する
-		 * @param {number} x x座標（横の場所）
-		 * @param {number} y y座標（たての場所）
-		 * @param {number} dir 方向
-		 * @param {number} unitTime 単位時間
-		 * @return {Array<number>} 座標
+		 * Update coordinates according to the speed
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number} dir Direction
+		 * @param {number} unitTime Unit time
+		 * @return {Array<number>} Coordinate
 		 */
 		update(x, y, dir, unitTime) {
 			let r = Math.sqrt(x * x + y * y);
@@ -233,7 +233,7 @@ const MOTION = (function () {
 	}
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
 	return { AxisMotion, PolarMotion };

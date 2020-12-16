@@ -1,7 +1,7 @@
 /**
- * タートル・ライブラリ（TURTLE）
+ * Turtle library (TURTLE)
  *
- * カメを動かして、絵をかくためのライブラリです。
+ * A library for moving the turtle and drawing pictures.
  *
  * @author Takuto Yanagida
  * @version 2020-04-22
@@ -9,29 +9,29 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const TURTLE = (function () {
 
 	'use strict';
 
 
-	// ライブラリ中だけで使用するユーティリティ --------------------------------
+	// Utilities used only in the library --------------------------------------
 
 
 	/**
-	 * 角度をラジアンにする
-	 * @param {number} deg 角度
-	 * @return {number} ラジアン
+	 * Convert degree to radian
+	 * @param {number} deg Degree
+	 * @return {number} Radian
 	 */
 	const rad = function (deg) {
 		return deg * Math.PI / 180.0;
 	};
 
 	/**
-	 * 角度を0～360度の範囲にする
-	 * @param {number} deg 角度
-	 * @return {number} 角度
+	 * Make an angle between 0 to 360 degrees
+	 * @param {number} deg Degree
+	 * @return {number} Degree
 	 */
 	const checkDegRange = function (deg) {
 		deg %= 360;
@@ -41,24 +41,24 @@ const TURTLE = (function () {
 
 
 	/**
-	 * タートル・ベース
-	 * @version 2020-05-05
+	 * Turtle base
+	 * @version 2020-12-16
 	 */
 	class TurtleBase {
 
 		/**
-		 * カメを作る
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number=} normalDeg 標準の方向
+		 * Make a turtle
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number=} normalDeg Normal degree
 		 */
 		constructor(ctx, normalDeg) {
-			if (typeof STYLE === 'undefined') throw new Error('Styleライブラリが必要です。');
-			if (typeof PATH === 'undefined') throw new Error('Pathライブラリが必要です。');
+			if (typeof STYLE === 'undefined') throw new Error('Style library is needed.');
+			if (typeof PATH === 'undefined') throw new Error('Path library is needed.');
 
 			this._ctx = ctx;
 			this._stack = [];
 
-			// 以下の変数は値を直接変えないこと
+			// Do not change the following variables directly
 			this._x       = 0;
 			this._y       = 0;
 			this._dir     = 0;
@@ -97,21 +97,21 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 子カメを作る
-		 * @return {*} 子カメ
+		 * Make a child turtle
+		 * @return {*} Child turtle
 		 */
 		makeChild() {
 			const child = new this.constructor(this._ctx);
 			child._setState(this._getState(), false);
-			// ペンの上げ下げをできなくする
+			// Make it impossible to make up and down the pen
 			child.pen = () => { return this; };
 			return child;
 		}
 
 		/**
-		 * 今の状態を保存する
-		 * @param {boolean=} [opt_savePaper=false] 紙の状態も保存するか？
-		 * @return {TurtleBase} このタートル・ベース
+		 * Save the current state
+		 * @param {boolean=} [opt_savePaper=false] Whether to save the paper state too
+		 * @return {TurtleBase} This turtle base
 		 */
 		save(opt_savePaper = false) {
 			if (opt_savePaper === true) this._ctx.save();
@@ -120,9 +120,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 前の状態を復元する
-		 * @param {boolean=} [opt_restorePaper=false] 紙の状態も復元するか？
-		 * @return {TurtleBase} このタートル・ベース
+		 * Restore previous state
+		 * @param {boolean=} [opt_restorePaper=false] Whether to restore the paper state too
+		 * @return {TurtleBase} This turtle base
 		 */
 		restore(opt_restorePaper = false) {
 			this._setState(this._stack.pop());
@@ -131,13 +131,13 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 状態を取得する（ライブラリ内だけで使用）
+		 * Get state (used only in the library)
 		 * @private
-		 * @return {Array} 状態
+		 * @return {Array} State
 		 */
 		_getState() {
 			return [
-				// 以下、順番に依存関係あり
+				// Below, there is a dependency in order
 				this._x, this._y, this._dir,
 				this._step,
 				this._liner.edge(),
@@ -147,19 +147,19 @@ const TURTLE = (function () {
 				new STYLE.Stroke(this._stroke),
 				new STYLE.Fill(this._fill),
 				this._curMode,
-				// ペンの状態は最後
+				// The state of the pen is last
 				this._pen,
 			];
 		}
 
 		/**
-		 * 状態を設定する（ライブラリ内だけで使用）
+		 * Set state (used only in the library)
 		 * @private
-		 * @param {Array} t 状態
-		 * @param {boolean=} [applyPenState=true] ペンの状態を設定するか？
+		 * @param {Array} t State
+		 * @param {boolean=} [applyPenState=true] Whether to set the state of the pen
 		 */
 		_setState(t, applyPenState = true) {
-			// 以下、順番に依存関係あり
+			// Below, there is a dependency in order
 			this._changePos(t[0], t[1], t[2]);
 			this.step(t[3]);
 			this._liner.edge(t[4]);
@@ -169,16 +169,16 @@ const TURTLE = (function () {
 			this._stroke = t[10];
 			this._fill = t[11];
 			this._curMode = t[12];
-			// ペンの状態は最後に設定すること（area等を参照しているため）
+			// The state of the pen should be set at the end (because the area etc. are referred)
 			if (applyPenState === true) this.pen(t[13]);
 		}
 
 		/**
-		 * 場所や方向を変える時に呼ばれる（ライブラリ内だけで使用）
+		 * Called when changing places and directions (used only in the library)
 		 * @private
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @param {number=} opt_deg 方向（オプション）
+		 * @param {number} x x coordinate
+		 * @param {number} y y coordinate
+		 * @param {number=} opt_deg Degree (optional)
 		 */
 		_changePos(x, y, opt_deg) {
 			this._x = x;
@@ -187,7 +187,7 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * アニメーション用プレースホルダ（アニメーションのスキップをチェックする）（ライブラリ内だけで使用）
+		 * Placeholder for animation (check skip animation) (used only in the library)
 		 * @private
 		 */
 		_getPower() {
@@ -195,7 +195,7 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * アニメーション用プレースホルダ（アニメーションの終わりをチェックする）（ライブラリ内だけで使用）
+		 * Placeholder for animation (check the end of animation) (used only in the library)
 		 * @private
 		 * @param {number} consumption
 		 */
@@ -203,33 +203,33 @@ const TURTLE = (function () {
 		}
 
 
-		// 場所か方向の変化 --------------------------------------------------------
+		// Change of place or direction --------------------------------------------
 
 
 		/**
-		 * 前に進む
-		 * @param {number} step 歩数
-		 * @return {TurtleBase} このタートル・ベース
+		 * Go forward
+		 * @param {number} step Number of steps
+		 * @return {TurtleBase} This turtle base
 		 */
 		go(step) {
 			return this._goPrep(step);
 		}
 
 		/**
-		 * 後ろに戻る
-		 * @param {number} step 歩数
-		 * @return {TurtleBase} このタートル・ベース
+		 * Go back
+		 * @param {number} step Number of steps
+		 * @return {TurtleBase} This turtle base
 		 */
 		back(step) {
-			// 前に進むことの逆
+			// The reverse of going forward
 			return this._goPrep(-step);
 		}
 
 		/**
-		 * 進む（ライブラリ内だけで使用）
+		 * Go (used only in the library)
 		 * @private
-		 * @param {number} step 歩数
-		 * @return {TurtleBase} このタートル・ベース
+		 * @param {number} step Number of steps
+		 * @return {TurtleBase} This turtle base
 		 */
 		_goPrep(step) {
 			const limit = this._getPower();
@@ -239,12 +239,12 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に進む（ライブラリ内だけで使用）
+		 * Actually go (used only in the library)
 		 * @private
-		 * @param {number} step 歩数
-		 * @param {number} limit 制限
-		 * @param {function=} [before=null] 実際に動く前に呼ばれる関数
-		 * @return {number} 実際に動いた量
+		 * @param {number} step Number of steps
+		 * @param {number} limit Limitation
+		 * @param {function=} [before=null] Function to be called before it actually moves
+		 * @return {number} Amount actually moved
 		 */
 		_doGo(step, limit, before = null) {
 			const x = this._x, y = this._y, dir_ = this._dir - 90, d = step * this._step;
@@ -253,29 +253,24 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 右に回る
-		 * @param {number} deg 角度
-		 * @return {TurtleBase} このタートル・ベース
+		 * Turn right
+		 * @param {number} deg Degree
+		 * @return {TurtleBase} This turtle base
 		 */
 		turnRight(deg) {
 			return this._turnPrep(deg);
 		}
 
-		/**
-		 * 左に回る
-		 * @param {number} deg 角度
-		 * @return {TurtleBase} このタートル・ベース
-		 */
 		turnLeft(deg) {
-			// 右に回ることの逆
+			// The reverse of turning to the right
 			return this._turnPrep(-deg);
 		}
 
 		/**
-		 * 回る（ライブラリ内だけで使用）
+		 * Turn (used only in the library)
 		 * @private
-		 * @param {number} deg 角度
-		 * @return {TurtleBase} このタートル・ベース
+		 * @param {number} deg Degree
+		 * @return {TurtleBase} This turtle base
 		 */
 		_turnPrep(deg) {
 			const limit = this._getPower();
@@ -285,12 +280,12 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に方向を変える（ライブラリ内だけで使用）
+		 * Actually change direction (used only in the library)
 		 * @private
-		 * @param {number} deg 角度
-		 * @param {number} limit 制限
-		 * @param {function=} [before=null] 実際に動く前に呼ばれる関数
-		 * @return {number} 実際に動いた量
+		 * @param {number} deg Degree
+		 * @param {number} limit Limitation
+		 * @param {function=} [before=null] Function to be called before it actually moves
+		 * @return {number} Amount actually moved
 		 */
 		_doTurn(deg, limit, before = null) {
 			const sign = (deg < 0 ? -1 : 1), d = sign * deg;
@@ -309,9 +304,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * x座標（横の場所）
-		 * @param {number=} val 値
-		 * @return x座標／このタートル・ベース
+		 * X coordinate
+		 * @param {number=} val Value
+		 * @return X coordinate, or this turtle base
 		 */
 		x(val) {
 			if (val === undefined) return this._x;
@@ -319,9 +314,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * y座標（たての場所）
-		 * @param {number=} val 値
-		 * @return y座標／このタートル・ベース
+		 * Y coordinate
+		 * @param {number=} val Value
+		 * @return Y coordinate, or this turtle base
 		 */
 		y(val) {
 			if (val === undefined) return this._y;
@@ -329,9 +324,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 方向
-		 * @param {number=} deg 角度
-		 * @return 角度／このタートル・ベース
+		 * Direction
+		 * @param {number=} deg Degree
+		 * @return Degree, or this turtle base
 		 */
 		direction(deg) {
 			if (deg === undefined) return this._dir;
@@ -341,11 +336,11 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 移動する
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @param {number=} opt_dir 方向（オプション）
-		 * @return {TurtleBase} このタートル・ベース
+		 * Move to
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number=} opt_dir Direction (optional)
+		 * @return {TurtleBase} This turtle base
 		 */
 		moveTo(x, y, opt_dir) {
 			if (this._getPower() === 0) return this;
@@ -359,25 +354,25 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 集まる
-		 * @param {TurtleBase} turtle 別のカメ
-		 * @return {TurtleBase} このタートル・ベース
+		 * Gather to
+		 * @param {TurtleBase} turtle Another turtle
+		 * @return {TurtleBase} This turtle base
 		 */
 		gatherTo(turtle) {
 			return this.moveTo(turtle._x, turtle._y, turtle._dir);
 		}
 
 		/**
-		 * ホームに帰る（最初の場所と方向に戻る）
-		 * @return {TurtleBase} このタートル・ベース
+		 * Go back to home (Return to the first place and direction)
+		 * @return {TurtleBase} This turtle base
 		 */
 		home() {
 			return this.moveTo(this._homeX, this._homeY, this._homeDir);
 		}
 
 		/**
-		 * 今の場所をホームに
-		 * @return {TurtleBase} このタートル・ベース
+		 * Set your current location to 'home'
+		 * @return {TurtleBase} This turtle base
 		 */
 		setHome() {
 			if (this._getPower() === 0) return this;
@@ -388,30 +383,30 @@ const TURTLE = (function () {
 		}
 
 
-		// 場所と方向の変化 --------------------------------------------------------
+		// Change of place and direction -------------------------------------------
 
 
 		/**
-		 * 右にカーブする
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @return {TurtleBase} このタートル・ベース
+		 * Curve to the right
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @return {TurtleBase} This turtle base
 		 */
 		curveRight(step0, deg, step1, opt_deg, opt_step) {
 			return this._curvePrep(step0, deg, step1, opt_deg, opt_step);
 		}
 
 		/**
-		 * 左にカーブする
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @return {TurtleBase} このタートル・ベース
+		 * Curve to the left
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @return {TurtleBase} This turtle base
 		 */
 		curveLeft(step0, deg, step1, opt_deg, opt_step) {
 			if (opt_deg === undefined) return this._curvePrep(step0, -deg, step1);
@@ -419,14 +414,14 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * カーブする（ライブラリ内だけで使用）
+		 * Curve (used only in the library)
 		 * @private
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @return {TurtleBase} このタートル・ベース
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @return {TurtleBase} This turtle base
 		 */
 		_curvePrep(step0, deg, step1, opt_deg, opt_step) {
 			const limit = this._getPower();
@@ -436,16 +431,16 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際にカーブする（ライブラリ内だけで使用）
+		 * Actually curve (used only in the library)
 		 * @private
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @param {number} limit 制限
-		 * @param {function=} [before=null] 実際に動く前に呼ばれる関数
-		 * @return {number} 実際に動いた量
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @param {number} limit Limitation
+		 * @param {function=} [before=null] Function to be called before it actually moves
+		 * @return {number} Amount actually moved
 		 */
 		_doCurve(step0, deg, step1, opt_deg, opt_step, limit, before = null) {
 			const x = this._x, y = this._y, dir_ = this._dir - 90, s = this._step;
@@ -462,32 +457,32 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 右に曲がる弧をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @return {TurtleBase} このタートル・ベース
+		 * Draw an arc that turns to the right
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @return {TurtleBase} This turtle base
 		 */
 		arcRight(r, deg) {
 			return this._arcPrep(r, deg, false);
 		}
 
 		/**
-		 * 左に曲がる弧をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @return {TurtleBase} このタートル・ベース
+		 * Draw an arc that turns to the left
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @return {TurtleBase} This turtle base
 		 */
 		arcLeft(r, deg) {
 			return this._arcPrep(r, deg, true);
 		}
 
 		/**
-		 * 弧をかく（ライブラリ内だけで使用）
+		 * Draw an arc (used only in the library)
 		 * @private
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @param {boolean} isLeft 左かどうか
-		 * @return {TurtleBase} このタートル・ベース
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @param {boolean} isLeft Whether it is left
+		 * @return {TurtleBase} This turtle base
 		 */
 		_arcPrep(r, deg, isLeft) {
 			const limit = this._getPower();
@@ -497,18 +492,18 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に弧をかく（ライブラリ内だけで使用）
+		 * Actually draw an arc (used only in the library)
 		 * @private
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @param {boolean} isLeft 左かどうか
-		 * @param {number} limit 制限
-		 * @param {function=} [before=null] 実際に動く前に呼ばれる関数
-		 * @return {number} 実際に動いた量
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @param {boolean} isLeft Whether it is left
+		 * @param {number} limit Limitation
+		 * @param {function=} [before=null] Function to be called before it actually moves
+		 * @return {number} Amount actually moved
 		 */
 		_doArc(r, deg, isLeft, limit, before = null) {
 			const p = PATH.arrangeArcParams(r, deg, this._step);
-			// 時計回りの接線の傾きなのでPIを足す（逆向きにする）
+			// Since it is the inclination of the tangent in the clockwise direction, add PI
 			const rev = isLeft ? 0 : Math.PI;
 
 			if (isLeft) {
@@ -532,13 +527,13 @@ const TURTLE = (function () {
 		}
 
 
-		// その他 ------------------------------------------------------------------
+		// Others ------------------------------------------------------------------
 
 
 		/**
-		 * 1歩の長さ
-		 * @param {number=} val 値
-		 * @return {number|TurtleBase} 1歩の長さ／このタートル・ベース
+		 * Length per step
+		 * @param {number=} val Value
+		 * @return {number|TurtleBase} Length per step, or this turtle base
 		 */
 		step(val) {
 			if (val === undefined) return this._step;
@@ -547,10 +542,10 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 今の場所から見て、ある場所がどの角度かを返す
-		 * @param {number} x ある場所のx座標（横の場所）
-		 * @param {number} y ある場所のy座標（たての場所）
-		 * @return {number} 角度
+		 * Seeing from the current location, what direction is there
+		 * @param {number} x X coordinate of a place
+		 * @param {number} y Y coordinate of a place
+		 * @return {number} Degree
 		 */
 		getDirectionOf(x, y) {
 			let d = (Math.atan2(this._y - y, this._x - x) * 180.0 / Math.PI - this._dir - 90);
@@ -560,38 +555,38 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 今の場所から見て、ホームがどの角度かを返す
-		 * @return {number} 角度
+		 * Seeing from the current location, which direction is home
+		 * @return {number} Degree
 		 */
 		getDirectionOfHome() {
 			return this.getDirectionOf(this._homeX, this._homeY);
 		}
 
 		/**
-		 * 今の場所から、ある場所までの距離を返す
-		 * @param {number} x ある場所のx座標
-		 * @param {number} y ある場所のy座標
-		 * @return {number} 距離
+		 * Distance from current location to a certain location
+		 * @param {number} x X coordinate of a place
+		 * @param {number} y Y coordinate of a place
+		 * @return {number} Distance
 		 */
 		getDistanceTo(x, y) {
 			return Math.sqrt((x - this._x) * (x - this._x) + (y - this._y) * (y - this._y));
 		}
 
 		/**
-		 * 今の場所から、ホームまでの距離を返す
-		 * @return {number} 距離
+		 * Distance from current location to home
+		 * @return {number} Distance
 		 */
 		getDistanceToHome() {
 			return this.getDistanceTo(this._homeX, this._homeY);
 		}
 
 
-		// 図形の描画 --------------------------------------------------------------
+		// Draw a shape ------------------------------------------------------------
 
 
 		/**
-		 * 点をかく
-		 * @return {TurtleBase} このタートル・ベース
+		 * Draw a point
+		 * @return {TurtleBase} This turtle base
 		 */
 		dot() {
 			this._drawShape((limit) => {
@@ -611,11 +606,11 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 円をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>=} [deg=360] 弧の角度（配列なら開始角度と終了角度）
-		 * @param {boolean=} [anticlockwise=false] 反時計回り？
-		 * @return {TurtleBase} このタートル・ベース
+		 * Draw a circle
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @param {boolean=} [anticlockwise=false] Whether it is counterclockwise
+		 * @return {TurtleBase} This turtle base
 		 */
 		circle(r, deg = 360, anticlockwise = false) {
 			const p = PATH.arrangeArcParams(r, deg, this._step);
@@ -629,16 +624,16 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に円をかく（ライブラリ内だけで使用）
+		 * Actually draw a circle (used only in the library)
 		 * @private
-		 * @param {number} cx 中心のx座標
-		 * @param {number} cy 中心のy座標
-		 * @param {dict} p パラメター
-		 * @param {boolean} anticlockwise 反時計回り？
-		 * @param {number} limit 制限
-		 * @param {number} dr 方向
-		 * @param {function=} [before=null] 実際に動く前に呼ばれる関数
-		 * @return {number} 実際に動いた量
+		 * @param {number} cx X coordinate of center
+		 * @param {number} cy Y coordinate of center
+		 * @param {dict} p Parameters
+		 * @param {boolean} anticlockwise Whether it is counterclockwise
+		 * @param {number} limit Limitation
+		 * @param {number} dr Direction
+		 * @param {function=} [before=null] Function to be called before it actually moves
+		 * @return {number} Amount actually moved
 		 */
 		_doCircle(cx, cy, p, anticlockwise, limit, dr, before = false) {
 			if (before) before(cx, cy, p, dr);
@@ -646,11 +641,11 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に絵をかく（ライブラリ内だけで使用）
+		 * Actually draw a shape (used only in the library)
 		 * @private
-		 * @param {function} doFunc 関数
-		 * @param {number=} [opt_x=null] 始点のx座標
-		 * @param {number=} [opt_y=null] 始点のy座標
+		 * @param {function} doFunc Function
+		 * @param {number=} [opt_x=null] Start point x coordinate
+		 * @param {number=} [opt_y=null] Start point y coordinate
 		 */
 		_drawShape(doFunc, opt_x = null, opt_y = null) {
 			const limit = this._getPower();
@@ -667,11 +662,11 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * イメージをかく
-		 * @param {Image|Paper|CanvasRenderingContext2D} image イメージ／紙／キャンバス・コンテキスト
-		 * @param {number} cx 中心のx座標
-		 * @param {number} cy 中心のy座標
-		 * @param {number=} [scale=1] スケール
+		 * Draw an image
+		 * @param {Image|Paper|CanvasRenderingContext2D} image Image, paper, or canvas context
+		 * @param {number} cx X coordinate of center
+		 * @param {number} cy Y coordinate of center
+		 * @param {number=} [scale=1] Scale
 		 */
 		image(image, cx, cy, scale = 1) {
 			const img = (image instanceof CROQUJS.Paper || image instanceof CanvasRenderingContext2D) ? image.canvas : image;
@@ -682,43 +677,43 @@ const TURTLE = (function () {
 		}
 
 
-		// 描画状態の変化 ----------------------------------------------------------
+		// Change of drawing state -------------------------------------------------
 
 
 		/**
-		 * ペンを上げる
-		 * @return {TurtleBase} このタートル・ベース
+		 * Raise up the pen
+		 * @return {TurtleBase} This turtle base
 		 */
 		penUp() {
 			return this.pen(false);
 		}
 
 		/**
-		 * ペンを下ろす
-		 * @return {TurtleBase} このタートル・ベース
+		 * Put down the pen
+		 * @return {TurtleBase} This turtle base
 		 */
 		penDown() {
 			return this.pen(true);
 		}
 
 		/**
-		 * ペンの状態
-		 * @param {boolean=} val 値（下がっているならtrue）
-		 * @return {boolean|TurtleBase} ペンの状態／このタートル・ベース
+		 * Pen state
+		 * @param {boolean=} val Value (true if down)
+		 * @return {boolean|TurtleBase} Pen state, or this turtle base
 		 */
 		pen(val) {
 			if (val === undefined) return this._pen;
 			if (this._pen === false && val === true) {
 				this._ctx.beginPath();
 				this._ctx.moveTo(this._x, this._y);
-				// ペンを下げた場所を保存しておく
+				// Save the place where the pen put down
 				this._area.fromX = this._area.left = this._area.right = this._x;
 				this._area.fromY = this._area.top = this._area.bottom = this._y;
 				this._area.sqLen = 0;
 				this._curMode = this._mode.toLowerCase();
 			}
 			if (this._pen === true && val === false && !this._isNotDrawn()) {
-				// ペンを下げた場所と同じ場所でペンを上げたら、パスを閉じる（始点と終点をつなげる）
+				// Close the path (connect the start and end points) by raising the pen at the same place where putting down the pen
 				if (this._isInPenDownPoint()) this._ctx.closePath();
 				this._drawActually();
 			}
@@ -727,9 +722,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * ペンを下ろした場所にいる？（ライブラリ内だけで使用）
+		 * Whether the current location is where putting down the pen (used only in the library)
 		 * @private
-		 * @return {boolean} ペンを下ろした場所にいるかどうか
+		 * @return {boolean} Whether the current location is where putting down the pen
 		 */
 		_isInPenDownPoint() {
 			const x = this._x, y = this._y;
@@ -739,23 +734,23 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に絵をかく（ライブラリ内だけで使用）
+		 * Actually draw (used only in the library)
 		 * @private
 		 */
 		_drawActually() {
 			let ms = this._curMode;
-			if (ms.match(/(fill|stroke|clip|none)/)) {
-				ms = ms.replace(/(fill|stroke|clip)/g, '$1,').replace(/,$/, '').split(',');
-			}
-			for (let m of ms) {
+			ms = ms.replace('fill', 'f');
+			ms = ms.replace('stroke', 's');
+			ms = ms.replace('clip', 'c');
+			for (const m of ms) {
 				switch (m) {
-					case 'fill': case 'f':
+					case 'f':
 						this._fill.draw(this._ctx, this._area);
 						break;
-					case 'stroke': case 's':
+					case 's':
 						this._stroke.draw(this._ctx, this._area);
 						break;
-					case 'clip': case 'c':
+					case 'c':
 						if (this._isClipable) this._ctx.clip();
 						break;
 				}
@@ -763,15 +758,15 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * かくモード
-		 * @param {string=} val 値
-		 * @return {string|TurtleBase} かくモード／このタートル・ベース
+		 * Drawing mode
+		 * @param {string=} val Value
+		 * @return {string|TurtleBase} Drawing mode, or this turtle base
 		 */
 		mode(val) {
 			if (val === undefined) return this._mode;
 			this._mode = val;
 
-			// ペンを下ろしていても、何も描いていないなら
+			// Even if the pen is down, if nothing is drawn
 			if (this._pen && this._isNotDrawn()) {
 				this._curMode = this._mode.toLowerCase();
 			}
@@ -779,9 +774,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 何もかいていない？（ライブラリ内だけで使用）
+		 * Whether nothing is drawn (used only in the library)
 		 * @private
-		 * @return {boolean} 何もかいていないかどうか
+		 * @return {boolean} Whether nothing is drawn
 		 */
 		_isNotDrawn() {
 			const a = this._area, x = this._x, y = this._y;
@@ -792,9 +787,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 線スタイル
-		 * @param {Stroke=} opt_stroke 設定する線スタイル（オプション）
-		 * @return {Stroke|TurtleBase} 線スタイル／このタートル・ベース
+		 * Stroke style
+		 * @param {Stroke=} opt_stroke Stroke style (optional)
+		 * @return {Stroke|TurtleBase} Stroke style, or this turtle base
 		 */
 		stroke(opt_stroke) {
 			if (opt_stroke === undefined) return this._stroke;
@@ -803,9 +798,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * ぬりスタイル
-		 * @param {Fill=} opt_fill 設定するぬりスタイル（オプション）
-		 * @return {Fill|TurtleBase} ぬりスタイル／このタートル・ベース
+		 * Filling style
+		 * @param {Fill=} opt_fill Filling style (optional)
+		 * @return {Fill|TurtleBase} Filling style, or this turtle base
 		 */
 		fill(opt_fill) {
 			if (opt_fill === undefined) return this._fill;
@@ -814,9 +809,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * エッジ
-		 * @param {function=} func エッジを決める関数
-		 * @return {function|TurtleBase} エッジ／このタートル・ベース
+		 * Edge
+		 * @param {function=} func Function to determine the edge
+		 * @return {function|TurtleBase} Edge, or this turtle base
 		 */
 		edge(func, ...fs) {
 			if (func === undefined) return this._liner.edge();
@@ -825,19 +820,19 @@ const TURTLE = (function () {
 		}
 
 
-		// 紙操作 ----------------------------------------------------------------
+		// Paper operation ---------------------------------------------------------
 
 
 		/**
-		 * 紙を返す
-		 * @return {Paper|CanvasRenderingContext2D} 紙／キャンバス・コンテキスト
+		 * Get the paper
+		 * @return {Paper|CanvasRenderingContext2D} Paper or canvas context
 		 */
 		context() {
 			return this._ctx;
 		}
 
 		/**
-		 * 紙をカメの場所と方向に合わせる
+		 * Align the paper with turtle location and orientation
 		 */
 		localize() {
 			this._ctx.translate(this._x, this._y);
@@ -845,9 +840,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 紙をカメの場所に合わせて拡大縮小する
-		 * @param {number} rate 拡大縮小率
-		 * @param {number=} opt_rateY たての拡大縮小率（オプション）
+		 * Scale the paper to the location of the turtle
+		 * @param {number} rate Scaling rate
+		 * @param {number=} opt_rateY Vertical scaling rate (optional)
 		 */
 		scale(rate, opt_rateY = null) {
 			this._ctx.translate(this._x, this._y);
@@ -863,15 +858,15 @@ const TURTLE = (function () {
 
 
 	/**
-	 * タートル
+	 * Turtle
 	 * @version 2020-04-22
 	 */
 	class Turtle extends TurtleBase {
 
 		/**
-		 * カメを作る
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number=} normalDeg 標準の方向
+		 * Make a turtle
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number=} normalDeg Normal degree
 		 */
 		constructor(ctx, normalDeg) {
 			super(ctx, normalDeg);
@@ -896,9 +891,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * ペンが変わったイベントに対応する関数をセットする
-		 * @param {function} handler 関数
-		 * @return {function|Turtle} 関数かこのタートル
+		 * Set the function corresponding to 'Pen changed event'
+		 * @param {function} handler Function
+		 * @return {function|Turtle} Function, or this turtle
 		 */
 		onPenChanged(handler) {
 			if (handler === undefined) return this._onPenChanged;
@@ -907,9 +902,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 移動したイベントに対応する関数をセットする
-		 * @param {function} handler 関数
-		 * @return {function|Turtle} 関数かこのタートル
+		 * Set the function corresponding to 'moved event'
+		 * @param {function} handler Function
+		 * @return {function|Turtle} Function, or this turtle
 		 */
 		onMoved(handler) {
 			if (handler === undefined) return this._onMoved;
@@ -918,13 +913,13 @@ const TURTLE = (function () {
 		}
 
 
-		// 場所か方向の変化 --------------------------------------------------------
+		// Change of place or direction --------------------------------------------
 
 
 		/**
-		 * 前に進む
-		 * @param {number} step 歩数
-		 * @return {Turtle} このタートル
+		 * Go forward
+		 * @param {number} step Number of steps
+		 * @return {Turtle} This turtle
 		 */
 		go(step) {
 			this._curFn = 'go';
@@ -932,9 +927,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 後ろに戻る
-		 * @param {number} step 歩数
-		 * @return {Turtle} このタートル
+		 * Go back
+		 * @param {number} step Number of steps
+		 * @return {Turtle} This turtle
 		 */
 		back(step) {
 			this._curFn = 'bk';
@@ -942,11 +937,11 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に進む（ライブラリ内だけで使用）
+		 * Actually go (used only in the library)
 		 * @private
-		 * @param {number} step 歩数
-		 * @param {number} limit 制限
-		 * @return {number} 実際に動いた量
+		 * @param {number} step Number of steps
+		 * @param {number} limit Limitation
+		 * @return {number} Amount actually moved
 		 */
 		_doGo(step, limit) {
 			return super._doGo(step, limit, (x0, y0, dir_, d) => {
@@ -959,31 +954,26 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 右に回る
-		 * @param {number} deg 角度
-		 * @return {Turtle} このタートル
+		 * Turn right
+		 * @param {number} deg Degree
+		 * @return {Turtle} This turtle
 		 */
 		turnRight(deg) {
 			this._curFn = 'tr';
 			return super.turnRight(deg);
 		}
 
-		/**
-		 * 左に回る
-		 * @param {number} deg 角度
-		 * @return {Turtle} このタートル
-		 */
 		turnLeft(deg) {
 			this._curFn = 'tl';
 			return super.turnLeft(deg);
 		}
 
 		/**
-		 * 実際に方向を変える（ライブラリ内だけで使用）
+		 * Actually change direction (used only in the library)
 		 * @private
-		 * @param {number} deg 角度
-		 * @param {number} limit 制限
-		 * @return {number} 実際に動いた量
+		 * @param {number} deg Degree
+		 * @param {number} limit Limitation
+		 * @return {number} Amount actually moved
 		 */
 		_doTurn(deg, limit) {
 			return super._doTurn(deg, limit, (bx, by) => {
@@ -995,17 +985,17 @@ const TURTLE = (function () {
 		}
 
 
-		// 場所と方向の変化 --------------------------------------------------------
+		// Change of place and direction -------------------------------------------
 
 
 		/**
-		 * 右にカーブする
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @return {Turtle} このタートル
+		 * Curve to the right
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @return {Turtle} This turtle
 		 */
 		curveRight(step0, deg, step1, opt_deg, opt_step) {
 			this._curFn = 'cr';
@@ -1013,13 +1003,13 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 左にカーブする
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @return {Turtle} このタートル
+		 * Curve to the left
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @return {Turtle} This turtle
 		 */
 		curveLeft(step0, deg, step1, opt_deg, opt_step) {
 			this._curFn = 'cl';
@@ -1027,16 +1017,16 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際にカーブする（ライブラリ内だけで使用）
+		 * Actually curve (used only in the library)
 		 * @private
-		 * @param {number} step0 歩数1
-		 * @param {number} deg 角度1
-		 * @param {number} step1 歩数2
-		 * @param {number=} opt_deg 角度2（オプション）
-		 * @param {number=} opt_step 歩数3（オプション）
-		 * @param {number} limit 制限
-		 * @param {function=} [before=null] 実際に動く前に呼ばれる関数
-		 * @return {number} 実際に動いた量
+		 * @param {number} step0 Number of steps 1
+		 * @param {number} deg Degree 1
+		 * @param {number} step1 Number of steps 2
+		 * @param {number=} opt_deg Degree 2 (optional)
+		 * @param {number=} opt_step Number of steps 3 (optional)
+		 * @param {number} limit Limitation
+		 * @param {function=} [before=null] Function to be called before it actually moves
+		 * @return {number} Amount actually moved
 		 */
 		_doCurve(step0, deg, step1, opt_deg, opt_step, limit) {
 			return super._doCurve(step0, deg, step1, opt_deg, opt_step, limit, (x, y, dir_, d0, deg, d1, opt_deg, d2) => {
@@ -1056,10 +1046,10 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 右に曲がる弧をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @return {Turtle} このタートル
+		 * Draw an arc that turns to the right
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @return {Turtle} This turtle
 		 */
 		arcRight(r, deg) {
 			this._curFn = 'ar';
@@ -1067,10 +1057,10 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 左に曲がる弧をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @return {Turtle} このタートル
+		 * Draw an arc that turns to the left
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @return {Turtle} This turtle
 		 */
 		arcLeft(r, deg) {
 			this._curFn = 'al';
@@ -1078,13 +1068,13 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に弧をかく（ライブラリ内だけで使用）
+		 * Actually draw an arc (used only in the library)
 		 * @private
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-		 * @param {boolean} isLeft 左かどうか
-		 * @param {number} limit 制限
-		 * @return {number} 実際に動いた量
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @param {boolean} isLeft Whether it is left
+		 * @param {number} limit Limitation
+		 * @return {number} Amount actually moved
 		 */
 		_doArc(r, deg, isLeft, limit) {
 			return super._doArc(r, deg, isLeft, limit, (lsp, ltp, rot, p) => {
@@ -1093,12 +1083,12 @@ const TURTLE = (function () {
 		}
 
 
-		// 図形の描画 --------------------------------------------------------------
+		// Draw a shape ------------------------------------------------------------
 
 
 		/**
-		 * 点をかく
-		 * @return {Turtle} このタートル
+		 * Draw a point
+		 * @return {Turtle} This turtle
 		 */
 		dot() {
 			this._curFn = 'dot';
@@ -1106,11 +1096,11 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 円をかく
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number|Array<number>=} [deg=360] 弧の角度（配列なら開始角度と終了角度）
-		 * @param {boolean=} [anticlockwise=false] 反時計回り？
-		 * @return {Turtle} このタートル
+		 * Draw a circle
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+		 * @param {boolean=} [anticlockwise=false] Whether it is counterclockwise
+		 * @return {Turtle} This turtle
 		 */
 		circle(r, deg = 360, anticlockwise = false) {
 			this._curFn = 'circle';
@@ -1118,15 +1108,15 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 実際に円をかく（ライブラリ内だけで使用）
+		 * Actually draw a circle (used only in the library)
 		 * @private
-		 * @param {number} cx 中心のx座標
-		 * @param {number} cy 中心のy座標
-		 * @param {dict} p パラメター
-		 * @param {boolean} anticlockwise 反時計回り？
-		 * @param {number} limit 制限
-		 * @param {number} dr 方向
-		 * @return {number} 実際に動いた量
+		 * @param {number} cx X coordinate of center
+		 * @param {number} cy Y coordinate of center
+		 * @param {dict} p Parameters
+		 * @param {boolean} anticlockwise Whether it is counterclockwise
+		 * @param {number} limit Limitation
+		 * @param {number} dr Direction
+		 * @return {number} Amount actually moved
 		 */
 		_doCircle(cx, cy, p, anticlockwise, limit, dr) {
 			return super._doCircle(cx, cy, p, anticlockwise, limit, dr, (cx, cy, p, dr) => {
@@ -1135,13 +1125,13 @@ const TURTLE = (function () {
 		}
 
 
-		// アニメーション ----------------------------------------------------------
+		// Animation ---------------------------------------------------------------
 
 
 		/**
-		 * アニメーションを表示する？
-		 * @param {boolean} val 値
-		 * @return {boolean|Turtle} アニメーションを表示する？／このタートル
+		 * Whether to show animation
+		 * @param {boolean} val Value
+		 * @return {boolean|Turtle} Whether to show animation, or this turtle
 		 */
 		visible(val) {
 			if (val === undefined) return this._visible;
@@ -1150,27 +1140,27 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * アニメーションを次に進める
-		 * @param {number} num フレーム数
+		 * Step the animation next
+		 * @param {number} num Number of frames
 		 */
 		stepNext(num) {
 			if (this._isAnimating) {
-				// アニメ終わり
+				// Animation ends
 				if (this._aniFinished) {
 					this._isAnimating = false;
-					// 保存してあったアニメ開始時点を捨てる
+					// Discard saved state at the animation start time
 					this._stack.pop();
 				} else {
 					this._drawTurtle(this._ctx);
-					// アニメ開始時点に戻す
+					// Revert to the beginning of the animation
 					this.restore().save();
 					this._aniMax += num;
 				}
 			} else {
-				// アニメ始まり
+				// Animation starts
 				if (!this._aniFinished) {
 					this._isAnimating = true;
-					// アニメ開始時点を保存する
+					// Save the state at the animation start time
 					this.save();
 				}
 			}
@@ -1180,24 +1170,24 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * アニメーションを最初に戻す
+		 * Reset the animation to beginning
 		 */
 		resetAnimation() {
 			if (this._isAnimating) {
 				this._isAnimating = false;
-				// 保存してあったアニメ開始時点を捨てる
+				// Discard saved state at the animation start time
 				this._stack.pop();
 			}
 			this._aniMax = 0;
 		}
 
 		/**
-		 * アニメーションのスキップをチェックする（ライブラリ内だけで使用）
+		 * Check the animation skip (used only in the library)
 		 * @private
-		 * @return {number} 残りのパワー
+		 * @return {number} Remaining power
 		 */
 		_getPower() {
-			// アニメーション表示でなかったらnullを返す
+			// Return null if the animation disabled
 			if (!this._visible) return null;
 
 			if (this._aniRemain <= 0) {
@@ -1209,9 +1199,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * アニメーションの終わりをチェックする（ライブラリ内だけで使用）
+		 * Check the end of the animation (used only in the library)
 		 * @private
-		 * @param {number} consumption 消費パワー
+		 * @param {number} consumption Power consumption
 		 */
 		_usePower(consumption) {
 			if (!this._visible) return;
@@ -1221,11 +1211,11 @@ const TURTLE = (function () {
 				const p = this._pen;
 				this.penUp();
 
-				// penUpの後の必要あり
+				// Need after penUp
 				this._aniFinished = false;
 				this._isClipable  = false;
 
-				// カメをかくための情報を保存しておく
+				// Save information for drawing the turtle
 				this._curLoc     = [this._x, this._y, this._dir];
 				this._curHomeLoc = [this._homeX, this._homeY, this._homeDir];
 				this._curPen     = p;
@@ -1238,12 +1228,12 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 座標に行列を適用する（ライブラリ内だけで使用）
+		 * Apply matrix to coordinates (used only in the library)
 		 * @private
-		 * @param {Array} t 行列
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @param {number} r 方向
+		 * @param {Array} t Matrix
+		 * @param {number} x x coordinate
+		 * @param {number} y y coordinate
+		 * @param {number} r Degree
 		 */
 		_transform(t, x, y, r) {
 			if (t === null) return [x, y, r];
@@ -1253,9 +1243,9 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * カメ（ホーム）をかく（ライブラリ内だけで使用）
+		 * Draw the turtle (home) (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 		 */
 		_drawTurtle(ctx) {
 			ctx.save();
@@ -1267,7 +1257,7 @@ const TURTLE = (function () {
 
 			ctx.setTransform(1, 0, 0, 1, 0, 0);
 			let [hx, hy, hd] = this._curHomeLoc;
-			// ホームの場所が変えられていたら
+			// If home location has been changed
 			if (hx !== 0 || hy !== 0 || hd !== 0) {
 				if (this._curTrans) [hx, hy, hd] = this._transform(this._curTrans, hx, hy, hd);
 				this._drawTriangle(ctx, [hx, hy, hd], true, 'Purple', '', 'Magenta');
@@ -1283,14 +1273,14 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * カメやホームを表す三角をかく（ライブラリ内だけで使用）
+		 * Draw a triangle representing a turtle or home (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {*} loc 場所
-		 * @param {*} pen ペンの状態
-		 * @param {*} downColor ペンを下げているときの色
-		 * @param {*} upColor ペンを上げているときの色
-		 * @param {*} lineColor 線の色
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {*} loc Location
+		 * @param {*} pen Pen state
+		 * @param {*} downColor Color when putting down the pen
+		 * @param {*} upColor Color when raising up the pen
+		 * @param {*} lineColor Line color
 		 */
 		_drawTriangle(ctx, loc, pen, downColor, upColor, lineColor) {
 			ctx.save();
@@ -1315,12 +1305,12 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * カメの実行中の動きをかく（ライブラリ内だけで使用）
+		 * Draw the running function of the turtle (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array<number>} loc 場所
-		 * @param {Array<number>} fnPos 関数をかく場所
-		 * @param {string} curFn 現在の関数
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array<number>} loc Location
+		 * @param {Array<number>} fnPos Location of drawing function
+		 * @param {string} curFn Current function
 		 */
 		_drawFunction(ctx, loc, fnPos, curFn) {
 			ctx.save();
@@ -1348,10 +1338,10 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * カメのアンカーをかく（ライブラリ内だけで使用）
+		 * Draw a turtle anchors (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array} curPos 場所
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array} curPos Positions
 		 */
 		_drawAnchor(ctx, curPos) {
 			for (let p of curPos) {
@@ -1408,12 +1398,12 @@ const TURTLE = (function () {
 		}
 
 		/**
-		 * 影をセットする（ライブラリ内だけで使用）
+		 * Set shadow (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number} blur ぼかし量
-		 * @param {number} off 影のずれ
-		 * @param {string} [color='rgba(0,0,0,0.5)'] 色
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number} blur Blur amount
+		 * @param {number} off Shadow offset
+		 * @param {string} [color='rgba(0,0,0,0.5)'] Color
 		 */
 		static _setShadow(ctx, blur, off, color = 'rgba(0,0,0,0.5)') {
 			ctx.shadowBlur = blur;
@@ -1424,18 +1414,18 @@ const TURTLE = (function () {
 	}
 
 
-	// ユーティリティ関数 ------------------------------------------------------
+	// Utility functions -------------------------------------------------------
 
 
 	/**
-	 * タートルを使ってかく関数からスタンプ（高速に絵をかく関数）を作る
-	 * @param {number} width スタンプの横幅
-	 * @param {number} height スタンプのたて幅
-	 * @param {number} cx スタンプの中心x座標
-	 * @param {number} cy スタンプの中心y座標
-	 * @param {number} scale 拡大率
-	 * @param {function} func 関数
-	 * @return {function} スタンプの関数
+	 * Create a stamp (a function that draws a picture at high speed) from a function drawn using a turtle
+	 * @param {number} width Width of stamp
+	 * @param {number} height Height of stamp
+	 * @param {number} cx X coordinate of center of stamp
+	 * @param {number} cy Y coordinate of center of stamp
+	 * @param {number} scale Scaling rate
+	 * @param {function} func Function
+	 * @return {function} Stamp function
 	 */
 	const makeStamp = function (width, height, cx, cy, scale, func) {
 		let curArgs = null, cacheCtx = null, cacheT = null;
@@ -1465,10 +1455,10 @@ const TURTLE = (function () {
 	};
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
-	// 関数の別名
+	// Function alias
 	const aliasMap = {
 		go            : ['forward', 'fd'],
 		back          : ['bk', 'backward'],
@@ -1486,7 +1476,7 @@ const TURTLE = (function () {
 		context       : ['paper'],
 	};
 
-	// 関数の別名を登録する
+	// Register function alias
 	for (let target of [Turtle, TurtleBase]) {
 		for (const [orig, aliases] of Object.entries(aliasMap)) {
 			for (let alias of aliases) {

@@ -1,7 +1,7 @@
 /**
- * パス・ライブラリ（PATH）
+ * Path library (PATH)
  *
- * 図形のパスを作るためのライブラリです。
+ * A library to make the path of the shape.
  *
  * @author Takuto Yanagida
  * @version 2020-04-21
@@ -9,46 +9,46 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const PATH = (function () {
 
 	'use strict';
 
 
-	// ライブラリ中だけで使用するユーティリティ --------------------------------
+	// Utilities used only in the library --------------------------------------
 
 
 	/**
-	 * 最小値
+	 * Minimum value
 	 */
 	const E = 0.0000000000001;
 
 	/**
-	 * 角度をラジアンにする
-	 * @param {number} deg 角度
-	 * @return {number} ラジアン
+	 * Convert degree to radian
+	 * @param {number} deg Degree
+	 * @return {number} Radian
 	 */
 	const rad = function (deg) {
 		return deg * Math.PI / 180.0;
 	};
 
 	/**
-	 * ラジアンを角度にする
-	 * @param {number} rad ラジアン
-	 * @return {number} 角度
+	 * Convert radian to degree
+	 * @param {number} rad Radian
+	 * @return {number} Degree
 	 */
 	const deg = function (rad) {
 		return rad * 180.0 / Math.PI;
 	};
 
 	/**
-	 * 2点間の角度を求める
-	 * @param {number} x0 点1のx座標
-	 * @param {number} y0 点1のy座標
-	 * @param {number} x1 点2のx座標
-	 * @param {number} y1 点2のy座標
-	 * @return {number} 角度
+	 * Find the angle between two points
+	 * @param {number} x0 X coordinate of point 1
+	 * @param {number} y0 Y coordinate of point 1
+	 * @param {number} x1 X coordinate of point 2
+	 * @param {number} y1 Y coordinate of point 2
+	 * @return {number} Degree
 	 */
 	const degOf = function (x0, y0, x1, y1) {
 		let d = (Math.atan2(y1 - y0, x1 - x0) * 180.0 / Math.PI);
@@ -58,26 +58,26 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 2点間の長さを求める
-	 * @param {number} x0 点1のx座標
-	 * @param {number} y0 点1のy座標
-	 * @param {number} x1 点2のx座標
-	 * @param {number} y1 点2のy座標
-	 * @return {number} 長さ
+	 * Find the length between two points
+	 * @param {number} x0 X coordinate of point 1
+	 * @param {number} y0 Y coordinate of point 1
+	 * @param {number} x1 X coordinate of point 2
+	 * @param {number} y1 Y coordinate of point 2
+	 * @return {number} Length
 	 */
 	const lenOf = function (x0, y0, x1, y1) {
 		return Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
 	};
 
 	/**
-	 * 長さを求める
-	 * @param {number} x0 始点x座標
-	 * @param {number} y0 始点y座標
-	 * @param {function(number, number, Array<number>)} func 関数
-	 * @param {number} I 計算する細かさ
-	 * @param {number=} [opt_limit=null] 長さ制限
-	 * @param {dict=} [opt_retArea=null] エリアを返す配列
-	 * @return {dict} 長さ
+	 * Determine the length
+	 * @param {number} x0 X coordinate of start point
+	 * @param {number} y0 Y coordinate of start point
+	 * @param {function(number, number, Array<number>)} func Function
+	 * @param {number} I Accuracy to calculate
+	 * @param {number=} [opt_limit=null] Length limitation
+	 * @param {dict=} [opt_retArea=null] An array returning areas
+	 * @return {dict} Length of span
 	 */
 	const calcSpan = function (x0, y0, func, I, opt_limit = null, opt_retArea = null) {
 		let px = x0, py = y0, pt = [], span = 0, limitedSpan = false, paramT, checkLimit;
@@ -109,10 +109,10 @@ const PATH = (function () {
 	};
 
 	/**
-	 * エリアの情報を更新する
-	 * @param {dict} area エリア情報
-	 * @param {number} x x座標
-	 * @param {number} y y座標
+	 * Update area information
+	 * @param {dict} area Area information
+	 * @param {number} x X coordinate
+	 * @param {number} y Y coordinate
 	 */
 	const updateArea = function (area, x, y) {
 		const fX = area.fromX, fY = area.fromY;
@@ -129,15 +129,15 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 線分の長さを求める
-	 * @param {number} x0 始点x座標
-	 * @param {number} y0 始点y座標
-	 * @param {number} x1 終点x座標
-	 * @param {number} y1 終点y座標
-	 * @param {number} I 計算する細かさ
-	 * @param {number=} [opt_limit=null] 長さ制限
-	 * @param {dict=} [opt_retArea=null] エリアを返す配列
-	 * @return {dict} 長さ
+	 * Find the length of a line segment
+	 * @param {number} x0 X coordinate of start point
+	 * @param {number} y0 Y coordinate of start point
+	 * @param {number} x1 X coordinate of end point
+	 * @param {number} y1 Y coordinate of end point
+	 * @param {number} I Accuracy to calculate
+	 * @param {number=} [opt_limit=null] Length limitation
+	 * @param {dict=} [opt_retArea=null] An array returning areas
+	 * @return {dict} Length of span
 	 */
 	const _lineLen = function (x0, y0, x1, y1, I, opt_limit = null, opt_retArea = null) {
 		return calcSpan(x0, y0, function (t, tp, pt) {
@@ -147,17 +147,17 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 二次ベジェ曲線の長さを求める
-	 * @param {number} x0 始点x座標
-	 * @param {number} y0 始点y座標
-	 * @param {number} x1 ハンドルx座標
-	 * @param {number} y1 ハンドルy座標
-	 * @param {number} x2 終点x座標
-	 * @param {number} y2 終点y座標
-	 * @param {number} I 計算する細かさ
-	 * @param {number=} [opt_limit=null] 長さ制限
-	 * @param {dict=} [opt_retArea=null] エリアを返す配列
-	 * @return {dict} 長さ
+	 * Find the length of a quadratic Bezier curve
+	 * @param {number} x0 X coordinate of start point
+	 * @param {number} y0 Y coordinate of start point
+	 * @param {number} x1 X coordinate of handle
+	 * @param {number} y1 Y coordinate of handle
+	 * @param {number} x2 X coordinate of end point
+	 * @param {number} y2 Y coordinate of end point
+	 * @param {number} I Accuracy to calculate
+	 * @param {number=} [opt_limit=null] Length limitation
+	 * @param {dict=} [opt_retArea=null] An array returning areas
+	 * @return {dict} Length of span
 	 */
 	const _quadLen = function (x0, y0, x1, y1, x2, y2, I, opt_limit = null, opt_retArea = null) {
 		return calcSpan(x0, y0, function (t, tp, pt) {
@@ -168,19 +168,19 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 三次ベジェ曲線の長さを求める
-	 * @param {number} x0 始点x座標
-	 * @param {number} y0 始点y座標
-	 * @param {number} x1 ハンドル1x座標
-	 * @param {number} y1 ハンドル1y座標
-	 * @param {number} x2 ハンドル2x座標
-	 * @param {number} y2 ハンドル2y座標
-	 * @param {number} x3 終点x座標
-	 * @param {number} y3 終点y座標
-	 * @param {number} I 計算する細かさ
-	 * @param {number=} [opt_limit=null] 長さ制限
-	 * @param {dict=} [opt_retArea=null] エリアを返す配列
-	 * @return {dict} 長さ
+	 * Find the length of a cubic Bézier curve
+	 * @param {number} x0 X coordinate of start point
+	 * @param {number} y0 Y coordinate of start point
+	 * @param {number} x1 X coordinate of handle 1
+	 * @param {number} y1 Y coordinate of handle 1
+	 * @param {number} x2 X coordinate of handle 2
+	 * @param {number} y2 Y coordinate of handle 2
+	 * @param {number} x3 X coordinate of end point
+	 * @param {number} y3 Y coordinate of end point
+	 * @param {number} I Accuracy to calculate
+	 * @param {number=} [opt_limit=null] Length limitation
+	 * @param {dict=} [opt_retArea=null] An array returning areas
+	 * @return {dict} Length of span
 	 */
 	const _bezierLen = function (x0, y0, x1, y1, x2, y2, x3, y3, I, opt_limit = null, opt_retArea = null) {
 		return calcSpan(x0, y0, function (t, tp, pt) {
@@ -192,19 +192,19 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 円弧の長さを求める
-	 * - r0 < r1 なら時計回り、r1 < r0 なら反時計回り
-	 * @param {number} cx 中心x座標
-	 * @param {number} cy 中心y座標
-	 * @param {number} dr 方向
-	 * @param {number} w 横半径
-	 * @param {number} h たて半径
-	 * @param {number} r0 開始角度
-	 * @param {number} r1 終了角度
-	 * @param {number} I 計算する細かさ
-	 * @param {number=} [opt_limit=null] 長さ制限
-	 * @param {dict=} [opt_retArea=null] エリアを返す配列
-	 * @return {dict} 長さ
+	 * Calculate arc length
+	 * - Clockwise if r0 < r1, or counterclockwise if r1 < r0
+	 * @param {number} cx X coordinate of center
+	 * @param {number} cy Y coordinate of center
+	 * @param {number} dr Direction
+	 * @param {number} w Width
+	 * @param {number} h Height
+	 * @param {number} r0 Start angle
+	 * @param {number} r1 End angle
+	 * @param {number} I Accuracy to calculate
+	 * @param {number=} [opt_limit=null] Length limitation
+	 * @param {dict=} [opt_retArea=null] An array returning areas
+	 * @return {dict} Length of span
 	 */
 	const _arcLen = function (cx, cy, dr, w, h, r0, r1, I, opt_limit = null, opt_retArea = null) {
 		const s0 = w * Math.cos(r0), t0 = h * Math.sin(r0);
@@ -221,14 +221,14 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 線分の中間点の座標を求める
+	 * Find the coordinates of the midpoint of the line segment
 	 * @private
-	 * @param {number} t 媒介変数
-	 * @param {number} x0 点1のx座標
-	 * @param {number} y0 点1のy座標
-	 * @param {number} x1 点2のx座標
-	 * @param {number} y1 点2のy座標
-	 * @return {Array<number>} 座標
+	 * @param {number} t Parameter variable
+	 * @param {number} x0 X coordinate of point 1
+	 * @param {number} y0 Y coordinate of point 1
+	 * @param {number} x1 X coordinate of point 2
+	 * @param {number} y1 Y coordinate of point 2
+	 * @return {Array<number>} Coordinates
 	 */
 	const _linePoints = function (t, x0, y0, x1, y1) {
 		const tp = 1 - t;
@@ -237,16 +237,16 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 二次ベジェ曲線の中間点の座標を求める
+	 * Find the coordinates of the midpoint of the quadratic Bezier curve
 	 * @private
-	 * @param {number} t 媒介変数
-	 * @param {number} x0 点1のx座標
-	 * @param {number} y0 点1のy座標
-	 * @param {number} x1 点2のx座標
-	 * @param {number} y1 点2のy座標
-	 * @param {number} x2 点3のx座標
-	 * @param {number} y2 点3のy座標
-	 * @return {Array<number>} 座標
+	 * @param {number} t Parameter variable
+	 * @param {number} x0 X coordinate of point 1
+	 * @param {number} y0 Y coordinate of point 1
+	 * @param {number} x1 X coordinate of point 2
+	 * @param {number} y1 Y coordinate of point 2
+	 * @param {number} x2 X coordinate of point 3
+	 * @param {number} y2 Y coordinate of point 3
+	 * @return {Array<number>} Coordinates
 	 */
 	const _quadPoints = function (t, x0, y0, x1, y1, x2, y2) {
 		const tp = 1 - t;
@@ -257,18 +257,18 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 三次ベジェ曲線の中間点の座標を求める
+	 * Find the coordinates of the midpoint of the cubic Bezier curve
 	 * @private
-	 * @param {number} t 媒介変数
-	 * @param {number} x0 点1のx座標
-	 * @param {number} y0 点1のy座標
-	 * @param {number} x1 点2のx座標
-	 * @param {number} y1 点2のy座標
-	 * @param {number} x2 点3のx座標
-	 * @param {number} y2 点3のy座標
-	 * @param {number} x3 点4のx座標
-	 * @param {number} y3 点4のy座標
-	 * @return {Array<number>} 座標
+	 * @param {number} t Parameter variable
+	 * @param {number} x0 X coordinate of point 1
+	 * @param {number} y0 Y coordinate of point 1
+	 * @param {number} x1 X coordinate of point 2
+	 * @param {number} y1 Y coordinate of point 2
+	 * @param {number} x2 X coordinate of point 3
+	 * @param {number} y2 Y coordinate of point 3
+	 * @param {number} x3 X coordinate of point 4
+	 * @param {number} y3 Y coordinate of point 4
+	 * @return {Array<number>} Coordinates
 	 */
 	const _bezierPoints = function (t, x0, y0, x1, y1, x2, y2, x3, y3) {
 		const tp = 1 - t;
@@ -283,15 +283,15 @@ const PATH = (function () {
 
 
 	/**
-	 * ライナー
+	 * Liner
 	 * @version 2019-09-03
 	 */
 	class Liner {
 
 		/**
-		 * ライナーを作る
-		 * @param {*} handler 描画ハンドラー
-		 * @param {number=} [opt_normalDir=Math.PI / -2] 法線方向
+		 * Make a liner
+		 * @param {*} handler Drawing handler
+		 * @param {number=} [opt_normalDir=Math.PI / -2] Normal direction
 		 */
 		constructor(handler, opt_normalDir = Math.PI / -2) {
 			this._handler   = handler;
@@ -300,9 +300,9 @@ const PATH = (function () {
 		}
 
 		/**
-		 * エッジ
-		 * @param {function=} func エッジを決める関数
-		 * @return {function|Liner} エッジ／このライナー
+		 * Edge
+		 * @param {function=} func Function to determine the edge
+		 * @return {function|Liner} Edge, or this liner
 		 */
 		edge(func, ...fs) {
 			if (func === undefined) return this._edge;
@@ -310,19 +310,9 @@ const PATH = (function () {
 		}
 
 
-		// 線分 --------------------------------------------------------------------
+		// Line --------------------------------------------------------------------
 
 
-		/**
-		 * 線分をかく
-		 * @param {*} x0 始点 x座標
-		 * @param {*} y0 始点 y座標
-		 * @param {*} dir 方向
-		 * @param {*} dist 長さ
-		 * @param {*} [opt_limit=null] 長さ制限
-		 * @param {*} [opt_retArea=null] エリアを返す配列
-		 * @return
-		 */
 		line(x0, y0, dir, dist, opt_limit = null, opt_retArea = null) {
 			const r = rad(dir);
 			const x1 = x0 + dist * Math.cos(r), y1 = y0 + dist * Math.sin(r);
@@ -330,35 +320,12 @@ const PATH = (function () {
 			return this._linePre(x0, y0, x1, y1, dir, roughSpan, opt_limit, opt_retArea);
 		}
 
-		/**
-		 * 線分をかく（始点x、y座標、終点x，y座標、<長さ制限>、<エリアを返す配列>）
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} [opt_limit=null]
-		 * @param {*} [opt_retArea=null]
-		 * @return
-		 */
 		lineAbs(x0, y0, x1, y1, opt_limit = null, opt_retArea = null) {
 			const dir = degOf(x0, y0, x1, y1);
 			const roughSpan = Math.ceil(lenOf(x0, y0, x1, y1));
 			return this._linePre(x0, y0, x1, y1, dir, roughSpan, opt_limit, opt_retArea);
 		}
 
-		/**
-		 * 線分をかく準備をする（始点x、y座標、終点x，y座標，終点方向、長さ、<長さ制限>、<エリアを返す配列>）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} dirEnd
-		 * @param {*} roughSpan
-		 * @param {*} opt_limit
-		 * @param {*} opt_retArea
-		 * @return
-		 */
 		_linePre(x0, y0, x1, y1, dirEnd, roughSpan, opt_limit, opt_retArea) {
 			const { span, limitedSpan, paramT } = _lineLen(x0, y0, x1, y1, roughSpan, opt_limit, opt_retArea);
 
@@ -374,19 +341,6 @@ const PATH = (function () {
 			return limitedSpan;
 		}
 
-		/**
-		 * 線分を実際にかく（終点方向、始点x、y座標、方向、終点x、y座標、長さ、制限長さ、エッジ）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} dirEnd
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} r
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} span
-		 * @param {*} limitedSpan
-		 * @param {*} edge
-		 */
 		_lineDraw(dirEnd, x0, y0, r, x1, y1, span, limitedSpan, edge) {
 			const nd = this._normalDir;
 			const nR = r + nd, nX = Math.cos(nR), nY = Math.sin(nR);
@@ -403,21 +357,9 @@ const PATH = (function () {
 		}
 
 
-		// 二次ベジェ曲線 ----------------------------------------------------------
+		// Quadratic Bezier curve --------------------------------------------------
 
 
-		/**
-		 * 二次ベジェ曲線をかく（始点x、y座標、方向1、長さ1、方向2、長さ2、<長さ制限>、<エリアを返す配列>）
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} dir
-		 * @param {*} dist0
-		 * @param {*} deg0
-		 * @param {*} dist1
-		 * @param {*} [opt_limit=null]
-		 * @param {*} [opt_retArea=null]
-		 * @return
-		 */
 		quadCurve(x0, y0, dir, dist0, deg0, dist1, opt_limit = null, opt_retArea = null) {
 			const r0 = rad(dir), r1 = rad(dir + deg0);
 			const x1 = x0 + dist0 * Math.cos(r0), y1 = y0 + dist0 * Math.sin(r0);
@@ -426,38 +368,11 @@ const PATH = (function () {
 			return this._quadCurvePre(x0, y0, x1, y1, x2, y2, dir + deg0, roughSpan, opt_limit, opt_retArea);
 		}
 
-		/**
-		 * 二次ベジェ曲線をかく（始点x、y座標、制御点x、y座標、終点x、y座標、<長さ制限>、<エリアを返す配列>）
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} x2
-		 * @param {*} y2
-		 * @param {*} [opt_limit=null]
-		 * @param {*} [opt_retArea=null]
-		 * @return
-		 */
 		quadCurveAbs(x0, y0, x1, y1, x2, y2, opt_limit = null, opt_retArea = null) {
 			const roughSpan = Math.ceil(lenOf(x0, y0, x1, y1) + lenOf(x1, y1, x2, y2));
 			return this._quadCurvePre(x0, y0, x1, y1, x2, y2, null, roughSpan, opt_limit, opt_retArea);
 		}
 
-		/**
-		 * 二次ベジェ曲線をかく準備をする（始点x、y座標、制御点x、y、終点x、y座標、終点方向、長さ、<長さ制限>、<エリアを返す配列>）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} x2
-		 * @param {*} y2
-		 * @param {*} dirEnd
-		 * @param {*} roughSpan
-		 * @param {*} opt_limit
-		 * @param {*} opt_retArea
-		 * @return
-		 */
 		_quadCurvePre(x0, y0, x1, y1, x2, y2, dirEnd, roughSpan, opt_limit, opt_retArea) {
 			const { span, limitedSpan, paramT } = _quadLen(x0, y0, x1, y1, x2, y2, roughSpan, opt_limit, opt_retArea);
 
@@ -475,20 +390,6 @@ const PATH = (function () {
 			return limitedSpan;
 		}
 
-		/**
-		 * 二次ベジェ曲線を実際にかく（終点方向、始点x、y座標、ハンドルx、y座標、終点x、y座標、長さ、制限長さ、エッジ）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} dirEnd
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} x2
-		 * @param {*} y2
-		 * @param {*} span
-		 * @param {*} limitedSpan
-		 * @param {*} edge
-		 */
 		_quadCurveDraw(dirEnd, x0, y0, x1, y1, x2, y2, span, limitedSpan, edge) {
 			const nd = this._normalDir;
 			let px = x0, py = y0, l = 0;
@@ -515,23 +416,9 @@ const PATH = (function () {
 		}
 
 
-		// 三次ベジェ曲線 ----------------------------------------------------------
+		// Cubic Bezier curve ------------------------------------------------------
 
 
-		/**
-		 * 三次ベジェ曲線をかく（始点x、y座標、方向1、長さ1、方向2、長さ2、方向3、長さ3、<長さ制限>、<エリアを返す配列>）
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} dir
-		 * @param {*} dist0
-		 * @param {*} deg0
-		 * @param {*} dist1
-		 * @param {*} deg1
-		 * @param {*} dist2
-		 * @param {*} [opt_limit=null]
-		 * @param {*} [opt_retArea=null]
-		 * @return
-		 */
 		bezierCurve(x0, y0, dir, dist0, deg0, dist1, deg1, dist2, opt_limit = null, opt_retArea = null) {
 			const r0 = rad(dir), r1 = rad(dir + deg0), r2 = rad(dir + deg0 + deg1);
 			const x1 = x0 + dist0 * Math.cos(r0), y1 = y0 + dist0 * Math.sin(r0);
@@ -541,42 +428,11 @@ const PATH = (function () {
 			return this._bezierCurvePre(x0, y0, x1, y1, x2, y2, x3, y3, dir + deg0 + deg1, roughSpan, opt_limit, opt_retArea);
 		}
 
-		/**
-		 * 三次ベジェ曲線をかく（始点x、y座標、制御点1x、y座標、制御点2x、y座標、終点x、y座標、<長さ制限>、<エリアを返す配列>）
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} x2
-		 * @param {*} y2
-		 * @param {*} x3
-		 * @param {*} y3
-		 * @param {*} [opt_limit=null]
-		 * @param {*} [opt_retArea=null]
-		 * @return
-		 */
 		bezierCurveAbs(x0, y0, x1, y1, x2, y2, x3, y3, opt_limit = null, opt_retArea = null) {
 			const roughSpan = Math.ceil(lenOf(x0, y0, x1, y1) + lenOf(x1, y1, x2, y2) + lenOf(x2, y2, x3, y3));
 			return this._bezierCurvePre(x0, y0, x1, y1, x2, y2, x3, y3, null, roughSpan, opt_limit, opt_retArea);
 		}
 
-		/**
-		 * 三次ベジェ曲線をかく準備をする（始点x、y座標、制御点1x、y、制御点2x、y、終点x、y座標、終点方向、長さ、<長さ制限>、<エリアを返す配列>）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} x2
-		 * @param {*} y2
-		 * @param {*} x3
-		 * @param {*} y3
-		 * @param {*} dirEnd
-		 * @param {*} roughSpan
-		 * @param {*} opt_limit
-		 * @param {*} opt_retArea
-		 * @return
-		 */
 		_bezierCurvePre(x0, y0, x1, y1, x2, y2, x3, y3, dirEnd, roughSpan, opt_limit, opt_retArea) {
 			const { span, limitedSpan, paramT } = _bezierLen(x0, y0, x1, y1, x2, y2, x3, y3, roughSpan, opt_limit, opt_retArea);
 
@@ -594,22 +450,6 @@ const PATH = (function () {
 			return limitedSpan;
 		}
 
-		/**
-		 * 三次ベジェ曲線を実際にかく（終点方向、始点x、y座標、ハンドル1x、y座標、ハンドル2x、y座標、終点x、y座標、長さ、制限長さ、エッジ）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} dirEnd
-		 * @param {*} x0
-		 * @param {*} y0
-		 * @param {*} x1
-		 * @param {*} y1
-		 * @param {*} x2
-		 * @param {*} y2
-		 * @param {*} x3
-		 * @param {*} y3
-		 * @param {*} span
-		 * @param {*} limitedSpan
-		 * @param {*} edge
-		 */
 		_bezierCurveDraw(dirEnd, x0, y0, x1, y1, x2, y2, x3, y3, span, limitedSpan, edge) {
 			const nd = this._normalDir;
 			let px = x0, py = y0, l = 0;
@@ -637,23 +477,9 @@ const PATH = (function () {
 		}
 
 
-		// 円弧 --------------------------------------------------------------------
+		// Arc ---------------------------------------------------------------------
 
 
-		/**
-		 * 円弧をかく（中心x、y座標、方向、横半径、たて半径、開始角度、終了角度、反時計回り？、長さ制限、<エリアを返す配列>）
-		 * @param {*} cx
-		 * @param {*} cy
-		 * @param {*} dir
-		 * @param {*} w
-		 * @param {*} h
-		 * @param {*} deg0
-		 * @param {*} deg1
-		 * @param {boolean} [anticlockwise=false]
-		 * @param {*} [opt_limit=null]
-		 * @param {*} [opt_retArea=null]
-		 * @return
-		 */
 		arc(cx, cy, dir, w, h, deg0, deg1, anticlockwise = false, opt_limit = null, opt_retArea = null) {
 			if (-E < w && w < E) w = (0 < w) ? E : -E;
 			if (-E < h && h < E) h = (0 < h) ? E : -E;
@@ -676,22 +502,6 @@ const PATH = (function () {
 			return this._arcPre(cx, cy, rad(dir), w, h, rad(deg0), rad(deg1), anticlockwise, roughSpan, opt_limit, opt_retArea);
 		}
 
-		/**
-		 * 円弧をかく準備をする（中心x、y座標、方向ラジアン、横半径、たて半径、開始ラジアン、終了ラジアン、反時計回り？、長さ、<長さ制限>、<エリアを返す配列>）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} cx
-		 * @param {*} cy
-		 * @param {*} dr
-		 * @param {*} w
-		 * @param {*} h
-		 * @param {*} r0
-		 * @param {*} r1
-		 * @param {*} ac
-		 * @param {*} roughSpan
-		 * @param {*} opt_limit
-		 * @param {*} opt_retArea
-		 * @return
-		 */
 		_arcPre(cx, cy, dr, w, h, r0, r1, ac, roughSpan, opt_limit, opt_retArea) {
 			const { span, limitedSpan, paramT } = _arcLen(cx, cy, dr, w, h, r0, r1, roughSpan, opt_limit, opt_retArea);
 
@@ -716,21 +526,6 @@ const PATH = (function () {
 			return limitedSpan;
 		}
 
-		/**
-		 * 円弧を実際にかく（終点方向、中心x、y座標、方向、横半径、たて半径、開始角度、終了角度、長さ、制限長さ、エッジ）（ライブラリ内だけで使用）
-		 * @private
-		 * @param {*} dirEnd
-		 * @param {*} cx
-		 * @param {*} cy
-		 * @param {*} dr
-		 * @param {*} w
-		 * @param {*} h
-		 * @param {*} r0
-		 * @param {*} r1
-		 * @param {*} span
-		 * @param {*} limitedSpan
-		 * @param {*} edge
-		 */
 		_arcDraw(dirEnd, cx, cy, dr, w, h, r0, r1, span, limitedSpan, edge) {
 			const nd = this._normalDir;
 			const rsin = Math.sin(dr), rcos = Math.cos(dr);
@@ -760,62 +555,62 @@ const PATH = (function () {
 	}
 
 
-	// デフォルト・ハンドラー生成関数 ------------------------------------------
+	// Default handler generation function -------------------------------------
 
 
 	/**
-	 * デフォルト・ハンドラーを作る
-	 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-	 * @return {*} ハンドラー
+	 * Make a default handler
+	 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+	 * @return {*} Handler
 	 */
 	const makeDefaultHandler = function (ctx) {
 		return {
 			/**
-			 * 線分をかくかペンの場所を変更する
-			 * @param {number} x 終点x座標
-			 * @param {number} y 終点y座標
-			 * @param {number} dir 終点方向
+			 * Draw a line or change the location of the pen
+			 * @param {number} x X coordinate of end point
+			 * @param {number} y Y coordinate of end point
+			 * @param {number} dir End direction
 			 */
 			lineOrMoveTo: function (x, y, dir) {
 				ctx.lineTo(x, y);
 			},
 			/**
-			 * 二次ベジェ曲線をかくかペンの場所を変更する
-			 * @param {number} x1 ハンドルx座標
-			 * @param {number} y1 ハンドルy座標
-			 * @param {number} x2 終点x座標
-			 * @param {number} y2 終点y座標
-			 * @param {number} dir 終点方向
+			 * Draw a quadratic Bezier curve or change the location of the pen
+			 * @param {number} x1 X coordinate of handle
+			 * @param {number} y1 Y coordinate of handle
+			 * @param {number} x2 X coordinate of end point
+			 * @param {number} y2 Y coordinate of end point
+			 * @param {number} dir End direction
 			 */
 			quadCurveOrMoveTo: function (x1, y1, x2, y2, dir) {
 				ctx.quadraticCurveTo(x1, y1, x2, y2);
 			},
 			/**
-			 * 三次ベジェ曲線をかくかペンの場所を変更する
-			 * @param {number} x1 ハンドル1x座標
-			 * @param {number} y1 ハンドル1y座標
-			 * @param {number} x2 ハンドル2x座標
-			 * @param {number} y2 ハンドル2y座標
-			 * @param {number} x3 終点x座標
-			 * @param {number} y3 終点y座標
-			 * @param {number} dir 終点方向
+			 * Draw a cubic Bezier curve or change the location of the pen
+			 * @param {number} x1 X coordinate of handle 1
+			 * @param {number} y1 Y coordinate of handle 1
+			 * @param {number} x2 X coordinate of handle 2
+			 * @param {number} y2 Y coordinate of handle 2
+			 * @param {number} x3 X coordinate of end point
+			 * @param {number} y3 Y coordinate of end point
+			 * @param {number} dir End direction
 			 */
 			bezierCurveOrMoveTo: function (x1, y1, x2, y2, x3, y3, dir) {
 				ctx.bezierCurveTo(x1, y1, x2, y2, x3, y3);
 			},
 			/**
-			 * 円弧をかくかペンの場所を変更する
-			 * @param {number} cx 中心x座標
-			 * @param {number} cy 中心y座標
-			 * @param {number} dr 方向
-			 * @param {number} w 横半径
-			 * @param {number} h たて半径
-			 * @param {number} r0 開始角度
-			 * @param {number} r1 終了角度
-			 * @param {boolean} ac 反時計回り？
-			 * @param {number} dir 終点方向
-			 * @param {number} xx 終点x座標
-			 * @param {number} yy 終点y座標
+			 * Draw an arc or change the location of the pen
+			 * @param {number} cx X coordinate of center
+			 * @param {number} cy Y coordinate of center
+			 * @param {number} dr Direction
+			 * @param {number} w Width
+			 * @param {number} h Height
+			 * @param {number} r0 Start angle
+			 * @param {number} r1 End angle
+			 * @param {boolean} ac Whether it is counterclockwise
+			 * @param {number} dir End direction
+			 * @param {number} xx X coordinate of end point
+			 * @param {number} yy Y coordinate of end point
 			 */
 			arcOrMoveTo: function (cx, cy, dr, w, h, r0, r1, ac, dir, xx, yy) {
 				eclipse(ctx, cx, cy, w, h, dr, r0, r1, ac);
@@ -825,7 +620,7 @@ const PATH = (function () {
 
 
 	/**
-	 * エッジ生成関数
+	 * Edge generation functions
 	 * @author Takuto Yanagida
 	 * @version 2019-09-04
 	 */
@@ -835,19 +630,19 @@ const PATH = (function () {
 
 
 	/**
-	 * 直線のエッジを作る
-	 * @return {function(number, number): number} 直線のエッジ
+	 * Make a straight edge
+	 * @return {function(number, number): number} Straight edge
 	 */
 	const normalEdge = function () {
 		return NORMAL_EDGE;
 	};
 
 	/**
-	 * サイン波のエッジを作る
-	 * @param {number=} [length=10] 長さ
-	 * @param {number=} [amplitude=10] 振幅
-	 * @param {*=} [opt={}] オプション
-	 * @return {function(number, number): number} サイン波のエッジ
+	 * Make a sine wave edge
+	 * @param {number=} [length=10] Length
+	 * @param {number=} [amplitude=10] Amplitude
+	 * @param {*=} [opt={}] Options
+	 * @return {function(number, number): number} Sine wave edge
 	 */
 	const sineEdge = function (length = 10, amplitude = 10, opt = {}) {
 		return _makeEdge(length, amplitude, opt, function (p) {
@@ -856,11 +651,11 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 矩形波のエッジを作る
-	 * @param {number=} [length=10] 長さ
-	 * @param {number=} [amplitude=10] 振幅
-	 * @param {*=} [opt={}] オプション
-	 * @return {function(number, number): number} 矩形波のエッジ
+	 * Make a square wave edge
+	 * @param {number=} [length=10] Length
+	 * @param {number=} [amplitude=10] Amplitude
+	 * @param {*=} [opt={}] Options
+	 * @return {function(number, number): number} Square wave edge
 	 */
 	const squareEdge = function (length = 10, amplitude = 10, opt = {}) {
 		return _makeEdge(length, amplitude, opt, function (p) {
@@ -873,11 +668,11 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 三角波のエッジを作る
-	 * @param {number=} [length=10] 長さ
-	 * @param {number=} [amplitude=10] 振幅
-	 * @param {*=} [opt={}] オプション
-	 * @return {function(number, number): number} 三角波のエッジ
+	 * Make a triangle wave edge
+	 * @param {number=} [length=10] Length
+	 * @param {number=} [amplitude=10] Amplitude
+	 * @param {*=} [opt={}] Options
+	 * @return {function(number, number): number} Triangle wave edge
 	 */
 	const triangleEdge = function (length = 10, amplitude = 10, opt = {}) {
 		return _makeEdge(length, amplitude, opt, function (p) {
@@ -888,11 +683,11 @@ const PATH = (function () {
 	};
 
 	/**
-	 * のこぎり波のエッジを作る
-	 * @param {number=} [length=10] 長さ
-	 * @param {number=} [amplitude=10] 振幅
-	 * @param {*=} [opt={}] オプション
-	 * @return {function(number, number): number} のこぎり波のエッジ
+	 * Make a sawtooth wave edge
+	 * @param {number=} [length=10] Length
+	 * @param {number=} [amplitude=10] Amplitude
+	 * @param {*=} [opt={}] Options
+	 * @return {function(number, number): number} Sawtooth wave edge
 	 */
 	const sawtoothEdge = function (length = 10, amplitude = 10, opt = {}) {
 		return _makeEdge(length, amplitude, opt, function (p) {
@@ -903,11 +698,11 @@ const PATH = (function () {
 	};
 
 	/**
-	 * サインの絶対値の波形のエッジを作る
-	 * @param {number=} [length=10] 長さ
-	 * @param {number=} [amplitude=10] 振幅
-	 * @param {*=} [opt={}] オプション
-	 * @return {function(number, number): number} サイン波のエッジ
+	 * Make an edge of the absolute value of the sine function
+	 * @param {number=} [length=10] Length
+	 * @param {number=} [amplitude=10] Amplitude
+	 * @param {*=} [opt={}] Options
+	 * @return {function(number, number): number} Edge of the absolute value of the sine function
 	 */
 	const absSineEdge = function (length = 10, amplitude = 10, opt = {}) {
 		return _makeEdge(length, amplitude, opt, function (p) {
@@ -916,11 +711,11 @@ const PATH = (function () {
 	};
 
 	/**
-	 * ノイズのエッジを作る
-	 * @param {number=} [length=10] 長さ
-	 * @param {number=} [amplitude=10] 振幅
-	 * @param {*=} [opt={}] オプション
-	 * @return {function(number, number): number} ノイズのエッジ
+	 * Make a noise edge
+	 * @param {number=} [length=10] Length
+	 * @param {number=} [amplitude=10] Amplitude
+	 * @param {*=} [opt={}] Options
+	 * @return {function(number, number): number} Noise edge
 	 */
 	const noiseEdge = function (length = 10, amplitude = 10, opt = {}) {
 		const amp = 2 * amplitude;
@@ -948,10 +743,10 @@ const PATH = (function () {
 	};
 
 	/**
-	 * いくつかのエッジを混ぜたエッジを作る
-	 * @param {function(number, number)} エッジ
-	 * @param {Array<function(number, number)>} いくつかのエッジ
-	 * @return {function(number, number): number} 混ざったエッジ
+	 * Make a mixture edge
+	 * @param {function(number, number)} Edge
+	 * @param {Array<function(number, number)>} Edges
+	 * @return {function(number, number): number} Mixed edge
 	 */
 	const mixEdge = function (func, ...fs) {
 		return function (x, max) {
@@ -962,15 +757,15 @@ const PATH = (function () {
 	};
 
 	/**
-	 * エッジを作る（ライブラリ内だけで使用）
+	 * Make an edge (used only in the library)
 	 * @private
-	 * @param {number} length 長さ
-	 * @param {number} amplitude 振幅
-	 * @param {*} opt オプション
-	 * @param {function(number): number} func 関数（原点を通り振幅±1）
-	 * @param {number} minPhase 最小値フェーズ
-	 * @param {number} maxPhase 最大値フェーズ
-	 * @return {function(number, number): number} エッジ
+	 * @param {number} length Length
+	 * @param {number} amplitude Amplitude
+	 * @param {*} opt Options
+	 * @param {function(number): number} fn Function (Amplitude 1 through the origin)
+	 * @param {number} minPhase Minimum phase
+	 * @param {number} maxPhase Maximum phase
+	 * @return {function(number, number): number} Edge
 	 */
 	const _makeEdge = function (length, amplitude, opt, fn, minPhase, maxPhase) {
 		let amp = 0.5 * amplitude;
@@ -996,22 +791,22 @@ const PATH = (function () {
 	};
 
 
-	// ユーティリティ関数 ------------------------------------------------------
+	// Utility functions -------------------------------------------------------
 
 
 	/**
-	 * 円や弧をかく関数の引数を整える
-	 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-	 * @param {number|Array<number>} deg 角度（配列なら開始角度と終了角度）
-	 * @param {number} [step=1] 係数
-	 * @return {dict} 引数
+	 * Arrange the arguments of functions that draw circles and arcs
+	 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+	 * @param {number|Array<number>} deg Degree (start and end angles if an array given)
+	 * @param {number} [step=1] Factor
+	 * @return {dict} Parameters
 	 */
 	const arrangeArcParams = function (r, deg, step = 1) {
 		const ap = {};
 
-		// 半径の引数を整える（負もOKに）
+		// Arrange the radius argument (negative also OK)
 		if (Array.isArray(r)) {
-			if (r.length < 2) throw new Error('PATH::arrangeArcParams: 半径rは配列なのに、数が一つしか含まれていません。');
+			if (r.length < 2) throw new Error('PATH::arrangeArcParams: Although the radius r is an array, it contains only one number.');
 			ap.w = r[0] * step;
 			ap.h = r[1] * step;
 		} else {
@@ -1020,9 +815,9 @@ const PATH = (function () {
 		if (-E < ap.w && ap.w < E) ap.w = (0 < ap.w) ? E : -E;
 		if (-E < ap.h && ap.h < E) ap.h = (0 < ap.h) ? E : -E;
 
-		// 角度の引数を整える
+		// Arrange the degree argument
 		if (Array.isArray(deg)) {
-			if (deg.length < 2) throw new Error('PATH::arrangeArcParams: 角度degは配列なのに、数が一つしか含まれていません。');
+			if (deg.length < 2) throw new Error('PATH::arrangeArcParams: Although the angle deg is an array, it contains only one number.');
 			ap.deg0 = deg[0];
 			ap.deg1 = deg[1];
 		} else {
@@ -1033,19 +828,19 @@ const PATH = (function () {
 	};
 
 	/**
-	 * 円をかく
-	 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-	 * @param {number} cx 中心x座標
-	 * @param {number} cy 中心y座標
-	 * @param {number} w 横幅
-	 * @param {number} h たて幅
-	 * @param {number} dr 向き
-	 * @param {number} r0 開始ラジアン
-	 * @param {number} r1 終了ラジアン
-	 * @param {boolean} ac 反時計回り？
+	 * Draw a circle
+	 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+	 * @param {number} cx X coordinate of center
+	 * @param {number} cy Y coordinate of center
+	 * @param {number} w Width
+	 * @param {number} h Height
+	 * @param {number} dr Direction
+	 * @param {number} r0 Start radian
+	 * @param {number} r1 End radian
+	 * @param {boolean} ac Whether it is counterclockwise
 	 */
 	const eclipse = function (ctx, cx, cy, w, h, dr, r0, r1, ac) {
-		// 負の半径もOKに
+		// Negative radius is also OK
 		if (w <= 0 || h <= 0 || ctx.ellipse === undefined) {
 			ctx.save();
 			ctx.translate(cx, cy);
@@ -1059,7 +854,7 @@ const PATH = (function () {
 	};
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
 	return {

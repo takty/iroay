@@ -1,8 +1,9 @@
 /**
- * 計算ライブラリ（CALC）
+ * Calculation library (CALC)
  *
- * 範囲を決められるランダム関数や、ある範囲の数を別の範囲の数に変えるマッピング、
- * 単純ではない動きを作るのに使うイージング関数が使えるようになるライブラリです。
+ * A library that allows you to use random functions with bounds,
+ * mappings that translate from one range number to another,
+ * and easing functions that you use to create non-trivial motions.
  *
  * @author Takuto Yanagida
  * @version 2019-09-03
@@ -10,36 +11,36 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const CALC = (function () {
 
 	'use strict';
 
 
-	// 乱数関数 ----------------------------------------------------------------
+	// Random number function --------------------------------------------------
 
 
 	/**
-	 * 基本サイコロ
+	 * Dice base
 	 * @author Takuto Yanagida
 	 * @version 2020-05-05
 	 */
 	class DiceBase {
 
 		/**
-		 * サイコロを作る
+		 * Make a dice
 		 */
 		constructor() {
 			this._r = Math.random;
 		}
 
 		/**
-		 * minからmaxまでのテキトウな数（乱数）を返す
-		 * @param {number} min 最小値
-		 * @param {number} max 最大値
-		 * @param {function(number): number=} opt_fn イージング関数（オプション）
-		 * @return {number} テキトウな数（乱数）
+		 * Return a random number from min to max
+		 * @param {number} min Minimum number
+		 * @param {number} max Maximum number
+		 * @param {function(number): number=} opt_fn Easing function (optional)
+		 * @return {number} A random number
 		 */
 		random(min, max, opt_fn) {
 			if (opt_fn === undefined) {
@@ -49,10 +50,10 @@ const CALC = (function () {
 		}
 
 		/**
-		 * 0からn_minまで、あるいはminからmaxまでのテキトウな整数（乱数）を返す
-		 * @param {number} n_min　整数nか整数min
-		 * @param {number=} opt_max　整数max
-		 * @return {number} テキトウな整数（乱数）
+		 * Returns a random number from 0 to n_min or from min to max
+		 * @param {number} n_min　An integer or a minimum integer
+		 * @param {number=} opt_max　Maximum integer
+		 * @return {number} A random integer
 		 */
 		rand(n_min, opt_max) {
 			if (opt_max === undefined) {
@@ -62,9 +63,9 @@ const CALC = (function () {
 		}
 
 		/**
-		 * パーセントで指定した確率で起こる
-		 * @param {number} percent パーセント
-		 * @return {boolean} 起こるかどうか
+		 * Occur with probability specified in percent
+		 * @param {number} percent Percent
+		 * @return {boolean} Whether it occurs
 		 */
 		isLikely(percent) {
 			return Math.floor(this._r() * (100 + 1)) <= percent;
@@ -74,14 +75,14 @@ const CALC = (function () {
 
 
 	/**
-	 * サイコロ
+	 * Dice
 	 * @author Takuto Yanagida
 	 * @version 2019-05-07
 	 */
 	class Dice extends DiceBase {
 
 		/**
-		 * サイコロを作る
+		 * Make a dice
 		 */
 		constructor(seed = Math.random()) {
 			super();
@@ -90,10 +91,10 @@ const CALC = (function () {
 		}
 
 		/**
-		 * テキトウな数（乱数）を返す関数を作る（Xorshift32）（ライブラリ内だけで使用）
+		 * Create a function that returns a random number (Xorshift32) (used only in the library)
 		 * @private
-		 * @param {number} seed シード値
-		 * @return {function(): number} テキトウな数（乱数）を返す関数
+		 * @param {number} seed Seed number
+		 * @return {function(): number} Function that returns a random number
 		 */
 		_createGenerator(seed) {
 			let y = seed;
@@ -110,21 +111,21 @@ const CALC = (function () {
 		}
 
 		/**
-		 * リセットする
+		 * Reset
 		 */
 		reset() {
 			this._r = this._createGenerator(this._seed);
 		}
 
 		/**
-		 * 今の状態を保存する
+		 * Save the current state
 		 */
 		save() {
 			this._r.save();
 		}
 
 		/**
-		 * 前の状態を復元する
+		 * Restore the previous state
 		 */
 		restore() {
 			this._r.restore();
@@ -136,16 +137,16 @@ const CALC = (function () {
 	let _dice = new DiceBase();
 
 	/**
-	 * ランダム関数にシード値を指定する
-	 * 同じシード値では同じランダムの値の組み合わせが作られます。
-	 * @param {number} seed シード値
+	 * Specify a seed value for the random function
+	 * The same seed value produces the same combination of random values.
+	 * @param {number} seed Seed value
 	 */
 	const setRandomSeed = function (seed) {
 		_dice = new Dice(seed);
 	};
 
 	/**
-	 * ランダム関数をリセットする
+	 * Reset the random function
 	 */
 	const resetRandomSeed = function () {
 		if (!(_dice instanceof Dice)) _dice = new Dice();
@@ -153,7 +154,7 @@ const CALC = (function () {
 	};
 
 	/**
-	 * ランダム関数の今の状態を保存する
+	 * Save the current state of the random function
 	 */
 	const saveRandomState = function () {
 		if (!(_dice instanceof Dice)) _dice = new Dice();
@@ -161,7 +162,7 @@ const CALC = (function () {
 	};
 
 	/**
-	 * ランダム関数の前の状態を復元する
+	 * Restore the previous state of the random function
 	 */
 	const restoreRandomState = function () {
 		if (!(_dice instanceof Dice)) _dice = new Dice();
@@ -169,30 +170,30 @@ const CALC = (function () {
 	};
 
 	/**
-	 * minからmaxまでのテキトウな数（乱数）を返す
-	 * @param {number} min 最小値
-	 * @param {number} max 最大値
-	 * @param {function(number): number=} opt_fn イージング関数（オプション）
-	 * @return {number} テキトウな数（乱数）
+	 * Return a random number from min to max
+	 * @param {number} min Minimum number
+	 * @param {number} max Maximum number
+	 * @param {function(number): number=} opt_fn Easing function (optional)
+	 * @return {number} A random number
 	 */
 	const random = function (min, max, opt_fn) {
 		return _dice.random(min, max, opt_fn);
 	};
 
 	/**
-	 * 0からn_minまで、あるいはminからmaxまでのテキトウな整数（乱数）を返す
-	 * @param {number} n_min　整数nか整数min
-	 * @param {number=} opt_max　整数max
-	 * @return テキトウな整数（乱数）
+	 * Returns a random number from 0 to n_min or from min to max
+	 * @param {number} n_min　An integer or a minimum integer
+	 * @param {number=} opt_max　Maximum integer
+	 * @return {number} A random integer
 	 */
 	const rand = function (n_min, opt_max) {
 		return _dice.rand(n_min, opt_max);
 	};
 
 	/**
-	 * パーセントで指定した確率で起こる
-	 * @param {number} percent パーセント
-	 * @return {boolean} 起こるかどうか
+	 * Occur with probability specified in percent
+	 * @param {number} percent Percent
+	 * @return {boolean} Whether it occurs
 	 */
 	const isLikely = function (percent) {
 		return _dice.isLikely(percent);
@@ -200,8 +201,8 @@ const CALC = (function () {
 
 
 	/**
-	 * ノイズ
-	 * 参考: Stefan Gustavson, SimplexNoise1234, http://staffwww.itn.liu.se/~stegu/aqsis/aqsis-newnoise/simplexnoise1234.cpp
+	 * Noise
+	 * Reference: Stefan Gustavson, SimplexNoise1234, http://staffwww.itn.liu.se/~stegu/aqsis/aqsis-newnoise/simplexnoise1234.cpp
 	 * @author Takuto Yanagida
 	 * @version 2020-04-29
 	 */
@@ -251,16 +252,16 @@ const CALC = (function () {
 	};
 
 
-	// ユーティリティ関数 ------------------------------------------------------
+	// Utility functions -------------------------------------------------------
 
 
 	/**
-	 * 数をある範囲の中に制限する
-	 * @param {number} val 数
-	 * @param {number} min 最小値
-	 * @param {number} max 最大値
-	 * @param {string=} type タイプ
-	 * @return {number} 数
+	 * Limit the number to a certain range
+	 * @param {number} val A number
+	 * @param {number} min Minimum number
+	 * @param {number} max Maximum number
+	 * @param {string=} type Type
+	 * @return {number} A limited number
 	 */
 	const constrain = function (val, min, max, type) {
 		if (type === 'loop') {
@@ -275,14 +276,14 @@ const CALC = (function () {
 	};
 
 	/**
-	 * ある範囲の数を別の範囲の数に直して返す
-	 * @param {number} val 元の数
-	 * @param {number} from1 元の範囲の初め
-	 * @param {number} to1 元の範囲の終わり
-	 * @param {number} from2 別の範囲の初め
-	 * @param {number} to2 別の範囲の終わり
-	 * @param {function(number): number=} opt_fn イージング関数（オプション）
-	 * @return {number} 数
+	 * Convert one range of numbers to another range of numbers
+	 * @param {number} val An original number
+	 * @param {number} from1 Beginning of original range
+	 * @param {number} to1 End of original range
+	 * @param {number} from2 Beginning of another range
+	 * @param {number} to2 End of another range
+	 * @param {function(number): number=} opt_fn Easing function (optional)
+	 * @return {number} A converted number
 	 */
 	const map = function (val, from1, to1, from2, to2, opt_fn) {
 		if (from1 < to1) {
@@ -300,71 +301,71 @@ const CALC = (function () {
 
 
 	/**
-	 * イージング関数（アルゴリズム）
-	 * 参考: http://easings.net/
+	 * Easing functions (algorithms)
+	 * Reference: http://easings.net/
 	 * @author Takuto Yanagida
 	 * @version 2019-05-06
 	 */
 
 
 	/**
-	 * リニア（変化なし）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Linear (no change)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const linear = function (t) {
 		return t;
 	};
 
 	/**
-	 * サイン関数（イーズ・イン）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Sine function (ease-in)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInSine = function (t) {
 		return -Math.cos(t * (Math.PI / 2)) + 1;
 	};
 
 	/**
-	 * サイン関数（イーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Sine function (ease-out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeOutSine = function (t) {
 		return Math.sin(t * (Math.PI / 2));
 	};
 
 	/**
-	 * サイン関数（イーズ・インとイーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Sine function (ease-in/out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInOutSine = function (t) {
 		return -0.5 * (Math.cos(Math.PI * t) - 1);
 	};
 
 	/**
-	 * 二次関数（イーズ・イン）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quadratic function (ease-in)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInQuad = function (t) {
 		return t * t;
 	};
 
 	/**
-	 * 二次関数（イーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quadratic function (ease-out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeOutQuad = function (t) {
 		return -t * (t - 2);
 	};
 
 	/**
-	 * 二次関数（イーズ・インとイーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quadratic function (ease-in/out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInOutQuad = function (t) {
 		t *= 2;
@@ -376,18 +377,18 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 三次関数（イーズ・イン）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Cubic function (ease-in)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInCubic = function (t) {
 		return t * t * t;
 	};
 
 	/**
-	 * 三次関数（イーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Cubic function (ease-out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeOutCubic = function (t) {
 		t -= 1;
@@ -395,9 +396,9 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 三次関数（イーズ・インとイーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Cubic function (ease-in/out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInOutCubic = function (t) {
 		t *= 2;
@@ -409,18 +410,18 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 四次関数（イーズ・イン）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quartic function (ease-in)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInQuart = function (t) {
 		return t * t * t * t;
 	};
 
 	/**
-	 * 四次関数（イーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quartic function (ease-out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeOutQuart = function (t) {
 		t -= 1;
@@ -428,9 +429,9 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 四次関数（イーズ・インとイーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quartic function (ease-in/out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInOutQuart = function (t) {
 		t *= 2;
@@ -442,18 +443,18 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 五次関数（イーズ・イン）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quintic function (ease-in)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInQuint = function (t) {
 		return t * t * t * t * t;
 	};
 
 	/**
-	 * 五次関数（イーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quintic function (ease-out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeOutQuint = function (t) {
 		t -= 1;
@@ -461,9 +462,9 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 五次関数（イーズ・インとイーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Quintic function (ease-in/out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInOutQuint = function (t) {
 		t *= 2;
@@ -475,27 +476,27 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 指数関数（イーズ・イン）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Exponential function (ease-in)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInExpo = function (t) {
 		return Math.pow(2, 10 * (t - 1));
 	};
 
 	/**
-	 * 指数関数（イーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Exponential function (ease-out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeOutExpo = function (t) {
 		return -Math.pow(2, -10 * t) + 1;
 	};
 
 	/**
-	 * 指数関数（イーズ・インとイーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Exponential function (ease-in/out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInOutExpo = function (t) {
 		t *= 2;
@@ -507,18 +508,18 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 円関数（イーズ・イン）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Circular function (ease-in)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInCirc = function (t) {
 		return -(Math.sqrt(1 - t * t) - 1);
 	};
 
 	/**
-	 * 円関数（イーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Circular function (ease-out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeOutCirc = function (t) {
 		t -= 1;
@@ -526,9 +527,9 @@ const CALC = (function () {
 	};
 
 	/**
-	 * 円関数（イーズ・インとイーズ・アウト）
-	 * @param {number} t 0～1の数
-	 * @return {number} 数
+	 * Circular function (ease-in/out)
+	 * @param {number} t A number fron 0 to 1
+	 * @return {number} A number
 	 */
 	const easeInOutCirc = function (t) {
 		t *= 2;
@@ -540,7 +541,7 @@ const CALC = (function () {
 	};
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
 	return {

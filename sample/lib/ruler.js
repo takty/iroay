@@ -1,5 +1,5 @@
 /**
- * 定規ライブラリ（RULER）
+ * Ruler library (RULER)
  *
  * @author Takuto Yanagida
  * @version 2020-04-22
@@ -7,38 +7,38 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const RULER = (function () {
 
 	'use strict';
 
 
-	// ライブラリ中だけで使用するユーティリティ --------------------------------
+	// Utilities used only in the library --------------------------------------
 
 
 	/**
-	 * 角度をラジアンにする
-	 * @param {number} deg 角度
-	 * @return {number} ラジアン
+	 * Convert degree to radian
+	 * @param {number} deg Degree
+	 * @return {number} Radian
 	 */
 	const rad = function (deg) {
 		return deg * Math.PI / 180.0;
 	};
 
 	/**
-	 * ラジアンを角度にする
-	 * @param {number} rad ラジアン
-	 * @return {number} 角度
+	 * Convert radian to degree
+	 * @param {number} rad Radian
+	 * @return {number} Degree
 	 */
 	const deg = function (rad) {
 		return rad * 180.0 / Math.PI;
 	};
 
 	/**
-	 * 角度を0～360度の範囲にする
-	 * @param {number} deg 角度
-	 * @return {number} 角度
+	 * Make an angle between 0 to 360 degrees
+	 * @param {number} deg Degree
+	 * @return {number} Degree
 	 */
 	const checkDegRange = function (deg) {
 		deg %= 360;
@@ -48,18 +48,18 @@ const RULER = (function () {
 
 
 	/**
-	 * 定規
-	 * @version 2020-04-21
+	 * Ruler
+	 * @version 2020-12-16
 	 */
 	class Ruler {
 
 		/**
-		 * 定規を作る
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+		 * Make a ruler
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 		 */
 		constructor(ctx) {
-			if (typeof STYLE === 'undefined') throw new Error('Styleライブラリが必要です。');
-			if (typeof PATH === 'undefined') throw new Error('Pathライブラリが必要です。');
+			if (typeof STYLE === 'undefined') throw new Error('Style library is needed.');
+			if (typeof PATH === 'undefined') throw new Error('Path library is needed.');
 
 			this._x = 0;
 			this._y = 0;
@@ -100,10 +100,10 @@ const RULER = (function () {
 		}
 
 		/**
-		 * エリアをリセットする
+		 * Reset the area
 		 * @private
-		 * @param {number} x x座標（横の場所）
-		 * @param {number} y y座標（たての場所）
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
 		 */
 		_resetArea(x, y) {
 			this._area.fromX = this._area.left = this._area.right = x;
@@ -115,9 +115,9 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 今の状態を保存する
-		 * @param {boolean=} [opt_savePaper=false] 紙の状態も保存するか？
-		 * @return {Ruler} この定規
+		 * Save the current state
+		 * @param {boolean=} [opt_savePaper=false] Whether to save the paper state too
+		 * @return {Ruler} This ruler
 		 */
 		save(opt_savePaper = false) {
 			if (opt_savePaper === true) this._ctx.save();
@@ -126,9 +126,9 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 前の状態を復元する
-		 * @param {boolean=} [opt_restorePaper=false] 紙の状態も復元するか？
-		 * @return {Ruler} この定規
+		 * Restore previous state
+		 * @param {boolean=} [opt_restorePaper=false] Whether to restore the paper state too
+		 * @return {Ruler} This ruler
 		 */
 		restore(opt_restorePaper = false) {
 			this._setState(this._stack.pop());
@@ -137,9 +137,9 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 状態を取得する（ライブラリ内だけで使用）
+		 * Get state (used only in the library)
 		 * @private
-		 * @return {Array} 状態
+		 * @return {Array} State
 		 */
 		_getState() {
 			return [
@@ -154,9 +154,9 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 状態を設定する（ライブラリ内だけで使用）
+		 * Set state (used only in the library)
 		 * @private
-		 * @param {Array} t 状態
+		 * @param {Array} t State
 		 */
 		_setState(t) {
 			this._x = t[0]; this._y = t[1];
@@ -169,13 +169,13 @@ const RULER = (function () {
 		}
 
 
-		// 描画状態の変化 ----------------------------------------------------------
+		// Change of drawing state -------------------------------------------------
 
 
 		/**
-		 * 線スタイル
-		 * @param {Stroke=} opt_stroke 設定する線スタイル（オプション）
-		 * @return {Stroke|Ruler} 線スタイル／この定規
+		 * Stroke style
+		 * @param {Stroke=} opt_stroke Stroke style (optional)
+		 * @return {Stroke|Ruler} Stroke style, or this ruler
 		 */
 		stroke(opt_stroke) {
 			if (opt_stroke === undefined) return this._stroke;
@@ -184,9 +184,9 @@ const RULER = (function () {
 		}
 
 		/**
-		 * ぬりスタイル
-		 * @param {Fill=} opt_fill 設定するぬりスタイル（オプション）
-		 * @return {Fill|Ruler} ぬりスタイル／この定規
+		 * Filling style
+		 * @param {Fill=} opt_fill Filling style (optional)
+		 * @return {Fill|Ruler} Filling style, or this ruler
 		 */
 		fill(opt_fill) {
 			if (opt_fill === undefined) return this._fill;
@@ -195,9 +195,9 @@ const RULER = (function () {
 		}
 
 		/**
-		 * エッジ
-		 * @param {function=} func エッジを決める関数
-		 * @return {function|Ruler} エッジ／この定規
+		 * Edge
+		 * @param {function=} func Function to determine the edge
+		 * @return {function|Ruler} Edge, or this ruler
 		 */
 		edge(func, ...fs) {
 			if (func === undefined) return this._liner.edge();
@@ -206,24 +206,24 @@ const RULER = (function () {
 		}
 
 
-		// 紙操作 ----------------------------------------------------------------
+		// Paper operation ---------------------------------------------------------
 
 
 		/**
-		 * 紙を返す
-		 * @return {Paper|CanvasRenderingContext2D} 紙／キャンバス・コンテキスト
+		 * Get the paper
+		 * @return {Paper|CanvasRenderingContext2D} Paper or canvas context
 		 */
 		context() {
 			return this._ctx;
 		}
 
 
-		// 図形の描画 --------------------------------------------------------------
+		// Draw a shape ------------------------------------------------------------
 
 
 		/**
-		 * パスを始める
-		 * @return {Ruler} この定規
+		 * Begin a path
+		 * @return {Ruler} This ruler
 		 */
 		beginPath() {
 			this._ctx.beginPath();
@@ -233,8 +233,8 @@ const RULER = (function () {
 		}
 
 		/**
-		 * パスを閉じる
-		 * @return {Ruler} この定規
+		 * Close the path
+		 * @return {Ruler} This ruler
 		 */
 		closePath() {
 			this.lineTo(this._beginX, this._beginY);
@@ -242,10 +242,10 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 移動する
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @return {Ruler} この定規
+		 * Move to
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @return {Ruler} This ruler
 		 */
 		moveTo(x, y) {
 			this._ctx.moveTo(x, y);
@@ -256,10 +256,10 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 線分をかく
-		 * @param {number} x1 終点x座標
-		 * @param {number} y1 終点y座標
-		 * @return {Ruler} この定規
+		 * Draw a line
+		 * @param {number} x1 X coordinate of end point
+		 * @param {number} y1 Y coordinate of end point
+		 * @return {Ruler} This ruler
 		 */
 		lineTo(x1, y1) {
 			if (!this._hasPath) {
@@ -272,12 +272,12 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 二次ベジェ曲線をかく
-		 * @param {number} x1 ハンドルx座標
-		 * @param {number} y1 ハンドルy座標
-		 * @param {number} x2 終点x座標
-		 * @param {number} y2 終点y座標
-		 * @return {Ruler} この定規
+		 * Draw a quadratic Bezier curve
+		 * @param {number} x1 X coordinate of handle
+		 * @param {number} y1 Y coordinate of handle
+		 * @param {number} x2 X coordinate of end point
+		 * @param {number} y2 Y coordinate of end point
+		 * @return {Ruler} This ruler
 		 */
 		quadraticCurveTo(x1, y1, x2, y2) {
 			if (!this._hasPath) this.moveTo(x1, y1);
@@ -288,14 +288,14 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 三次ベジェ曲線をかく
-		 * @param {*} x1 ハンドル1x座標
-		 * @param {*} y1 ハンドル1y座標
-		 * @param {*} x2 ハンドル2x座標
-		 * @param {*} y2 ハンドル2y座標
-		 * @param {*} x3 終点x座標
-		 * @param {*} y3 終点y座標
-		 * @return {Ruler} この定規
+		 * Draw a cubic Bezier curve
+		 * @param {*} x1 X coordinate of handle 1
+		 * @param {*} y1 Y coordinate of handle 1
+		 * @param {*} x2 X coordinate of handle 2
+		 * @param {*} y2 Y coordinate of handle 2
+		 * @param {*} x3 X coordinate of end point
+		 * @param {*} y3 Y coordinate of end point
+		 * @return {Ruler} This ruler
 		 */
 		bezierCurveTo(x1, y1, x2, y2, x3, y3) {
 			if (!this._hasPath) this.moveTo(x1, y1);
@@ -306,14 +306,14 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 円弧をかく
-		 * @param {number} cx 中心x座標
-		 * @param {number} cy 中心y座標
-		 * @param {number} radius 半径
-		 * @param {number} startAngle 開始角度
-		 * @param {number} endAngle 終了角度
-		 * @param {boolean=} [anticlockwise=false] 反時計回り？
-		 * @return {Ruler} この定規
+		 * Draw an arc
+		 * @param {number} cx X coordinate of center
+		 * @param {number} cy Y coordinate of center
+		 * @param {number} radius Radius
+		 * @param {number} startAngle Start angle
+		 * @param {number} endAngle End angle
+		 * @param {boolean=} [anticlockwise=false] Whether it is counterclockwise
+		 * @return {Ruler} This ruler
 		 */
 		arc(cx, cy, radius, startAngle, endAngle, anticlockwise = false) {
 			const x0 = cx + radius * Math.cos(rad(startAngle));
@@ -332,16 +332,16 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 円をかく
-		 * @param {number} x 中心x座標
-		 * @param {number} y 中心y座標
-		 * @param {number} radiusX 横半径
-		 * @param {number} radiusY たて半径
-		 * @param {number} rotation 回転
-		 * @param {number} startAngle 開始角度
-		 * @param {number} endAngle 終了角度
-		 * @param {boolean=} [anticlockwise=false] 反時計回り？
-		 * @return {Ruler} この定規
+		 * Draw a circle
+		 * @param {number} x X coordinate of center
+		 * @param {number} y Y coordinate of center
+		 * @param {number} radiusX Width
+		 * @param {number} radiusY Height
+		 * @param {number} rotation Rotation
+		 * @param {number} startAngle Start angle
+		 * @param {number} endAngle End angle
+		 * @param {boolean=} [anticlockwise=false] Whether it is counterclockwise
+		 * @return {Ruler} This ruler
 		 */
 		ellipse(x, y, radiusX, radiusY, rotation, startAngle, endAngle, anticlockwise = false) {
 			const s0 = radiusX * Math.cos(rad(startAngle)), t0 = radiusY * Math.sin(rad(startAngle));
@@ -359,12 +359,12 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 四角形をかく
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @param {number} width 横幅
-		 * @param {number} height たて幅
-		 * @return {Ruler} この定規
+		 * Draw a rectangle
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number} width Width
+		 * @param {number} height Height
+		 * @return {Ruler} This ruler
 		 */
 		rect(x, y, width, height) {
 			this._resetArea(x, y);
@@ -379,24 +379,24 @@ const RULER = (function () {
 		}
 
 		/**
-		 * 実際にかく
-		 * @param {string} mode モード
-		 * @return {Ruler} この定規
+		 * Actually draw
+		 * @param {string} mode Mode
+		 * @return {Ruler} This ruler
 		 */
 		draw(mode) {
 			let ms = mode;
-			if (ms.match(/(fill|stroke|clip|none)/)) {
-				ms = ms.replace(/(fill|stroke|clip)/g, '$1,').replace(/,$/, '').split(',');
-			}
-			for (let m of ms) {
+			ms = ms.replace('fill', 'f');
+			ms = ms.replace('stroke', 's');
+			ms = ms.replace('clip', 'c');
+			for (const m of ms) {
 				switch (m) {
-					case 'fill': case 'f':
+					case 'f':
 						this._fill.draw(this._ctx, this._area);
 						break;
-					case 'stroke': case 's':
+					case 's':
 						this._stroke.draw(this._ctx, this._area);
 						break;
-					case 'clip': case 'c':
+					case 'c':
 						if (this._isClipable) this._ctx.clip();
 						break;
 				}
@@ -405,18 +405,18 @@ const RULER = (function () {
 		}
 
 
-		// 直接描画関数 ------------------------------------------------------------
+		// Direct drawing functions ------------------------------------------------
 
 
 		/**
-		 * 円をかく
-		 * @param {number} cx 中心x座標
-		 * @param {number} cy 中心y座標
-		 * @param {number|Array<number>} r 半径（配列なら横半径とたて半径）
-		 * @param {number=} [opt_dir=0] 方向
-		 * @param {number=|Array<number>} [opt_deg=360] 角度（配列なら開始角度と終了角度）
-		 * @param {boolean=} [opt_anticlockwise=false] 反時計回り？
-		 * @return {Ruler} この定規
+		 * Draw a circle
+		 * @param {number} cx X coordinate of center
+		 * @param {number} cy Y coordinate of center
+		 * @param {number|Array<number>} r Radius (horizontal radius and vertical radius if an array given)
+		 * @param {number=} [opt_dir=0] Direction
+		 * @param {number=|Array<number>} [opt_deg=360] Degree (start and end angles if an array given)
+		 * @param {boolean=} [opt_anticlockwise=false] Whether it is counterclockwise
+		 * @return {Ruler} This ruler
 		 */
 		circle(cx, cy, r, opt_dir = 0, opt_deg = 360, opt_anticlockwise = false) {
 			const p = PATH.arrangeArcParams(r, opt_deg, 1);
@@ -434,12 +434,12 @@ const RULER = (function () {
 		};
 
 		/**
-		 * 線をかく
-		 * @param {number} fromX 始点x座標
-		 * @param {number} fromY 始点y座標
-		 * @param {number} toX 終点x座標
-		 * @param {number} toY 終点y座標
-		 * @return {Ruler} この定規
+		 * Draw a line
+		 * @param {number} fromX X coordinate of start point
+		 * @param {number} fromY Y coordinate of start point
+		 * @param {number} toX X coordinate of end point
+		 * @param {number} toY Y coordinate of end point
+		 * @return {Ruler} This ruler
 		 */
 		line(fromX, fromY, toX, toY) {
 			const dr = Math.atan2(toY - fromY, toX - fromX);
@@ -454,32 +454,29 @@ const RULER = (function () {
 		};
 
 		/**
-		 * 点をかく
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @return {Ruler} この定規
+		 * Draw a dot
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @return {Ruler} This ruler
 		 */
 		dot(x, y) {
-			// this._resetArea(x, y);
 			this._ctx.beginPath();
 			this._ctx.rect(x, y, 1, 1);
-			// this._ctx.moveTo(x, y);
-			// this._liner.line(x, y, 0, 1, null, this._area);
 			return this;
 		}
 
 	}
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
-	// 関数の別名
+	// Function alias
 	const aliasMap = {
 		context: ['paper'],
 	};
 
-	// 関数の別名を登録する
+	// Register function alias
 	for (const [orig, aliases] of Object.entries(aliasMap)) {
 		for (let alias of aliases) {
 			Ruler.prototype[alias] = Ruler.prototype[orig];

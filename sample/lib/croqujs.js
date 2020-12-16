@@ -1,30 +1,30 @@
 /**
- * クロッキー・ライブラリ（CROQUJS）
+ * Croqujs library (CROQUJS)
  *
- * 絵をかくための紙を作るライブラリです。
- * このライブラリは、HTMLについて知っていなくてもJavaScriptから簡単に絵をかけ、
- * マウスの操作に対応できるようにするための準備をするものです。
- * （ここでの紙は、HTML5のCanvas要素のCanvasRenderingContext2Dを拡張したもののことです）
+ * A library to make paper for painting.
+ * This library prepares to draw pictures easily from JavaScript
+ * without having to know HTML and to be able to handle mouse operations.
+ * ('Paper' here is an extension of CanvasRenderingContext2D of HTML5 Canvas element)
  *
  * @author Takuto Yanagida
- * @version 2020-04-30
+ * @version 2020-11-20
  */
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const CROQUJS = (function () {
 
 	'use strict';
 
 
-	// 共通のCSS
+	// Common CSS
 	const s = document.createElement('style');
 	s.innerHTML = '*{margin:0;padding:0}body{white-space:nowrap;display:flex;flex-wrap:wrap;align-items:flex-start;}';
 	document.head.appendChild(s);
 
-	// すべてのプログラム（スクリプト）を読み込み終わったらsetup関数を呼び出すように、イベント・リスナーを登録する
+	// Register event listeners so that the setup function is called when all programs (scripts) have been loaded
 	window.addEventListener('load', () => {
 		if (typeof setup === 'function') {
 			setup();
@@ -32,29 +32,29 @@ const CROQUJS = (function () {
 	}, true);
 
 
-	// ペーパー（CROQUJS.Paper) ---------------------------------------------
+	// Paper (CROQUJS.Paper) ------------------------------------------------
 
 
 	const CANVAS_TO_PAPER = {};
 
 
 	/**
-	 * キー操作処理
+	 * Key operation handler
 	 * @author Takuto Yanagida
 	 * @version 2019-05-12
 	 */
 	class KeyHandler {
 
 		/**
-		 * キー操作処理を作る
-		 * @param {Canvas} can キャンバス
+		 * Make a key operation handler
+		 * @param {Canvas} can Canvas
 		 */
 		constructor(can) {
 			this._keys = {};
 			this._onDown = null;
 			this._onUp = null;
 
-			// キー・ダウン・イベントに対応する
+			// Handle key down events
 			can.addEventListener('keydown', (e) => {
 				if (!this._keys[e.keyCode]) {
 					if (this._onDown !== null) {
@@ -65,7 +65,7 @@ const CROQUJS = (function () {
 				}
 			}, true);
 
-			// キー・アップ・イベントに対応する
+			// Handle key up events
 			can.addEventListener('keyup', (e) => {
 				if (this._keys[e.keyCode]) {
 					if (this._onUp !== null) {
@@ -78,13 +78,13 @@ const CROQUJS = (function () {
 		}
 
 
-		// 公開関数 ----------------------------------------------------------------
+		// Public functions --------------------------------------------------------
 
 
 		/**
-		 * キー・ダウン・イベントに対応する関数をセットする
-		 * @param {function(string, KeyEvent)=} handler 関数
-		 * @return {function(string, KeyEvent)=} 関数
+		 * Set the function handling key down events
+		 * @param {function(string, KeyEvent)=} handler Function
+		 * @return {function(string, KeyEvent)=} Function
 		 */
 		onKeyDown(handler) {
 			if (handler === undefined) return this._onDown;
@@ -92,9 +92,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * キー・アップ・イベントに対応する関数をセットする
-		 * @param {function(string, KeyEvent)=} handler 関数
-		 * @return {function(string, KeyEvent)=} 関数
+		 * Set the function handling key up events
+		 * @param {function(string, KeyEvent)=} handler Function
+		 * @return {function(string, KeyEvent)=} Function
 		 */
 		onKeyUp(handler) {
 			if (handler === undefined) return this._onUp;
@@ -105,15 +105,15 @@ const CROQUJS = (function () {
 
 
 	/**
-	 * マウス操作処理
+	 * Mouse operation handler
 	 * @author Takuto Yanagida
 	 * @version 2019-05-12
 	 */
 	class MouseHandler {
 
 		/**
-		 * マウス操作処理を作る
-		 * @param {Canvas} can キャンバス
+		 * Make a mouse operation handler
+		 * @param {Canvas} can Canvas
 		 */
 		constructor(can) {
 			this._canvas = can;
@@ -132,7 +132,7 @@ const CROQUJS = (function () {
 			this._onClick = null;
 			this._onWheel = null;
 
-			// ウィンドウにイベント・リスナーをセット
+			// Set event listener in window
 			this._onDownWinListener = this._onDownWin.bind(this);
 			this._onMoveWinListener = this._onMoveWin.bind(this);
 			this._onUpWinListener = this._onUpWin.bind(this);
@@ -146,7 +146,7 @@ const CROQUJS = (function () {
 			window.addEventListener('dragend', this._onUpWinListener, false);
 			window.addEventListener('blur', this._onBlurWinListener);
 
-			// キャンバスにイベント・リスナーをセット
+			// Set event listener in canvas
 			if (window.ontouchstart !== undefined) {  // iOS, Android (& Chrome)
 				this._canvas.addEventListener('touchstart', (e) => { this._onDownCan(e); this._onClickCan(e); }, true);
 				this._canvas.addEventListener('touchmove', this._onMoveCan.bind(this), true);
@@ -165,14 +165,14 @@ const CROQUJS = (function () {
 			this._canvas.addEventListener('wheel', this._onWheelCan.bind(this));
 
 			this._canvas.oncontextmenu = () => {
-				// イベントが割り当てられている時はコンテキストメニューをキャンセル
+				// Cancel context menu when event is assigned
 				if (this._mouseUp !== null) return false;
 				return true;
 			};
 		}
 
 		/**
-		 * イベント・リスナーを削除する
+		 * Remove event listeners
 		 */
 		removeWinListener() {
 			window.removeEventListener('mousedown', this._onDownWinListener, true);
@@ -185,29 +185,29 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 子を追加する
-		 * @param {MouseHandler} child 子
+		 * Add a child
+		 * @param {MouseHandler} child Child
 		 */
 		addChild(child) {
 			this._children.push(child);
 		}
 
 		/**
-		 * 子を削除する
-		 * @param {MouseHandler} child 子
+		 * Remove a child
+		 * @param {MouseHandler} child Child
 		 */
 		removeChild(child) {
 			this._children = this._children.filter(e => (e !== child));
 		}
 
 
-		// ウインドウから直接ボタンのイベントを受け取る ----------------------------
+		// Receive button events directly from the window --------------------------
 
 
 		/**
-		 * マウス・ダウン・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse down events (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_onDownWin(e) {
 			if (e.target !== this._canvas) {
@@ -220,9 +220,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ムーブ・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse move events (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_onMoveWin(e) {
 			if (e.target !== this._canvas && this._btns === 0) {
@@ -235,9 +235,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・アップ・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse up events (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_onUpWin(e) {
 			const btnTbl = [1, 4, 2];
@@ -246,9 +246,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * どのマウス・ボタンが押されたのかを記録する（ライブラリ内だけで使用）
+		 * Record which mouse button was pressed (used only in the library)
 		 * @private
-		 * @param {number} buttons ボタン
+		 * @param {number} buttons Buttons
 		 */
 		_setButtonWin(buttons) {
 			this._btnL = (buttons & 1) ? true : false;
@@ -262,13 +262,13 @@ const CROQUJS = (function () {
 		}
 
 
-		// キャンバスからボタンのイベントを受け取る --------------------------------
+		// Receive button events from the canvas -----------------------------------
 
 
 		/**
-		 * マウス・ダウン・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse down events (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_onDownCan(e) {
 			this._setPosition(e);
@@ -281,23 +281,23 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ムーブ・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse move events (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_onMoveCan(e) {
 			this._setPosition(e);
 			if (this._onMove !== null) {
-				// ウィンドウ外からカーソルが入った時にボタンを検出する前にイベントが発生する問題を回避するため
+				// To avoid an event that occurs before the button is detected when the cursor enters from outside the window
 				setTimeout(() => { this._onMove(this._posX, this._posY, e) }, 1);
 				e.preventDefault();
 			}
 		}
 
 		/**
-		 * マウス・アップ・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse up events (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_onUpCan(e) {
 			this._setPosition(e);
@@ -309,9 +309,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * クリック・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to click events (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_onClickCan(e) {
 			this._setPosition(e);
@@ -322,9 +322,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * ホイール・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to wheel events (used only in the library)
 		 * @private
-		 * @param {WheelEvent} e イベント
+		 * @param {WheelEvent} e Event
 		 */
 		_onWheelCan(e) {
 			if (this._onWheel !== null) {
@@ -334,12 +334,12 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・イベントの起こった場所（座標）を正しくして記録する（ライブラリ内だけで使用）
+		 * Correctly record where the mouse event happened (coordinates) (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
+		 * @param {MouseEvent} e Event
 		 */
 		_setPosition(e) {
-			// タッチの時／マウスの時
+			// When touch, or when mouse
 			const ee = (e.clientX === undefined) ? e.changedTouches[0] : e;
 			const r = this._canvas.getBoundingClientRect();
 			this._posX = ee.clientX - r.left;
@@ -352,16 +352,16 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * どのマウス・ボタンが押されたのかを記録する（ライブラリ内だけで使用）
+		 * Record which mouse button was pressed (used only in the library)
 		 * @private
-		 * @param {MouseEvent} e イベント
-		 * @param {boolean} val 状態
+		 * @param {MouseEvent} e Event
+		 * @param {boolean} val State
 		 */
 		_setButtonCanvas(e, val) {
-			// どのボタンかがわからない時（Androidタッチの時）
+			// When it is not known which button (when touch on Android)
 			const which = (e.which === undefined) ? 0 : e.which;
 
-			// タッチ以外の処理は基本的にInputMouseButtonが担当（以下はタッチイベント関連への簡易対応のため）
+			// Basically, the InputMouseButton is in charge of processing other than touch (the following is for easy correspondence to touch event related)
 			switch (which) {
 				case 0:
 				case 1: this._btnL = val; break;
@@ -374,13 +374,13 @@ const CROQUJS = (function () {
 		}
 
 
-		// 公開関数 ----------------------------------------------------------------
+		// Public functions --------------------------------------------------------
 
 
 		/**
-		 * マウス・ダウン・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse down event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseDown(handler) {
 			if (handler === undefined) return this._onDown;
@@ -388,9 +388,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ムーブ・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse move event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseMove(handler) {
 			if (handler === undefined) return this._onMove;
@@ -398,9 +398,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・アップ・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse up event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseUp(handler) {
 			if (handler === undefined) return this._onUp;
@@ -408,9 +408,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・クリック・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse click event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseClick(handler) {
 			if (handler === undefined) return this._onClick;
@@ -418,9 +418,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ホイール・イベントに対応する関数をセットする
-		 * @param {function(number, WheelEvent)=} handler 関数
-		 * @return {function(number, WheelEvent)=} 関数
+		 * Set the function handling the mouse wheel event
+		 * @param {function(number, WheelEvent)=} handler Function
+		 * @return {function(number, WheelEvent)=} Function
 		 */
 		onMouseWheel(handler) {
 			if (handler === undefined) return this._onWheel;
@@ -428,40 +428,40 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウスの横の場所を返す
-		 * @return {number} マウスの横の場所
+		 * Return x coordinate of the mouse
+		 * @return {number} X coordinate of the mouse
 		 */
 		mouseX() {
 			return this._posX;
 		}
 
 		/**
-		 * マウスのたての場所を返す
-		 * @return {number} マウスのたての場所
+		 * Return y coordinate of the mouse
+		 * @return {number} Y coordinate of the mouse
 		 */
 		mouseY() {
 			return this._posY;
 		}
 
 		/**
-		 * マウスの左ボタンが押されているか？
-		 * @return {boolean} マウスの左ボタンが押されているか
+		 * Whether the left mouse button is pressed
+		 * @return {boolean} Whether the left mouse button is pressed
 		 */
 		mouseLeft() {
 			return this._btnL;
 		}
 
 		/**
-		 * マウスの右ボタンが押されているか？
-		 * @return {boolean} マウスの右ボタンが押されているか
+		 * Whether the right mouse button is pressed
+		 * @return {boolean} Whether the right mouse button is pressed
 		 */
 		mouseRight() {
 			return this._btnR;
 		}
 
 		/**
-		 * マウスの中ボタンが押されているか？
-		 * @return {boolean} マウスの中ボタンが押されているか
+		 * Whether the middle mouse button is pressed
+		 * @return {boolean} Whether the middle mouse button is pressed
 		 */
 		mouseMiddle() {
 			return this._btnM;
@@ -471,15 +471,15 @@ const CROQUJS = (function () {
 
 
 	/**
-	 * ズーム操作処理
+	 * Zoom operation handler
 	 * @author Takuto Yanagida
 	 * @version 2020-04-30
 	 */
 	class ZoomHandler {
 
 		/**
-		 * ズーム操作処理を作る
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+		 * Make a zoom operation handler
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 		 */
 		constructor(ctx) {
 			this._ctx = ctx;
@@ -504,7 +504,7 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ダウン・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse down events (used only in the library)
 		 * @private
 		 */
 		_onMouseDown() {
@@ -515,7 +515,7 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ムーブ・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to mouse move events (used only in the library)
 		 * @private
 		 */
 		_onMouseMove() {
@@ -527,9 +527,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * ホイール・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to wheel events (used only in the library)
 		 * @private
-		 * @param {WheelEvent} e イベント
+		 * @param {WheelEvent} e Event
 		 */
 		_onWheel(e) {
 			if (!this._isEnabled) return;
@@ -551,10 +551,10 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * ビュー・オフセットをセットする（ライブラリ内だけで使用）
+		 * Set the view offsets (used only in the library)
 		 * @private
-		 * @param {number} x x座標
-		 * @param {number} y y座標
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
 		 */
 		_setViewOffset(x, y) {
 			const w = this._ctx.width(), h = this._ctx.height();
@@ -569,9 +569,9 @@ const CROQUJS = (function () {
 
 
 		/**
-		 * タッチ・スタート・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to touch start events (used only in the library)
 		 * @private
-		 * @param {TouchEvent} e イベント
+		 * @param {TouchEvent} e Event
 		 */
 		_onTouchStart(e) {
 			this._touchDist = 0;
@@ -579,9 +579,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * タッチ・ムーブ・イベントに対応する（ライブラリ内だけで使用）
+		 * Respond to touch move events (used only in the library)
 		 * @private
-		 * @param {TouchEvent} e イベント
+		 * @param {TouchEvent} e Event
 		 */
 		_onTouchMove(e) {
 			e.preventDefault();
@@ -617,9 +617,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * ズームの段階を計算する（ライブラリ内だけで使用）
+		 * Calculate the zoom step (used only in the library)
 		 * @private
-		 * @param {number} s スケール（拡大率）
+		 * @param {number} s Scale (magnification rate)
 		 */
 		_calcZoomStep(s) {
 			const ns = Math.min(Math.max(s, 1), this._steps[this._steps.length - 1]);
@@ -638,9 +638,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * タッチ情報を更新する（ライブラリ内だけで使用）
+		 * Update touch information (used only in the library)
 		 * @private
-		 * @param {TouchList} ts タッチ
+		 * @param {TouchList} ts Touches
 		 */
 		_updateTouch(ts) {
 			this._touchCount = ts.length;
@@ -648,9 +648,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * タッチされた点を求める（ライブラリ内だけで使用）
+		 * Get the touched point (used only in the library)
 		 * @private
-		 * @param {TouchList} ts タッチ
+		 * @param {TouchList} ts Touches
 		 */
 		_getTouchPoint(ts) {
 			let x = 0, y = 0;
@@ -665,9 +665,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * タッチされた2点の距離を求める（ライブラリ内だけで使用）
+		 * Get the distance between two touched points (used only in the library)
 		 * @private
-		 * @param {TouchList} ts タッチ
+		 * @param {TouchList} ts Touches
 		 */
 		_getTouchDistance(ts) {
 			const x1 = ts[0].screenX, y1 = ts[0].screenY;
@@ -680,9 +680,9 @@ const CROQUJS = (function () {
 
 
 		/**
-		 * ホイール回転でズームするか
-		 * @param {boolean=} val ホイール回転でズームするか
-		 * @return {boolean} ホイール回転でズームするか
+		 * Whether to magnify on wheel rotation
+		 * @param {boolean=} val Whether to magnify on wheel rotation
+		 * @return {boolean} Whether to magnify on wheel rotation
 		 */
 		enabled(val) {
 			if (val === undefined) return this._isEnabled;
@@ -690,8 +690,8 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 絵をかく前の設定をする（紙だけで使用）
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+		 * Make settings before drawing (used only in the Paper)
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 		 */
 		beforeDrawing(ctx) {
 			if (!this._isEnabled) return;
@@ -705,8 +705,8 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 絵をかいた後で設定を戻す（紙だけで使用）
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+		 * Reset the settings after drawing (used only in the Paper)
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 		 */
 		afterDrawing(ctx) {
 			if (!this._isEnabled) return;
@@ -717,17 +717,17 @@ const CROQUJS = (function () {
 
 
 	/**
-	 * 紙
+	 * Paper
 	 * @version 2020-05-05
 	 */
 	class Paper {
 
 		/**
-		 * 紙を作る
+		 * Make a paper
 		 * @constructor
-		 * @param {number} width 横の大きさ
-		 * @param {number} height たての大きさ
-		 * @param {boolean} [isVisible=true] 画面に表示する？
+		 * @param {number} width width
+		 * @param {number} height height
+		 * @param {boolean} [isVisible=true] Whether to be visible
 		 */
 		constructor(width, height, isVisible = true) {
 			const can = document.createElement('canvas');
@@ -738,7 +738,7 @@ const CROQUJS = (function () {
 			this._ctx = can.getContext('2d');
 			if (!PAPER_IS_AUGMENTED) augmentPaperPrototype(this._ctx);
 
-			// 画面に表示する場合は
+			// When displaying on the screen
 			if (isVisible === true) {
 				const style = document.createElement('style');
 				style.innerHTML = 'body>canvas{border:0 solid lightgray;display:inline-block;touch-action:none;outline:none;}';
@@ -758,9 +758,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 紙を強化する（ライブラリ内だけで使用）
+		 * Augment papers (used only in the library)
 		 * @private
-		 * @param {DOMElement} can キャンバス要素
+		 * @param {DOMElement} can Canvas element
 		 */
 		_augment(can) {
 			this._frame = 0;
@@ -781,9 +781,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 横の大きさ
-		 * @param {number=} val 横の大きさ
-		 * @return {number|Paper} 横の大きさ／この紙
+		 * Width
+		 * @param {number=} val Width
+		 * @return {number|Paper} Width, or this paper
 		 */
 		width(val) {
 			if (val === undefined) return this.canvas.width;
@@ -792,9 +792,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * たての大きさ
-		 * @param {number=} val たての大きさ
-		 * @return {number|Paper} たての大きさ／この紙
+		 * Height
+		 * @param {number=} val Height
+		 * @return {number|Paper} Height, or this paper
 		 */
 		height(val) {
 			if (val === undefined) return this.canvas.height;
@@ -803,10 +803,10 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 紙のサイズを変える
-		 * @param {number} width 横の大きさ
-		 * @param {number} height たての大きさ
-		 * @return {Paper} この紙
+		 * Set the size of the paper
+		 * @param {number} width Width
+		 * @param {number} height Height
+		 * @return {Paper} This paper
 		 */
 		setSize(width, height) {
 			this.canvas.width = width;
@@ -815,10 +815,10 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 紙を指定した色でクリアする
-		 * @param {string} style スタイル（指定しなければ透明）
-		 * @param {number} alpha アルファ
-		 * @return {Paper} この紙
+		 * Clear the paper in the specified color
+		 * @param {string} style Style (transparent if not specified)
+		 * @param {number} alpha Alpha
+		 * @return {Paper} This paper
 		 */
 		clear(style, alpha) {
 			this.save();
@@ -837,14 +837,14 @@ const CROQUJS = (function () {
 		}
 
 
-		// アニメーション -------------------------------------------------------
+		// Animation ------------------------------------------------------------
 
 
 		/**
-		 * アニメーションを始める
-		 * @param {function} callback 一枚一枚の絵を書く関数
-		 * @param {Array} args_array 関数に渡す引数
-		 * @return {Paper} この紙
+		 * Start animation
+		 * @param {function} callback Function to draw picture one by one
+		 * @param {Array} args_array Arguments to pass to the function
+		 * @return {Paper} This paper
 		 */
 		animate(callback, args_array) {
 			const startTime = getTime();
@@ -874,8 +874,8 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * アニメーションを止める
-		 * @return {Paper} この紙
+		 * Stop animation
+		 * @return {Paper} This paper
 		 */
 		stop() {
 			this._isAnimating = false;
@@ -883,17 +883,17 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * フレーム
-		 * @return {number} フレーム
+		 * Frames
+		 * @return {number} Frames
 		 */
 		frame() {
 			return this._frame;
 		}
 
 		/**
-		 * FPS（1秒間のコマ数）
-		 * @param {number=} val FPS（1秒間のコマ数）
-		 * @return {number|Paper} FPS（1秒間のコマ数）／この紙
+		 * Frames per second
+		 * @param {number=} val Frames per second
+		 * @return {number|Paper} Frames per second, or this paper
 		 */
 		fps(val) {
 			if (val === undefined) return this._fps;
@@ -902,9 +902,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * フレーム長
-		 * @param {number=} val フレーム長
-		 * @return {number|Paper} フレーム長／この紙
+		 * Frame length
+		 * @param {number=} val Frame length
+		 * @return {number|Paper} Frame length, or this paper
 		 */
 		frameLength(val) {
 			if (val === undefined) return this._frameLength;
@@ -913,21 +913,21 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 全フレーム
-		 * @return {number} 全フレーム
+		 * Total frames
+		 * @return {number} Total frames
 		 */
 		totalFrame() {
 			return this._totalFrame;
 		}
 
 
-		// ページ ---------------------------------------------------------------
+		// Page -----------------------------------------------------------------
 
 
 		/**
-		 * 新しいページを作る
-		 * @param {string} pageName ページの名前
-		 * @return {Paper} ページ
+		 * Make a new page
+		 * @param {string} pageName Page name
+		 * @return {Paper} Page
 		 */
 		makePage(pageName) {
 			if (!this._pages) this._pages = {};
@@ -936,9 +936,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * ページをもらう
-		 * @param {string} pageName ページの名前
-		 * @return {Paper|boolean} ページ／false
+		 * Get a page
+		 * @param {string} pageName Page name
+		 * @return {Paper|boolean} Page, or false
 		 */
 		getPage(pageName) {
 			if (!this._pages) return false;
@@ -946,12 +946,12 @@ const CROQUJS = (function () {
 		}
 
 
-		// 子の紙 ---------------------------------------------------------------
+		// Child page -----------------------------------------------------------
 
 
 		/**
-		 * 子の紙を追加する
-		 * @param {Paper} paper 子の紙
+		 * Add a child paper
+		 * @param {Paper} paper Child paper
 		 */
 		addChild(paper) {
 			if (!this._children) this._children = [];
@@ -960,8 +960,8 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 子の紙を削除する
-		 * @param {Paper} paper 子の紙
+		 * Remove a child paper
+		 * @param {Paper} paper Child paper
 		 */
 		removeChild(paper) {
 			if (!this._children) return;
@@ -970,24 +970,24 @@ const CROQUJS = (function () {
 		}
 
 
-		// ユーティリティ -------------------------------------------------------
+		// Utilities ------------------------------------------------------------
 
 
 		/**
-		 * 定規をもらう
-		 * @return {Ruler} 定規
+		 * Get a ruler
+		 * @return {Ruler} Ruler
 		 */
 		getRuler() {
-			if (typeof RULER === 'undefined') throw new Error('Rulerライブラリが必要です。');
+			if (typeof RULER === 'undefined') throw new Error('Ruler library is needed.');
 			if (!this._ruler) this._ruler = new RULER.Ruler(this);
 			return this._ruler;
 		}
 
 		/**
-		 * 紙にかいた絵をファイルに保存する
-		 * @param {string=} fileName ファイル名
-		 * @param {string=} type ファイルの種類
-		 * @return {Paper} この紙
+		 * Save the picture drawn on the paper to a file
+		 * @param {string=} fileName File name
+		 * @param {string=} type File type
+		 * @return {Paper} This paper
 		 */
 		saveImage(fileName, type) {
 			const canvasToBlob = function (canvas, type) {
@@ -1011,9 +1011,9 @@ const CROQUJS = (function () {
 
 
 		/**
-		 * ホイールクリックでグリッドを表示するか
-		 * @param {boolean=} val ホイールクリックでグリッドを表示するか
-		 * @return {boolean|Paper} ホイールクリックでグリッドを表示するか／この紙
+		 * Whether to show grid on wheel click
+		 * @param {boolean=} val Whether to show grid on wheel click
+		 * @return {boolean|Paper} Whether to show grid on wheel click, or this paper
 		 */
 		gridVisible(val) {
 			if (val === undefined) return this._isGridVisible;
@@ -1022,7 +1022,7 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * 紙にマス目をかく
+		 * Draw grid on the paper
 		 */
 		drawGrid() {
 			const w = this.width(), h = this.height();
@@ -1051,9 +1051,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * ホイール回転でズームするか
-		 * @param {boolean=} val ホイール回転でズームするか
-		 * @return {boolean|Paper} ホイール回転でズームするか／この紙
+		 * Whether to magnify on wheel rotation
+		 * @param {boolean=} val Whether to magnify on wheel rotation
+		 * @return {boolean|Paper} Whether to magnify on wheel rotation, or this paper
 		 */
 		zoomEnabled(val) {
 			if (val === undefined) return this._zoomHandler.enabled();
@@ -1062,13 +1062,13 @@ const CROQUJS = (function () {
 		}
 
 
-		// キーボード -----------------------------------------------------------
+		// Keyboard -------------------------------------------------------------
 
 
 		/**
-		 * キー・ダウン・イベントに対応する関数をセットする
-		 * @param {function(string, KeyEvent)=} handler 関数
-		 * @return {function(string, KeyEvent)=} 関数
+		 * Set the function handling key down events
+		 * @param {function(string, KeyEvent)=} handler Function
+		 * @return {function(string, KeyEvent)=} Function
 		 */
 		onKeyDown(handler) {
 			if (handler === undefined) return this._keyEventHandler.onKeyDown();
@@ -1077,9 +1077,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * キー・アップ・イベントに対応する関数をセットする
-		 * @param {function(string, KeyEvent)=} handler 関数
-		 * @return {function(string, KeyEvent)=} 関数
+		 * Set the function handling key up events
+		 * @param {function(string, KeyEvent)=} handler Function
+		 * @return {function(string, KeyEvent)=} Function
 		 */
 		onKeyUp(handler) {
 			if (handler === undefined) return this._keyEventHandler.onKeyUp();
@@ -1088,13 +1088,13 @@ const CROQUJS = (function () {
 		}
 
 
-		// マウス ---------------------------------------------------------------
+		// Mouse ----------------------------------------------------------------
 
 
 		/**
-		 * マウス・ダウン・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse down event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseDown(handler) {
 			if (handler === undefined) return this._mouseEventHandler.onMouseDown();
@@ -1103,9 +1103,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ムーブ・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse move event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseMove(handler) {
 			if (handler === undefined) return this._mouseEventHandler.onMouseMove();
@@ -1114,9 +1114,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・アップ・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse up event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseUp(handler) {
 			if (handler === undefined) return this._mouseEventHandler.onMouseUp();
@@ -1125,9 +1125,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・クリック・イベントに対応する関数をセットする
-		 * @param {function(number, number, MouseEvent)=} handler 関数
-		 * @return {function(number, number, MouseEvent)=} 関数
+		 * Set the function handling the mouse click event
+		 * @param {function(number, number, MouseEvent)=} handler Function
+		 * @return {function(number, number, MouseEvent)=} Function
 		 */
 		onMouseClick(handler) {
 			if (handler === undefined) return this._mouseEventHandler.onMouseClick();
@@ -1136,9 +1136,9 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウス・ホイール・イベントに対応する関数をセットする
-		 * @param {function(number, WheelEvent)=} handler 関数
-		 * @return {function(number, WheelEvent)=} 関数
+		 * Set the function handling the mouse wheel event
+		 * @param {function(number, WheelEvent)=} handler Function
+		 * @return {function(number, WheelEvent)=} Function
 		 */
 		onMouseWheel(handler) {
 			if (handler === undefined) return this._mouseEventHandler.onMouseWheel();
@@ -1147,40 +1147,40 @@ const CROQUJS = (function () {
 		}
 
 		/**
-		 * マウスの横の場所を返す
-		 * @return {number} マウスの横の場所
+		 * Return x coordinate of the mouse
+		 * @return {number} X coordinate of the mouse
 		 */
 		mouseX() {
 			return this._mouseEventHandler.mouseX();
 		}
 
 		/**
-		 * マウスのたての場所を返す
-		 * @return {number} マウスのたての場所
+		 * Return y coordinate of the mouse
+		 * @return {number} Y coordinate of the mouse
 		 */
 		mouseY() {
 			return this._mouseEventHandler.mouseY();
 		}
 
 		/**
-		 * マウスの左ボタンが押されているか？
-		 * @return {boolean} マウスの左ボタンが押されているか
+		 * Whether the left mouse button is pressed
+		 * @return {boolean} Whether the left mouse button is pressed
 		 */
 		mouseLeft() {
 			return this._mouseEventHandler.mouseLeft();
 		}
 
 		/**
-		 * マウスの右ボタンが押されているか？
-		 * @return {boolean} マウスの右ボタンが押されているか
+		 * Whether the right mouse button is pressed
+		 * @return {boolean} Whether the right mouse button is pressed
 		 */
 		mouseRight() {
 			return this._mouseEventHandler.mouseRight();
 		}
 
 		/**
-		 * マウスの中ボタンが押されているか？
-		 * @return {boolean} マウスの中ボタンが押されているか
+		 * Whether the middle mouse button is pressed
+		 * @return {boolean} Whether the middle mouse button is pressed
 		 */
 		mouseMiddle() {
 			return this._mouseEventHandler.mouseMiddle();
@@ -1207,20 +1207,20 @@ const CROQUJS = (function () {
 	}
 
 
-	// ユーティリティ関数 ---------------------------------------------------
+	// Utility functions ----------------------------------------------------
 
 
 	/**
-	 * 今のミリ秒を得る
-	 * @return {number} 今のミリ秒
+	 * Get the current millisecond
+	 * @return {number} The current millisecond
 	 */
 	const getTime = (function () {
 		return window.performance.now.bind(window.performance);
 	}());
 
 	/**
-	 * 例外を除き画面上の要素をすべて削除する
-	 * @param {DOMElement} exception 例外の要素
+	 * Delete all elements on the screen except for the specified exception
+	 * @param {DOMElement} exception Elements of exception
 	 */
 	const removeAll = function (...exception) {
 		let ex = [];
@@ -1244,9 +1244,9 @@ const CROQUJS = (function () {
 	};
 
 	/**
-	 * 現在の紙
-	 * @param {Paper=} paper 紙
-	 * @return {Paper} 現在の紙
+	 * Current paper
+	 * @param {Paper=} paper Paper
+	 * @return {Paper} Current paper
 	 */
 	const currentPaper = function (paper) {
 		if (paper) CROQUJS._currentPaper = paper;
@@ -1255,15 +1255,15 @@ const CROQUJS = (function () {
 
 
 	/**
-	 * スクリプトの読み込み
+	 * Script loader
 	 * @author Takuto Yanagida
 	 * @version 2020-04-24
 	 */
 
 
 	/**
-	 * スクリプトを読み込む（非同期）
-	 * @param {string} src スクリプトのURL
+	 * Load a script (asynchronous)
+	 * @param {string} src The URL of a script
 	 */
 	function loadScript(src) {
 		const s = document.createElement('script');
@@ -1272,8 +1272,8 @@ const CROQUJS = (function () {
 	}
 
 	/**
-	 * スクリプトを読み込む（同期）
-	 * @param {string} src スクリプトのURL
+	 * Load a script (synchronous)
+	 * @param {string} src The URL of a script
 	 */
 	function loadScriptSync(src) {
 		const xhr = new XMLHttpRequest();
@@ -1287,7 +1287,7 @@ const CROQUJS = (function () {
 	}
 
 
-	// ライブラリを作る -----------------------------------------------------
+	// Create a library -----------------------------------------------------
 
 
 	return { Paper, getTime, removeAll, currentPaper, loadScript, loadScriptSync };

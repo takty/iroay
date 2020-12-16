@@ -1,8 +1,8 @@
 /**
- * スプライト・ライブラリ（SPRITE）
+ * Sprite library (SPRITE)
  *
- * スプライト（アニメのセル画のようなもの）を作って、
- * 好きな場所に好きな大きさ、向き、透明度で表示するためのライブラリです。
+ * A library to make sprites (like animation cell pictures)
+ * and display them in the size, orientation, and transparency you like.
  *
  * @author Takuto Yanagida
  * @version 2020-05-04
@@ -10,20 +10,20 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const SPRITE = (function () {
 
 	'use strict';
 
 
-	// ライブラリ中だけで使用するユーティリティ --------------------------------
+	// Utilities used only in the library --------------------------------------
 
 
 	/**
-	 * 角度を0～360度の範囲にする
-	 * @param {number} deg 角度
-	 * @return {number} 角度
+	 * Make an angle between 0 to 360 degrees
+	 * @param {number} deg Degree
+	 * @return {number} Degree
 	 */
 	const checkDegRange = function (deg) {
 		deg %= 360;
@@ -32,9 +32,9 @@ const SPRITE = (function () {
 	};
 
 	/**
-	 * 値ならそのまま返し、関数なら関数を呼び出す
-	 * @param {number|function(): number} vf 値か関数
-	 * @return {number} 値
+	 * If a value is given, return it, and if a function is given, call it
+	 * @param {number|function(): number} vf Value or function
+	 * @return {number} Value
 	 */
 	const valueFunction = function (vf) {
 		if (typeof vf === 'function') {
@@ -45,11 +45,11 @@ const SPRITE = (function () {
 	};
 
 	/**
-	 * 範囲をチェックする関数を作る
-	 * @param {number} min 最小値
-	 * @param {number} max 最大値
-	 * @param {boolean=} isLoop ループする？
-	 * @return {function(number): number} 範囲をチェックする関数
+	 * Make a function to check the range
+	 * @param {number} min Minimum value
+	 * @param {number} max Maximum value
+	 * @param {boolean=} isLoop Whether to loop
+	 * @return {function(number): number} Function to check the range
 	 */
 	const makeRangeChecker = function (min, max, isLoop) {
 		if (isLoop) {
@@ -69,14 +69,14 @@ const SPRITE = (function () {
 
 
 	/**
-	 * 要素（スプライト・ステージ共通）
+	 * Element (common to sprites and stages)
 	 * @version 2020-05-05
 	 */
 	class Element {
 
 		/**
-		 * 要素を作る
-		 * @param {Motion?} [motion=null] 動き
+		 * Make an element
+		 * @param {Motion?} [motion=null] Motion
 		 */
 		constructor(motion = null) {
 			this._parent    = null;
@@ -108,9 +108,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * x座標
-		 * @param {number=} val x座標の値
-		 * @return {number|Element} x座標の値／この要素
+		 * X coordinate
+		 * @param {number=} val Value of x coordinate
+		 * @return {number|Element} Value of x coordinate, or this element
 		 */
 		x(val) {
 			if (val === undefined) return this._x;
@@ -119,9 +119,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * y座標
-		 * @param {number=} val y座標の値
-		 * @return {number|Element} y座標の値／この要素
+		 * Y coordinate
+		 * @param {number=} val Value of y coordinate
+		 * @return {number|Element} Value of y coordinate, or this element
 		 */
 		y(val) {
 			if (val === undefined) return this._y;
@@ -130,9 +130,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 方向
-		 * @param {number=} deg 角度の値
-		 * @return {number|Element} 角度の値／この要素
+		 * Direction
+		 * @param {number=} deg Value of degree
+		 * @return {number|Element} Value of degree, or this element
 		 */
 		direction(deg) {
 			if (deg === undefined) return this._dir;
@@ -141,11 +141,11 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 移動する
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @param {number=} opt_dir 方向（オプション）
-		 * @return {Element} この要素
+		 * Move to
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number=} opt_dir Direction (optional)
+		 * @return {Element} This element
 		 */
 		moveTo(x, y, opt_dir) {
 			this._x = x;
@@ -155,9 +155,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * スケール
-		 * @param {number=} val スケールの値
-		 * @return {number|Element} スケールの値／この要素
+		 * Scale
+		 * @param {number=} val Value of scale
+		 * @return {number|Element} Value of scale, or this element
 		 */
 		scale(val) {
 			if (val === undefined) return this._scale;
@@ -166,9 +166,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * アルファ
-		 * @param {number=} val アルファの値
-		 * @return {number|Element} アルファの値／この要素
+		 * Alpha
+		 * @param {number=} val Value of alpha
+		 * @return {number|Element} Value of alpha, or this element
 		 */
 		alpha(val) {
 			if (val === undefined) return this._alpha;
@@ -177,9 +177,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * z軸を中心とする角度（向き）
-		 * @param {number=} deg 角度の値
-		 * @return {number|Element} 角度の値／この要素
+		 * Angle around z axis (direction)
+		 * @param {number=} deg Value of degree
+		 * @return {number|Element} Value of degree, or this element
 		 */
 		angle(val) {
 			if (val === undefined) return this._angle;
@@ -188,9 +188,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * x軸を中心とする角度（向き）
-		 * @param {number=} deg 角度の値
-		 * @return {number|Element} 角度の値／この要素
+		 * Angle around x axis (direction)
+		 * @param {number=} deg Value of degree
+		 * @return {number|Element} Value of degree, or this element
 		 */
 		angleX(val) {
 			if (val === undefined) return this._angleX;
@@ -199,9 +199,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * z軸を中心とする角度2（向き）
-		 * @param {number=} deg 角度の値
-		 * @return {number|Element} 角度の値／この要素
+		 * 2nd angle around z axis (direction)
+		 * @param {number=} deg Value of degree
+		 * @return {number|Element} Value of degree, or this element
 		 */
 		angleZ(val) {
 			if (val === undefined) return this._angleZ;
@@ -210,9 +210,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 絵をかく方向を向きと関係なく固定するか？
-		 * @param {boolean=} val 値
-		 * @return {boolean|Element} 値／この要素
+		 * Whether is the drawing direction fixed regardless of the direction of the element?
+		 * @param {boolean=} val Value
+		 * @return {boolean|Element} Value or this element
 		 */
 		fixedHeading(val) {
 			if (val === undefined) return this._isFixedHeading;
@@ -221,9 +221,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * スピード
-		 * @param {number=} val スピード
-		 * @return {number|Element} スピード／この要素
+		 * Speed
+		 * @param {number=} val Speed
+		 * @return {number|Element} Speed or this element
 		 */
 		speed(val) {
 			if (val === undefined) return this._speed;
@@ -232,9 +232,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 方向スピード
-		 * @param {number=} val 方向スピード
-		 * @return {number|Element} 方向スピード／この要素
+		 * Angle speed
+		 * @param {number=} val Angle speed
+		 * @return {number|Element} Angle speed or this element
 		 */
 		angleSpeed(val) {
 			if (val === undefined) return this._angleSpeed;
@@ -243,9 +243,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 方向スピードx
-		 * @param {number=} val 方向スピード
-		 * @return {number|Element} 方向スピード／この要素
+		 * Angle speed x
+		 * @param {number=} val Angle speed
+		 * @return {number|Element} Angle speed or this element
 		 */
 		angleSpeedX(val) {
 			if (val === undefined) return this._angleSpeedX;
@@ -254,9 +254,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 方向スピードz
-		 * @param {number=} val 方向スピード
-		 * @return {number|Element} 方向スピード／この要素
+		 * Angle speed z
+		 * @param {number=} val Angle speed
+		 * @return {number|Element} Angle speed or this element
 		 */
 		angleSpeedZ(val) {
 			if (val === undefined) return this._angleSpeedZ;
@@ -265,29 +265,29 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 横方向の範囲をセットする
-		 * @param {number} min 始まり
-		 * @param {number} max 終わり
-		 * @param {boolean} isLoop ループする？
+		 * Set the horizontal range
+		 * @param {number} min Minimum value
+		 * @param {number} max Maximum value
+		 * @param {boolean} isLoop Whether to loop
 		 */
 		setRangeX(min, max, isLoop) {
 			this._checkRangeX = makeRangeChecker(min, max, isLoop);
 		}
 
 		/**
-		 * たて方向の範囲をセットする
-		 * @param {number} min 始まり
-		 * @param {number} max 終わり
-		 * @param {boolean} isLoop ループする？
+		 * Set the vertical range
+		 * @param {number} min Minimum value
+		 * @param {number} max Maximum value
+		 * @param {boolean} isLoop Whether to loop
 		 */
 		setRangeY(min, max, isLoop) {
 			this._checkRangeY = makeRangeChecker(min, max, isLoop);
 		}
 
 		/**
-		 * 更新前イベントのハンドラーをセットする
-		 * @param {function(*)} fn 関数
-		 * @param {Array} args_array 関数に渡す引数の配列
+		 * Set handler for update event
+		 * @param {function(*)} fn Function
+		 * @param {Array} args_array Array of arguments to pass to the function
 		 */
 		setOnUpdate(fn, args_array) {
 			const f = () => { fn.apply(this, args_array); };
@@ -295,9 +295,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 更新後イベントのハンドラーをセットする
-		 * @param {function(*)} fn 関数
-		 * @param {Array} args_array 関数に渡す引数の配列
+		 * Set handler for updated event
+		 * @param {function(*)} fn Function
+		 * @param {Array} args_array Array of arguments to pass to the function
 		 */
 		setOnUpdated(fn, args_array) {
 			const f = () => { fn.apply(this, args_array); };
@@ -305,9 +305,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 動き
-		 * @param {Motion=} val 動き
-		 * @return {Motion|Element} 動き／この要素
+		 * Motion
+		 * @param {Motion=} val Motion
+		 * @return {Motion|Element} Motion or this element
 		 */
 		motion(val) {
 			if (val === undefined) return this._motion;
@@ -316,9 +316,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * データ
-		 * @param {object=} val データ
-		 * @return {object|Element} データ／この要素
+		 * Data
+		 * @param {object=} val Data
+		 * @return {object|Element} Data or this element
 		 */
 		data(val) {
 			if (val === undefined) return this._data;
@@ -327,21 +327,21 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 紙の座標変換とアルファ値をセットする（ライブラリ内だけで使用）
+		 * Set paper transformation and alpha value (used only in the library)
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
 		 */
 		_setTransformation(ctx) {
 			ctx.translate(this._x, this._y);
 			if (!this._isFixedHeading) {
 				ctx.rotate(this._dir * Math.PI / 180.0);
 			}
-			// 下ではスプライトを、Z軸中心にangle度回転、X軸を中心にangleX度回転、さらにもう一度Z軸を中心にangleZ度回転させている
-			// 角度をラジアンに変換して回転（ラジアン = 角度 ✕ π / 180）
+			// Below, the sprite is rotated by angle degrees around the Z axis, angleX degrees around the X axis, and again by angleZ degrees around the Z axis.
+			// Convert an angle to radians and rotate (radian = angle * π / 180)
 			ctx.rotate(this._angleZ * Math.PI / 180);
 			ctx.scale(1.0, Math.cos(this._angleX * Math.PI / 180));
 			ctx.rotate(this._angle * Math.PI / 180);
-			// ※Z-X-Zのオイラー角に対応
+			// * Corresponding to Euler angle of Z-X-Z
 
 			if (this._scale instanceof Array) {
 				ctx.scale(this._scale[0], this._scale[1]);
@@ -352,11 +352,11 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * スピードに合わせて座標と角度を更新する（ライブラリ内だけで使用）
+		 * Update coordinates and angles according to the speeds (used only in the library)
 		 * @private
 		 */
 		_update() {
-			// 更新前イベント
+			// Update event
 			if (this._onUpdate) this._onUpdate.call(this);
 
 			this._angle  = checkDegRange(this._angle  + valueFunction(this._angleSpeed));
@@ -378,9 +378,9 @@ const SPRITE = (function () {
 				}
 			}
 
-			// 更新後イベント
+			// Updated event
 			if (this._onUpdated) this._onUpdated.call(this);
-			// 最初にこの関数が呼ばれ、座標などが正しいことを示す
+			// This function is called first to indicate that the coordinates etc. are correct
 			this._fisrtUpdated = true;
 		}
 
@@ -388,18 +388,18 @@ const SPRITE = (function () {
 
 
 	/**
-	 * スプライト
+	 * Sprite
 	 * @extends {Element}
 	 * @version 2020-05-05
 	 */
 	class Sprite extends Element {
 
 		/**
-		 * スプライトを作る
-		 * - ただし普通は、SPRITE.StageのmakeSprite関数を使う。
-		 * @param {function(*)} drawFunction 絵をかく関数
-		 * @param {Array=} opt_args_array 関数に渡す引数の配列
-		 * @param {Motion=} opt_motion モーション
+		 * Make a sprite
+		 * - However, normally, use the makeSprite function of SPRITE.Stage.
+		 * @param {function(*)} drawFunction Function to draw pictures
+		 * @param {Array=} opt_args_array Array of arguments to pass to the function
+		 * @param {Motion=} opt_motion Motion
 		 */
 		constructor(drawFunction, opt_args_array, opt_motion) {
 			super(opt_motion);
@@ -412,9 +412,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * スプライトをかく
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array} args_array その他の引数の配列
+		 * Draw a sprite
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array} args_array Array of other arguments
 		 */
 		draw(ctx, args_array) {
 			let args = args_array;
@@ -431,9 +431,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 衝突半径
-		 * @param {number=} val 半径
-		 * @return {number|Sprite} 半径／このスプライト
+		 * Collision radius
+		 * @param {number=} val Radius
+		 * @return {number|Sprite} Radius, or this sprite
 		 */
 		collisionRadius(val) {
 			if (val === undefined) return this._collisionRadius;
@@ -442,9 +442,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 衝突イベントに対応する関数をセットする
-		 * @param {function(this, Sprite)=} handler 関数
-		 * @return {function(this, Sprite)=} 半径／このスプライト
+		 * Set the function handling the collision event
+		 * @param {function(this, Sprite)=} handler Function
+		 * @return {function(this, Sprite)=|Sprite} Function, or this sprite
 		 */
 		onCollision(handler) {
 			if (handler === undefined) return this._onCollision;
@@ -456,15 +456,15 @@ const SPRITE = (function () {
 
 
 	/**
-	 * ステージ
+	 * Stage
 	 * @extends {Element}
 	 * @version 2020-05-05
 	 */
 	class Stage extends Element {
 
 		/**
-		 * ステージを作る
-		 * @param {Motion=} opt_motion モーション
+		 * Make a stage
+		 * @param {Motion=} opt_motion Motion
 		 */
 		constructor(opt_motion) {
 			super(opt_motion);
@@ -478,11 +478,11 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * スプライトを作って加える
-		 * @param {function(*)} drawFunction 絵をかく関数
-		 * @param {Array=} opt_args_array 関数に渡す引数の配列
-		 * @param {Motion=} opt_motion モーション
-		 * @return {Sprite} スプライト
+		 * Make a sprite and add it to this stage
+		 * @param {function(*)} drawFunction Function to draw pictures
+		 * @param {Array=} opt_args_array Array of arguments to pass to the function
+		 * @param {Motion=} opt_motion Motion
+		 * @return {Sprite} Sprite
 		 */
 		makeSprite(drawFunction, opt_args_array, opt_motion) {
 			const s = new SPRITE.Sprite(drawFunction, opt_args_array, opt_motion);
@@ -491,8 +491,8 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * ステージを作って加える
-		 * @return {Stage} ステージ
+		 * Make a stage and add it to this stage
+		 * @return {Stage} Stage
 		 */
 		makeStage() {
 			const l = new SPRITE.Stage();
@@ -501,8 +501,8 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * スプライトか子ステージを加える
-		 * @param {Element} child スプライトか子ステージ
+		 * Add a sprite or a stage
+		 * @param {Element} child A sprite or a child stage
 		 */
 		add(child) {
 			this._children.push(child);
@@ -511,25 +511,25 @@ const SPRITE = (function () {
 
 		/**
 		 * スプライトか子ステージを返す
-		 * @param {number} index 何番目か
-		 * @return {Element} スプライトか子ステージ
+		 * @param {number} index Index
+		 * @return {Element} Sprite or child stage
 		 */
 		get(index) {
 			return this._children[index];
 		}
 
 		/**
-		 * 何枚のスプライトか子ステージを持っているか、数を返す
-		 * @return {mumber} 数
+		 * Return the count of sprites or child stages this stage has
+		 * @return {mumber} Count
 		 */
 		size() {
 			return this._children.length;
 		}
 
 		/**
-		 * 持っているスプライトと子ステージに対して処理をする
-		 * @param {function} callback 処理をする関数
-		 * @param {*} thisArg This引数
+		 * Process for sprites and child stages that this stage has
+		 * @param {function} callback Function to process
+		 * @param {*} thisArg 'This' argument
 		 */
 		forEach(callback, thisArg) {
 			for (let i = 0, I = this._children.length; i < I; i += 1) {
@@ -539,16 +539,16 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 指定したスプライトを固定して表示する
-		 * @param {Element} descendant スプライトかステージ
-		 * @param {boolean=} opt_stopRotation 回転を止めるか
+		 * Display specified sprite as fixed
+		 * @param {Element} descendant Sprite or stage
+		 * @param {boolean=} opt_stopRotation Whether to stop rotation
 		 */
 		localize(descendant, opt_stopRotation) {
 			this._localizeOption = [descendant, opt_stopRotation];
 		}
 
 		/**
-		 * 指定したスプライトを固定して表示する（ライブラリ内だけで使用）
+		 * Display specified sprite as fixed (used only in the library)
 		 * @private
 		 */
 		_localize() {
@@ -567,9 +567,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * このステージの原点の紙での場所を返す
-		 * @param {Element} descendant スプライトかステージ
-		 * @return {Array<number>} 場所
+		 * Returns the position in the paper of this stage's origin
+		 * @param {Element} descendant Sprite or child stage of this stage
+		 * @return {Array<number>} Position
 		 */
 		getPositionOnContext(descendant) {
 			const p = this._getPositionOnParent(descendant, 0, 0, 0);
@@ -585,9 +585,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 持っているスプライトと子ステージを全てかく
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {Array} args_array その他の引数の配列
+		 * Draw all sprites and child stages this stage has
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {Array} args_array Array of other arguments
 		 */
 		draw(ctx, args_array) {
 			ctx.save();
@@ -599,25 +599,25 @@ const SPRITE = (function () {
 
 			for (let i = 0, I = this._children.length; i < I; i += 1) {
 				const c = this._children[i];
-				// スプライトのdraw関数を呼び出す
+				// Call the sprite's draw function
 				c.draw.call(c, ctx, args_array);
 			}
 			ctx.restore();
 
-			// このタイミングでTracer::stepNextが呼ばれ、その結果、Tracer::onStepも呼び出される
+			// At this timing Tracer::stepNext is called, and as a result, Tracer::onStep is also called
 			this._update();
 			this._checkCollision();
 		}
 
 		/**
-		 * ある要素の原点の紙での場所を返す（ライブラリ内だけで使用）
+		 * Return the position in the paper of the origin of an element (used only in the library)
 		 * @private
-		 * @param {Element} elm スプライトか子ステージ
-		 * @param {number} cx 横位置
-		 * @param {number} cy たて位置
-		 * @param {number} ca 角度
-		 * @param {boolean=} opt_stopRotation 回転を止めるか
-		 * @return {Array<number>} 場所
+		 * @param {Element} elm Sprite or child stage
+		 * @param {number} cx Position x
+		 * @param {number} cy Position y
+		 * @param {number} ca Angle
+		 * @param {boolean=} opt_stopRotation Whether to stop rotation
+		 * @return {Array<number>} Position
 		 */
 		_getPositionOnParent(elm, cx, cy, ca, opt_stopRotation) {
 			const a = (opt_stopRotation ? elm._angle : 0) + (elm._isFixedHeading ? 0 : elm._dir);
@@ -637,7 +637,7 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 持っているスプライトが衝突しているかどうかをチェックする（ライブラリ内だけで使用）
+		 * Check if the sprites are colliding (used only in the library)
 		 * @private
 		 */
 		_checkCollision() {
@@ -665,8 +665,8 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 観察者（オブザーバー）を加える
-		 * @param {*} observer 観察者（オブザーバー）
+		 * Add an observer
+		 * @param {*} observer Observer
 		 */
 		addObserver(observer) {
 			if (!this._observers) {
@@ -679,17 +679,17 @@ const SPRITE = (function () {
 
 
 	/**
-	 * 密度マップ
+	 * Density Map
 	 * @version 2020-05-05
 	 */
 	class DensityMap {
 
 		/**
-		 * 密度マップを作る
+		 * Make a density map
 		 * @constructor
-		 * @param {number} width 横の大きさ
-		 * @param {number} height たての大きさ
-		 * @param {number} gridSize マス目の大きさ
+		 * @param {number} width width
+		 * @param {number} height height
+		 * @param {number} gridSize grid size
 		 */
 		constructor(width, height, gridSize) {
 			this._width    = width;
@@ -705,9 +705,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * マップを作る（ライブラリ内だけで使用）
+		 * Make a map (used only in the library)
 		 * @private
-		 * @return {Array<Array<number>>} マップ
+		 * @return {Array<Array<number>>} Map
 		 */
 		_makeMap() {
 			const m = new Array(this._gh);
@@ -716,8 +716,8 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * ステージに合わせてマップを更新する
-		 * @param {Stage} stage ステージ
+		 * Update the map according to the stage
+		 * @param {Stage} stage Stage
 		 */
 		update(stage) {
 			const m = this._map;
@@ -738,12 +738,12 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 密度を求める
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @param {number} [deg=0] 方向
-		 * @param {number} [len=0] 長さ
-		 * @return 密度
+		 * Get a density
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @param {number} [deg=0] Direction
+		 * @param {number} [len=0] Length
+		 * @return Density
 		 */
 		getDensity(x, y, deg = 0, len = 0) {
 			if (len === 0) {
@@ -765,10 +765,10 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 1点の密度を求める（ライブラリ内だけで使用）
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @return 密度
+		 * Get a density of one point (used only in the library)
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @return Density
 		 */
 		_getDensity(x, y) {
 			[x, y] = this._checkCoordinate(x, y);
@@ -779,10 +779,10 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 座標の範囲を調べて正しい範囲の座標を返す（ライブラリ内だけで使用）
-		 * @param {number} x x座標
-		 * @param {number} y y座標
-		 * @return 座標
+		 * Check the range of coordinates and return the correct range of coordinates (used only in the library)
+		 * @param {number} x X coordinate
+		 * @param {number} y Y coordinate
+		 * @return Coordinate
 		 */
 		_checkCoordinate(x, y) {
 			if (x < 0) x += this._width;
@@ -795,9 +795,9 @@ const SPRITE = (function () {
 		}
 
 		/**
-		 * 密度マップをかく
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number} max 最大値
+		 * Draw the density map
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number} max Maximum value
 		 */
 		draw(ctx, max) {
 			const gs = this._gridSize;
@@ -815,15 +815,15 @@ const SPRITE = (function () {
 	}
 
 
-	// ユーティリティ関数 ------------------------------------------------------
+	// Utility functions -------------------------------------------------------
 
 
 	/**
-	 * スプライトの軌跡をプロットする関数を作る
-	 * @param {Element} descendant 子孫要素
-	 * @param {Stage} ancestorStage 先祖ステージ
-	 * @param {Paper|CanvasRenderingContext2D} ctx プロットする紙／キャンバス・コンテキスト
-	 * @return {function} スプライトの軌跡をプロットする関数
+	 * Make a function to plot sprite trajectory
+	 * @param {Element} descendant Descendant element
+	 * @param {Stage} ancestorStage Ancestor stage
+	 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context to plot
+	 * @return {function} Function to plot sprite trajectory
 	 */
 	const makePlotFunction = function (descendant, ancestorStage, ctx) {
 		let old = [];
@@ -841,7 +841,7 @@ const SPRITE = (function () {
 	};
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
 	return { Stage, Sprite, DensityMap, makePlotFunction };

@@ -1,7 +1,7 @@
 /**
- * ウィジェット・ライブラリ（WIDGET）
+ * Widget library (WIDGET)
  *
- * 様々なウィジェット（コントロール）を使えるようにするライブラリです。
+ * A library that allows you to use various widgets (controls).
  *
  * @author Takuto Yanagida
  * @version 2020-04-24
@@ -9,7 +9,7 @@
 
 
 /**
- * ライブラリ変数
+ * Library variable
  */
 const WIDGET = (function () {
 
@@ -32,7 +32,7 @@ const WIDGET = (function () {
 	let isBaseStyleAssigned = false;
 
 	/**
-	 * ベース・スタイルを登録する
+	 * Register base style
 	 */
 	const ensureBaseStyle = function () {
 		if (isBaseStyleAssigned) return;
@@ -112,16 +112,16 @@ const WIDGET = (function () {
 
 
 	/**
-	 * ウィジェット共通
+	 * Common widget
 	 * @author Takuto Yanagida
 	 * @version 2019-05-14
 	 */
 	class Widget {
 
 		/**
-		 * ウィジェットを作る
-		 * @param {number=} [width=null] 横幅
-		 * @param {number=} [height=null] たて幅
+		 * Make a widget
+		 * @param {number=} [width=null] Width
+		 * @param {number=} [height=null] Height
 		 */
 		constructor(width = null, height = null) {
 			ensureBaseStyle();
@@ -140,24 +140,24 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * DOM要素を返す
-		 * @return {domElement} DOM要素
+		 * Return the DOM element
+		 * @return {domElement} DOM element
 		 */
 		domElement() {
 			return this._outer;
 		}
 
 		/**
-		 * 横幅をフルにするかどうかをセットする
-		 * @param {boolean} flag 横幅をフルにするかどうか
+		 * Set whether to make the width full
+		 * @param {boolean} flag Whether to make the width full
 		 */
 		setFillWidth(flag) {
 			this._outer.style.flexBasis = flag ? '100%' : 'auto';
 		}
 
 		/**
-		 * 表示するかどうかをセットする
-		 * @param {boolean} flag 表示するかどうか
+		 * Set whether to display
+		 * @param {boolean} flag Whether to display
 		 */
 		setVisible(flag) {
 			this._outer.style.display = flag ? '' : 'none';
@@ -167,16 +167,16 @@ const WIDGET = (function () {
 
 
 	/**
-	 * スイッチ
+	 * Switch
 	 * @author Takuto Yanagida
 	 * @version 2019-05-14
 	 */
 	class Switch extends Widget {
 
 		/**
-		 * スイッチを作る
-		 * @param {number} [num_or_names=3] ボタン数／ボタンの名前配列
-		 * @param {number} [cur=0] 現在のボタン
+		 * Make a switch
+		 * @param {number} [num_or_names=3] Number of buttons, or an array of button names
+		 * @param {number} [cur=0] Index of currently selected button
 		 */
 		constructor(num_or_names = 3, cur = 0) {
 			super();
@@ -213,9 +213,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 現在の値
-		 * @param {boolean} val 現在の値
-		 * @return {boolean|Toggle} 現在の値／このスイッチ
+		 * Current value
+		 * @param {boolean} val Current value
+		 * @return {boolean|Toggle} Current value, or this switch
 		 */
 		value(val) {
 			if (val === undefined) return this._value;
@@ -224,9 +224,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * プッシュ・イベントに対応する関数
-		 * @param {function(boolean, number)} handler 関数
-		 * @return {function(boolean, number)|Toggle} 関数／このスイッチ
+		 * Function handling to push events
+		 * @param {function(boolean, number)} handler Function
+		 * @return {function(boolean, number)|Toggle} Function, or this switch
 		 */
 		onPushed(handler) {
 			if (handler === undefined) return this._onPushed;
@@ -238,16 +238,16 @@ const WIDGET = (function () {
 
 
 	/**
-	 * トグル
+	 * Toggle
 	 * @author Takuto Yanagida
 	 * @version 2019-05-14
 	 */
 	class Toggle extends Widget {
 
 		/**
-		 * トグル・ボタンを作る
-		 * @param {string=|Array<string>} [caption_s=''] ボタンの名前
-		 * @param {boolean=|Array<boolean>} [state_s=false] 現在の状態
+		 * Make a toggle button
+		 * @param {string=|Array<string>} [caption_s=''] Name(s) of button(s)
+		 * @param {boolean=|Array<boolean>} [state_s=false] Current state(s)
 		 */
 		constructor(caption_s = '', state_s = false) {
 			super();
@@ -283,9 +283,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 現在の値
-		 * @param {boolean} val 現在の値
-		 * @return {boolean|Toggle} 現在の値／このトグル
+		 * Current value
+		 * @param {boolean} val Current value
+		 * @return {boolean|Toggle} Current value, or this toggle
 		 */
 		value(val) {
 			if (val === undefined) return this._value;
@@ -294,9 +294,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * プッシュ・イベントに対応する関数
-		 * @param {function(boolean, number)} handler 関数
-		 * @return {function(boolean, number)|Toggle} 関数／このトグル
+		 * Function handling to push events
+		 * @param {function(boolean, number)} handler Function
+		 * @return {function(boolean, number)|Toggle} Function, or this toggle
 		 */
 		onPushed(handler) {
 			if (handler === undefined) return this._onPushed;
@@ -308,17 +308,17 @@ const WIDGET = (function () {
 
 
 	/**
-	 * 文字列出力
+	 * String output
 	 * @author Takuto Yanagida
 	 * @version 2019-05-14
 	 */
 	class Output extends Widget {
 
 		/**
-		 * 文字列出力を作る
-		 * @param {number} width 横幅
-		 * @param {number=} [height=null] たて幅
-		 * @param {boolean=} [nowrap=false] 折り返す？
+		 * Make an output
+		 * @param {number} width Width
+		 * @param {number=} [height=null] Height
+		 * @param {boolean=} [nowrap=false] Whether to wrap
 		 */
 		constructor(width, height = null, nowrap = false) {
 			super(width, height);
@@ -335,9 +335,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 文字列
-		 * @param {string=} val 文字列
-		 * @return {string|Output} 文字列／この文字列出力
+		 * String
+		 * @param {string=} val String
+		 * @return {string|Output} String, or this output
 		 */
 		string(val) {
 			if (val === undefined) return this._inner.innerText;
@@ -349,7 +349,7 @@ const WIDGET = (function () {
 
 
 	/**
-	 * グラフ
+	 * Chart
 	 * @author Takuto Yanagida
 	 * @version 2020-04-22
 	 */
@@ -373,9 +373,9 @@ const WIDGET = (function () {
 	class Chart extends Widget {
 
 		/**
-		 * グラフを作る
-		 * @param {number} [width=300] 横幅
-		 * @param {number} [height=150] たて幅
+		 * Make a chart
+		 * @param {number} [width=300] Width
+		 * @param {number} [height=150] Height
 		 */
 		constructor(width = 300, height = 150) {
 			super(width, height);
@@ -387,7 +387,7 @@ const WIDGET = (function () {
 				this._draw(this._legendWidth);
 			};
 			this._base.appendChild(this._can);
-			// 以下はbaseに追加した後に行うこと（offsetWidth/Heightは追加後でないと取得できない）
+			// Do the following after adding to base (offsetWidth/Height can not be acquired without adding)
 			this._can.setAttribute('width', this._can.offsetWidth);
 			this._can.setAttribute('height', this._can.offsetHeight);
 
@@ -403,24 +403,24 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 凡例の幅をセットする
-		 * @param {number} px 幅
+		 * Set the width of legend
+		 * @param {number} px Width
 		 */
 		setLegendWidth(px) {
 			this._legendWidth = px;
 		}
 
 		/**
-		 * 桁数をセットする
-		 * @param {number} num 桁数
+		 * Set digits
+		 * @param {number} num Digits
 		 */
 		setDigits(num) {
 			this._digits = num;
 		}
 
 		/**
-		 * 項目の設定をセットする
-		 * @param {dict} items 項目の設定
+		 * Set item configurations
+		 * @param {dict} items Item configuration
 		 */
 		setItems(items) {
 			// items = {key1: {name: 'name1', style: 'style1'}, key2: {}, ...}
@@ -443,8 +443,8 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * データを追加する
-		 * @param {dict} data データ
+		 * Add data
+		 * @param {dict} data Data
 		 */
 		addData(data) {
 			for (let key of this._keys) {
@@ -457,9 +457,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 絵をかく
+		 * Draw a picture
 		 * @private
-		 * @param {number} legendWidth 凡例の幅
+		 * @param {number} legendWidth Width of legend
 		 */
 		_draw(legendWidth) {
 			const c = this._can.getContext('2d');
@@ -476,10 +476,10 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 凡例をかく
+		 * Draw a legend
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number} legendWidth 凡例の幅
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number} legendWidth Width of legend
 		 */
 		_drawLegend(ctx, legendWidth) {
 			ctx.font = '14px sans-serif';
@@ -503,11 +503,11 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * フォーマットする
+		 * Format
 		 * @private
-		 * @param {number} digits 桁数
-		 * @param {number} val 値
-		 * @return {string} フォーマットされた文字列
+		 * @param {number} digits Number of digits
+		 * @param {number} val Value
+		 * @return {string} Formatted string
 		 */
 		_format(digits, val) {
 			if (digits === 0) {
@@ -525,14 +525,14 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * わくをかく
+		 * Draw a frame
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number} left 横の場所
-		 * @param {number} cx 横の幅
-		 * @param {number} cy たての幅
-		 * @param {number} min 最小値
-		 * @param {number} max 最大値
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number} left X coordinate
+		 * @param {number} cx Width
+		 * @param {number} cy Height
+		 * @param {number} min Minimum value
+		 * @param {number} max Maximum value
 		 */
 		_drawFrame(ctx, left, cx, cy, min, max) {
 			ctx.strokeStyle = 'Black';
@@ -551,14 +551,14 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 全データ表示モードの絵をかく
+		 * Draw a picture on all data mode
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number} left 横の場所
-		 * @param {number} cx 横の幅
-		 * @param {number} cy たての幅
-		 * @param {number} min 最小値
-		 * @param {number} max 最大値
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number} left X coordinate
+		 * @param {number} cx Width
+		 * @param {number} cy Height
+		 * @param {number} min Minimum value
+		 * @param {number} max Maximum value
 		 */
 		_drawAllDataMode(ctx, left, cx, cy, min, max) {
 			for (let key of this._keys) {
@@ -588,14 +588,14 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * スクロール・モードの絵をかく
+		 * Draw a picture on scroll mode
 		 * @private
-		 * @param {Paper|CanvasRenderingContext2D} ctx 紙／キャンバス・コンテキスト
-		 * @param {number} left 横の場所
-		 * @param {number} cx 横の幅
-		 * @param {number} cy たての幅
-		 * @param {number} min 最小値
-		 * @param {number} max 最大値
+		 * @param {Paper|CanvasRenderingContext2D} ctx Paper or canvas context
+		 * @param {number} left X coordinate
+		 * @param {number} cx Width
+		 * @param {number} cy Height
+		 * @param {number} min Minimum value
+		 * @param {number} max Maximum value
 		 */
 		_drawScrollMode(ctx, left, cx, cy, min, max) {
 			for (let key of this._keys) {
@@ -622,17 +622,17 @@ const WIDGET = (function () {
 
 
 	/**
-	 * スライダー・ベース
+	 * Slider base
 	 * @author Takuto Yanagida
 	 * @version 2019-09-06
 	 */
 	class SliderBase extends Widget {
 
 		/**
-		 * スライダー・ベースを作る
-		 * @param {number=} [width=null] 横幅
-		 * @param {number=} [height=null] たて幅
-		 * @param {boolean=} [isVertical=true] たて向きにする？
+		 * Make a slider base
+		 * @param {number=} [width=null] Width
+		 * @param {number=} [height=null] Height
+		 * @param {boolean=} [isVertical=true] Whether to be vertical
 		 */
 		constructor(width = null, height = null, isVertical = true) {
 			super(width, height);
@@ -644,9 +644,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 最小値
-		 * @param {number=} val 最小値
-		 * @return {number|SliderBase} 最小値／このスライダー・ベース
+		 * Minimum value
+		 * @param {number=} val Minimum value
+		 * @return Minimum value, or this slider base
 		 */
 		min(val) {
 			if (val === undefined) return this._min;
@@ -657,9 +657,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 最大値
-		 * @param {number=} val
-		 * @return {number|SliderBase} 最大値／このスライダー・ベース
+		 * Maximum value
+		 * @param {number=} val Maximum value
+		 * @return Maximum value, or this slider base
 		 */
 		max(val) {
 			if (val === undefined) return this._max;
@@ -670,9 +670,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 現在の値
-		 * @param {boolean} val 現在の値
-		 * @return {boolean|SliderBase} 現在の値／このスライダー・ベース
+		 * Current value
+		 * @param {boolean} val Current value
+		 * @return {boolean|SliderBase} Current value, or this slider base
 		 */
 		value(val) {
 			if (val === undefined) return this._value;
@@ -684,9 +684,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * チェンジ・イベントに対応する関数
-		 * @param {function(number)} handler 関数
-		 * @return {function(number)|SliderBase} 関数／このスライダー・ベース
+		 * Function handling to change events
+		 * @param {function(number)} handler Function
+		 * @return {function(number)|SliderBase} Function, or this slider base
 		 */
 		onChanged(handler) {
 			if (handler === undefined) return this._onChanged;
@@ -695,11 +695,11 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 現在の値からつまみの場所を計算する
+		 * Calculate the position of the knob from the current value
 		 * @private
-		 * @param {number} v 現在の値
-		 * @param {boolean=} reverse 向きを反対にするか？
-		 * @return {number} 場所
+		 * @param {number} v Current value
+		 * @param {boolean=} reverse Whether to reverse the direction
+		 * @return {number} Position
 		 */
 		_valueToPos(v, reverse = this._reverse) {
 			v = (this._int) ? Math.round(v) : v;
@@ -710,11 +710,11 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * つまみの場所から現在の値を計算する
+		 * Calculate current value from knob position
 		 * @private
-		 * @param {number} p つまみの場所
-		 * @param {boolean=} reverse 向きを反対にするか？
-		 * @return {number} 現在の値
+		 * @param {number} p Position
+		 * @param {boolean=} reverse Whether to reverse the direction
+		 * @return {number} Current value
 		 */
 		_posToValue(p, reverse = this._reverse) {
 			let v = this._min;
@@ -727,11 +727,11 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * みぞの絵をかく
+		 * Draw a rail
 		 * @private
-		 * @param {Canvas} canvas キャンバス
-		 * @param {*} width 幅
-		 * @param {number} verticalMargin たてのすき間
+		 * @param {Canvas} canvas Canvas
+		 * @param {*} width Width
+		 * @param {number} verticalMargin Vertical margin
 		 */
 		_drawRail(canvas, width, verticalMargin) {
 			const isv = this._isVertical;
@@ -758,11 +758,11 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 目もりの絵をかく
+		 * Draw a scale
 		 * @private
-		 * @param {Canvas} canvas キャンバス
-		 * @param {number} verticalMargin たてのすき間
-		 * @param {number} [subWidth=12] サブ目もりの幅
+		 * @param {Canvas} canvas Canvas
+		 * @param {number} verticalMargin Vertical margin
+		 * @param {number} [subWidth=12] Width of sub scale
 		 */
 		_drawScale(canvas, verticalMargin, subWidth = 12) {
 			const isv = this._isVertical;
@@ -817,12 +817,12 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 最大範囲を計算する
+		 * Calculate the maximum range
 		 * @private
-		 * @param {number} min 最小値
-		 * @param {number} max 最大値
-		 * @param {number} minInt 最小の間隔
-		 * @return {number} 最大範囲
+		 * @param {number} min Minimum value
+		 * @param {number} max Maximum value
+		 * @param {number} minInt Minimum interval
+		 * @return {number} Maximum range
 		 */
 		_calcMaxRange(min, max, minInt) {
 			const is = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000];
@@ -839,11 +839,11 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 間隔を計算する
+		 * Calculate intervals
 		 * @private
-		 * @param {number} baseInt 基準の間隔
-		 * @param {number} minInt 最小の間隔
-		 * @return {number} 間隔
+		 * @param {number} baseInt Base interval
+		 * @param {number} minInt Minimum interval
+		 * @return {number} Interval
 		 */
 		_calcInterval(baseInt, minInt) {
 			const is = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000];
@@ -867,10 +867,10 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 間隔を一つ計算する
+		 * Calculate one interval
 		 * @private
-		 * @param {number} val 値
-		 * @return {number} 間隔
+		 * @param {number} val Value
+		 * @return {number} Interval
 		 */
 		_calcOneInt(val) {
 			const y1 = this._valueToPos(val, false), y2 = this._valueToPos(val * 2, false);
@@ -881,18 +881,18 @@ const WIDGET = (function () {
 
 
 	/**
-	 * スライダー
+	 * Slider
 	 * @author Takuto Yanagida
 	 * @version 2019-09-06
 	 */
 	class Slider extends SliderBase {
 
 		/**
-		 * スライダーを作る
-		 * @param {number} [min=0] 最小値
-		 * @param {number} [max=10] 最大値
-		 * @param {number} [value=0] 現在の値
-		 * @param {*} [{ int = false, reverse = false, horizontal = false, width = 72, height = 400 }={}] オプション（整数にする？、向きを逆にする？、たて向きにする？）
+		 * Make a slider
+		 * @param {number} [min=0] Minimum value
+		 * @param {number} [max=10] Maximum value
+		 * @param {number} [value=0] Current value
+		 * @param {*} [{ int = false, reverse = false, horizontal = false, width = 72, height = 400 }={}] Options (Whether to integer, whether to reverse, whether to be vertical)
 		 */
 		constructor(min = 0, max = 10, value = 0, { int = false, reverse = false, horizontal = false, width = false, height = false } = {}) {
 			if (horizontal) {
@@ -916,7 +916,7 @@ const WIDGET = (function () {
 			this._scale = document.createElement('canvas');
 			this._scale.className = '__widget __widget-full';
 			inner.appendChild(this._scale);
-			// 以下はbaseに追加した後に行うこと（offsetWidth/Heightは追加後でないと取得できない）
+			// Do the following after adding to base (offsetWidth/Height can not be acquired without adding)
 			this._scale.setAttribute('width', this._scale.offsetWidth);
 			this._scale.setAttribute('height', this._scale.offsetHeight);
 
@@ -945,7 +945,7 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 値が変更されたときに呼び出される
+		 * Called when the value has changed
 		 * @private
 		 */
 		_valueChanged() {
@@ -957,14 +957,14 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * つまみの場所を求める
+		 * Get the position of the knob
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
-		 * @return {number} 場所
+		 * @param {MouseEvent} e Mouse event
+		 * @return {number} Position
 		 */
 		_getKnobPos(e) {
 			const r = this._scale.getBoundingClientRect();
-			// クライアント座標系から計算する必要あり！
+			// Need to calculate from client coordinate system!
 			let p;
 			if (this._isVertical) {
 				p = e.clientY - this.VMARGIN - r.top;
@@ -975,9 +975,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * マウスのボタンが押されたときに呼び出される
+		 * Called when the mouse button is pressed
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
+		 * @param {MouseEvent} e Mouse event
 		 */
 		_mouseDown(e) {
 			this.value(this._posToValue(this._getKnobPos(e)));
@@ -988,9 +988,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * マウスが移動したときに呼び出される
+		 * Called when the mouse moves
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
+		 * @param {MouseEvent} e Mouse event
 		 */
 		_mouseMove(e) {
 			if (!this._dragging) return;
@@ -999,9 +999,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * マウスのボタンが離されたときに呼び出される
+		 * Called when the mouse button is released
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
+		 * @param {MouseEvent} e Mouse event
 		 */
 		_mouseUp(e) {
 			this._dragging = false;
@@ -1010,10 +1010,10 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 絵をかく
+		 * Draw a picture
 		 * @private
-		 * @param {Canvas} canvas キャンバス
-		 * @param {number} verticalMargin たてのすき間
+		 * @param {Canvas} canvas Canvas
+		 * @param {number} verticalMargin Vertical margin
 		 */
 		_draw(canvas, verticalMargin) {
 			this._drawScale(canvas, verticalMargin);
@@ -1024,18 +1024,18 @@ const WIDGET = (function () {
 
 
 	/**
-	 * 温度計
+	 * Thermometer
 	 * @author Takuto Yanagida
 	 * @version 2019-09-06
 	 */
 	class Thermometer extends SliderBase {
 
 		/**
-		 * 温度計を作る
-		 * @param {number=} [min=-10] 最小温度
-		 * @param {number=} [max=50] 最大温度
-		 * @param {number=} [value=25] 現在の温度
-		 * @param {dict} [{ width = 72, height = 400 }={}]　オプション
+		 * Make a thermometer
+		 * @param {number=} [min=-10] Minimum temperature
+		 * @param {number=} [max=50] Maximum temperature
+		 * @param {number=} [value=25] Current temperature
+		 * @param {dict} [{ width = 72, height = 400 }={}] Options
 		 */
 		constructor(min = -10, max = 50, value = 25, { width = 72, height = 400 } = {}) {
 			super(width, height);
@@ -1060,7 +1060,7 @@ const WIDGET = (function () {
 			this._scale = document.createElement('canvas');
 			this._scale.className = '__widget __widget-full';
 			inner.appendChild(this._scale);
-			// 以下はbaseに追加した後に行うこと（offsetWidth/Heightは追加後でないと取得できない）
+			// Do the following after adding to base (offsetWidth/Height can not be acquired without adding)
 			this._scale.setAttribute('width', this._scale.offsetWidth);
 			this._scale.setAttribute('height', this._scale.offsetHeight);
 
@@ -1077,7 +1077,7 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 値が変更されたときに呼び出される
+		 * Called when the value has changed
 		 * @private
 		 */
 		_valueChanged() {
@@ -1086,22 +1086,22 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * つまみの場所を求める
+		 * Get the position of the knob
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
-		 * @return {number} 場所
+		 * @param {MouseEvent} e Mouse event
+		 * @return {number} Position
 		 */
 		_getKnobPos(e) {
 			const r = this._scale.getBoundingClientRect();
-			// クライアント座標系から計算する必要あり！
+			// Need to calculate from client coordinate system!
 			const p = e.clientY - this.VMARGIN - r.top;
 			return Math.min(Math.max(0, p), this._railHeight);
 		}
 
 		/**
-		 * マウスのボタンが押されたときに呼び出される
+		 * Called when the mouse button is pressed
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
+		 * @param {MouseEvent} e Mouse event
 		 */
 		_mouseDown(e) {
 			this.value(this._posToValue(this._getKnobPos(e)));
@@ -1111,9 +1111,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * マウスが移動したときに呼び出される
+		 * Called when the mouse moves
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
+		 * @param {MouseEvent} e Mouse event
 		 */
 		_mouseMove(e) {
 			if (!this._dragging) return;
@@ -1122,9 +1122,9 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * マウスのボタンが離されたときに呼び出される
+		 * Called when the mouse button is released
 		 * @private
-		 * @param {MouseEvent} e マウス・イベント
+		 * @param {MouseEvent} e Mouse event
 		 */
 		_mouseUp(e) {
 			this._dragging = false;
@@ -1132,10 +1132,10 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 絵をかく
+		 * Draw a picture
 		 * @private
-		 * @param {Canvas} canvas キャンバス
-		 * @param {number} verticalMargin たてのすき間
+		 * @param {Canvas} canvas Canvas
+		 * @param {number} verticalMargin Vertical margin
 		 */
 		_draw(canvas, verticalMargin) {
 			this._drawScale(canvas, verticalMargin, 16);
@@ -1144,11 +1144,11 @@ const WIDGET = (function () {
 		}
 
 		/**
-		 * 中身をかく
+		 * Draw a filler
 		 * @private
-		 * @param {Canvas} canvas キャンバス
-		 * @param {number} width 幅
-		 * @param {number} verticalMargin たてのすき間
+		 * @param {Canvas} canvas Canvas
+		 * @param {number} width Width
+		 * @param {number} verticalMargin Vertical margin
 		 */
 		_drawFiller(canvas, width, verticalMargin) {
 			const c = canvas.getContext('2d');
@@ -1168,7 +1168,7 @@ const WIDGET = (function () {
 	}
 
 
-	// ライブラリを作る --------------------------------------------------------
+	// Create a library --------------------------------------------------------
 
 
 	return { Widget, Switch, Toggle, Output, Chart, Slider, Thermometer };
