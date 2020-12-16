@@ -18,8 +18,8 @@ const setup = function () {
 };
 
 const draw = function (p, sl) {
-	p.styleClear().color('White').draw();
 	const v = sl.value() / 255;
+	p.styleClear().color(v < 0.5 ? 'White' : 'Black').draw();
 // 	drawChartRGB(p, v);
 // 	drawChartLRGB(p, v);
 // 	drawChartXYZ(p, v);
