@@ -3,7 +3,7 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2020-12-08
+ * @version 2020-12-17
  *
  */
 
@@ -12,10 +12,10 @@
  * Convert a color from one color space to another.
  * @param {number[]} vs a color of the color space 'from'
  * @param {string} from a color space name
- * @param {string} to a color space name
+ * @param {string=} [to='rgb'] a color space name
  * @return {number[]} a color of the color space 'to'
  */
-function convert(vs, from, to) {
+function convert(vs, from, to = 'rgb') {
 	const type = from.toLowerCase() + '-' + to.toLowerCase();
 	switch (type) {
 		case 'yiq-rgb'     : return RGB.fromLRGB(LRGB.fromYIQ(vs));
