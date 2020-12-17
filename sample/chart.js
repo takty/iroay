@@ -3,8 +3,8 @@
 // @need lib/calc
 // @need lib/widget
 // @need lib/ruler
-// @need ../dist/color-space.min
-// @need ../dist/color-util.min
+// @need ../dist/color
+// @need ../dist/vision
 
 const setup = function () {
 	const sl = new WIDGET.Slider(0, 255, 0);
@@ -31,95 +31,81 @@ const draw = function (p, sl) {
 
 const drawChartRGB = function (p, value) {
 	const g = value * 255;
-	const ruler = p.getRuler();
 	for (let y = 0; y < 256; y += 1) {
 		for (let x = 0; x < 256; x += 1) {
-			ruler.stroke().rgb(x, g, y);
-			ruler.dot(x, 255 - y).draw('stroke');
+			p.setPixel(x, 255 - y, [x, g, y]);
 		}
 	}
 };
 
 const drawChartLRGB = function (p, value) {
-	const ruler = p.getRuler();
 	for (let y = 0; y < 256; y += 1) {
 		const ry = y / 255;
 		for (let x = 0; x < 256; x += 1) {
 			const rx = x / 255;
-			const c = RGB.fromLRGB([rx, value, ry]);
-			ruler.stroke().rgb(...c);
-			ruler.dot(x, 255 - y).draw('stroke');
+			const c = COLOR.convert([rx, value, ry], 'lrgb');
+			p.setPixel(x, 255 - y, c);
 		}
 	}
 };
 
 const drawChartXYZ = function (p, value) {
-	const ruler = p.getRuler();
 	for (let y = 0; y < 256; y += 1) {
 		const ry = y / 255;
 		for (let x = 0; x < 256; x += 1) {
 			const rx = x / 255;
-			const c = RGB.fromLRGB(LRGB.fromXYZ([rx, value, ry]));
-			if (RGB.isSaturated) continue;
-			ruler.stroke().rgb(...c);
-			ruler.dot(x, 255 - y).draw('stroke');
+			const c = COLOR.convert([rx, value, ry], 'xyz');
+			if (COLOR.RGB.isSaturated) continue;
+			p.setPixel(x, 255 - y, c);
 		}
 	}
 };
 
 const drawChartLab = function (p, value) {
 	const L = value * 100;
-	const ruler = p.getRuler();
 	for (let y = 0; y < 256; y += 1) {
 		for (let x = 0; x < 256; x += 1) {
-			const c = RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab([L, x - 128, y - 128])));
-			if (RGB.isSaturated) continue;
-			ruler.stroke().rgb(...c);
-			ruler.dot(x, 255 - y).draw('stroke');
+			const c = COLOR.convert([L, x - 128, y - 128], 'lab');
+			if (COLOR.RGB.isSaturated) continue;
+			p.setPixel(x, 255 - y, c);
 		}
 	}
 };
 
 const drawChartYxy = function (p, value) {
-	const ruler = p.getRuler();
 	for (let y = 0; y < 256; y += 1) {
 		const ry = y / 255;
 		for (let x = 0; x < 256; x += 1) {
 			const rx = x / 255;
-			const c = RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromYxy([value, rx, ry])));
-			if (RGB.isSaturated) continue;
-			ruler.stroke().rgb(...c);
-			ruler.dot(x, 255 - y).draw('stroke');
+			const c = COLOR.convert([value, rx, ry], 'yxy');
+			if (COLOR.RGB.isSaturated) continue;
+			p.setPixel(x, 255 - y, c);
 		}
 	}
 };
 
 const drawChartMunsell = function (p, value) {
 	const V = value * 10;
-	const ruler = p.getRuler();
 	for (let y = 0; y < 256; y += 1) {
 		const C = y * 38 / 255;
 		for (let x = 0; x < 256; x += 1) {
 			const H = x * 100 / 255;
-			const c = RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromMunsell([H, V, C])));
-			if (Munsell.isSaturated || RGB.isSaturated) continue;
-			ruler.stroke().rgb(...c);
-			ruler.dot(x, 255 - y).draw('stroke');
+			const c = COLOR.convert([H, V, C], 'munsell');
+			if (COLOR.Munsell.isSaturated || COLOR.RGB.isSaturated) continue;
+			p.setPixel(x, 255 - y, c);
 		}
 	}
 };
 
 const drawChartPCCS = function (p, value) {
 	const l = value * 10;
-	const ruler = p.getRuler();
 	for (let y = 0; y < 256; y += 1) {
 		const s = y * 10 / 255;
 		for (let x = 0; x < 256; x += 1) {
 			const h = x * 24 / 255;
-			const c = RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromMunsell(Munsell.fromPCCS([h, l, s]))));
-			if (Munsell.isSaturated || RGB.isSaturated) continue;
-			ruler.stroke().rgb(...c);
-			ruler.dot(x, 255 - y).draw('stroke');
+			const c = COLOR.convert([h, l, s], 'pccs');
+			if (COLOR.Munsell.isSaturated || COLOR.RGB.isSaturated) continue;
+			p.setPixel(x, 255 - y, c);
 		}
 	}
 };

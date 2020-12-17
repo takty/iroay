@@ -718,7 +718,7 @@ const CROQUJS = (function () {
 
 	/**
 	 * Paper
-	 * @version 2020-05-05
+	 * @version 2020-12-17
 	 */
 	class Paper {
 
@@ -832,6 +832,33 @@ const CROQUJS = (function () {
 				this.fillStyle = style;
 				this.fillRect(0, 0, this.width(), this.height());
 			}
+			this.restore();
+			return this;
+		}
+
+		/**
+		 * Get pixel color
+		 * @param {number} x x coordinate
+		 * @param {number} y y coordinate
+		 * @return {[number, number, number, number]} Array representing color (RGBA)
+		 */
+		getPixel(x, y) {
+			return this.getImageData(x, y, 1, 1).data;
+		}
+
+		/**
+		 * Set pixel color
+		 * @param {number} x x coordinate
+		 * @param {number} y y coordinate
+		 * @param {[number, number, number, number]} rgba Array representing color (RGB)
+		 * @return {Paper} This paper
+		 */
+		setPixel(x, y, [r = 0, g = 0, b = 0, a = 255]) {
+			this.save();
+			this.strokeStyle = `rgba(${r},${g},${b},${a})`;
+			this.beginPath();
+			this.rect(x, y, 1, 1);
+			this.stroke();
 			this.restore();
 			return this;
 		}

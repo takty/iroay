@@ -16,6 +16,12 @@
 				"clear": {
 					"!type": "fn(style?: string, alpha?: number) -> this"
 				},
+				"getPixel": {
+					"!type": "fn(x: number, y: number) -> [number, number, number, number]"
+				},
+				"setPixel": {
+					"!type": "fn(x: number, y: number, rgba: [number, number, number, number]) -> this"
+				},
 				"animate": {
 					"!type": "fn(callback: fn(?), args_array: [?]) -> this"
 				},
