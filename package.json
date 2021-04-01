@@ -22,7 +22,7 @@
 		"gulp-replace": "^1.0.0",
 		"gulp-rm-lines": "0.0.10",
 		"gulp-sourcemaps": "^3.0.0",
-		"gulp-terser": "^2.0.0",
-		"yargs-parser": ">=20.2.4"
+		"gulp-terser": "^2.0.1",
+		"yargs-parser": ">=20.2.7"
 	}
 }
