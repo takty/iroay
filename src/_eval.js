@@ -198,5 +198,4 @@ Evaluation.CATEGORICAL_COLORS = [
 Evaluation._Y_TO_LUM = 60;
 Evaluation._LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
-//=
-//=include table/_cc-min.js
+// @include table/_cc-min.js

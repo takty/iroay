@@ -15,13 +15,10 @@
 	"homepage": "https://github.com/takty/colorjst#readme",
 	"dependencies": {
 		"gulp": "^4.0.2",
-		"gulp-include": "^2.4.1",
-		"gulp-load-plugins": "^2.0.7",
+		"gulp-changed": "^4.0.3",
 		"gulp-plumber": "^1.2.1",
+		"gulp-preprocess": "^4.0.2",
 		"gulp-rename": "^2.0.0",
-		"gulp-replace": "^1.1.3",
-		"gulp-rm-lines": "0.0.10",
-		"gulp-sourcemaps": "^3.0.0",
 		"gulp-terser": "^2.1.0"
 	}
 }

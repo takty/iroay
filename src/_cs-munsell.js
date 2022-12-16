@@ -420,7 +420,6 @@ function _initTable() {
 	}
 }
 
-//=
-//=include table/_hc2xy-real-min.js
+// @include table/_hc2xy-real-min.js
 
 _initTable();
