@@ -1,12 +1,19 @@
 /**
- *
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2020-12-17
- *
+ * @version 2024-07-17
  */
 
+import { Lab } from './_cs-lab';
+import { LMS } from './_cs-lms';
+import { LRGB } from './_cs-lrgb';
+import { RGB } from './_cs-rgb';
+import { XYZ } from './_cs-xyz';
+import { YIQ } from './_cs-yiq';
+import { Yxy } from './_cs-yxy';
+import { Munsell } from './_cs-munsell';
+import { PCCS } from './_cs-pccs';
 
 /**
  * Convert a color from one color space to another.
@@ -15,7 +22,7 @@
  * @param {string=} [to='rgb'] a color space name
  * @return {number[]} a color of the color space 'to'
  */
-function convert(vs, from, to = 'rgb') {
+export function convert(vs: [number, number, number], from: string, to: string | undefined = 'rgb'): [number, number, number] {
 	const type = from.toLowerCase() + '-' + to.toLowerCase();
 	switch (type) {
 		case 'yiq-rgb'     : return RGB.fromLRGB(LRGB.fromYIQ(vs));
@@ -102,14 +109,14 @@ function convert(vs, from, to = 'rgb') {
 	return vs;
 }
 
-function isRGBSaturated() {
+export function isRGBSaturated(): boolean {
 	return RGB.isSaturated;
 }
 
-function isYxySaturated() {
+export function isYxySaturated(): boolean {
 	return Yxy.isSaturated;
 }
 
-function isMunsellSaturated() {
+export function isMunsellSaturated(): boolean {
 	return Munsell.isSaturated;
 }

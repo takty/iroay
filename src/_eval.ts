@@ -1,14 +1,13 @@
 /**
- *
  * Evaluation Methods
  *
  * @author Takuto Yanagida
- * @version 2020-12-16
- *
+ * @version 2024-07-17
  */
 
+import { _CC_TABLE } from './table/_cc-min';
 
-class Evaluation {
+export class Evaluation {
 
 
 	// Calculation of the conspicuity degree -----------------------------------
@@ -22,7 +21,7 @@ class Evaluation {
 	 * @return {number} Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
-	static conspicuityOfLab([ls, as, bs]) {
+	static conspicuityOfLab([, as, bs]: [number, number, number]): number {
 		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
 		const H = rad / (Math.PI * 2) * 360;
 		const a = 35;  // Constant
@@ -40,7 +39,7 @@ class Evaluation {
 	 * @param {number[]} vs2 vector 2
 	 * @return {number} Distance
 	 */
-	static distance([v11, v12, v13], [v21, v22, v23]) {
+	static distance([v11, v12, v13]: [number, number, number], [v21, v22, v23]: [number, number, number]): number {
 		return Math.sqrt((v11 - v21) * (v11 - v21) + (v12 - v22) * (v12 - v22) + (v13 - v23) * (v13 - v23));
 	}
 
@@ -50,7 +49,7 @@ class Evaluation {
 	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	 */
-	static CIE76([ls1, as1, bs1], [ls2, as2, bs2]) {
+	static CIE76([ls1, as1, bs1]: [number, number, number], [ls2, as2, bs2]: [number, number, number]): number {
 		return Math.sqrt((ls1 - ls2) * (ls1 - ls2) + (as1 - as2) * (as1 - as2) + (bs1 - bs2) * (bs1 - bs2));
 	}
 
@@ -62,7 +61,7 @@ class Evaluation {
 	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	*/
-	static CIEDE2000([ls1, as1, bs1], [ls2, as2, bs2]) {
+	static CIEDE2000([ls1, as1, bs1]: [number, number, number], [ls2, as2, bs2]: [number, number, number]): number {
 		const C1 = Math.sqrt(as1 * as1 + bs1 * bs1), C2 = Math.sqrt(as2 * as2 + bs2 * bs2);
 		const Cb = (C1 + C2) / 2;
 		const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + Math.pow(25, 7))));
@@ -108,10 +107,10 @@ class Evaluation {
 		const DE = Math.sqrt(sq(DLp / (kL * SL)) + sq(DCp / (kC * SC)) + sq(DHp / (kH * SH)) + RT * (DCp / (kC * SC)) * (DHp / (kH * SH)));
 		return DE;
 
-		function sq(v) { return v * v; }
-		function atan(y, x) { const v = Math.atan2(y, x) * 180 / Math.PI; return (v < 0) ? (v + 360) : v; }
-		function sin(deg) { return Math.sin(deg * Math.PI / 180); }
-		function cos(deg) { return Math.cos(deg * Math.PI / 180); }
+		function sq(v: number) { return v * v; }
+		function atan(y: number, x: number) { const v = Math.atan2(y, x) * 180 / Math.PI; return (v < 0) ? (v + 360) : v; }
+		function sin(deg: number) { return Math.sin(deg * Math.PI / 180); }
+		function cos(deg: number) { return Math.cos(deg * Math.PI / 180); }
 	}
 
 	/**
@@ -121,7 +120,7 @@ class Evaluation {
 	 * @param {string} method Method of calculation
 	 * @return {number} Color difference
 	 */
-	static differenceBetweenLab(lab1, lab2, method = 'cie76') {
+	static differenceBetweenLab(lab1: [number, number, number], lab2: [number, number, number], method = 'cie76'): number {
 		if (method === 'cie76') {
 			return Evaluation.CIE76(lab1, lab2);
 		} else {
@@ -138,23 +137,23 @@ class Evaluation {
 	 * @param {number[]} yxy Yxy color
 	 * @return {string} Basic categorical color
 	 */
-	static categoryOfYxy([y, sx, sy]) {
+	static categoryOfYxy([y, sx, sy]: [number, number, number]): string {
 		const lum = Math.pow(y * Evaluation._Y_TO_LUM, 0.9);  // magic number
 
 		let diff = Number.MAX_VALUE;
-		let clum = 0;
+		let clu = 0;
 		for (let l of Evaluation._LUM_TABLE) {
 			const d = Math.abs(lum - l);
 			if (d < diff) {
 				diff = d;
-				clum = l;
+				clu = l;
 			}
 		}
-		const t = Evaluation._CC_TABLE[clum];
+		const t: string = Evaluation._CC_TABLE[clu as 2|5|10|20|30|40] as string;
 		sx *= 1000;
 		sy *= 1000;
 		let dis = Number.MAX_VALUE;
-		let cc = 1;
+		let cc: number|string = 1;
 		for (let i = 0; i < 18 * 21; i += 1) {
 			if (t[i] === '.') continue;
 			const x = (i % 18) * 25 + 150;
@@ -165,37 +164,36 @@ class Evaluation {
 				cc = t[i];
 			}
 		}
-		const ci = (cc === 'a') ? 10 : parseInt(cc);
+		const ci = (cc === 'a') ? 10 : parseInt(cc as string);
 		return Evaluation.CATEGORICAL_COLORS[ci];
 	}
 
+	/**
+	 * They are sensual expressions of color difference by NBS unit.
+	 * The values represent the lower limit of each range.
+	 */
+	static NBS_TRACE       = 0.0;
+	static NBS_SLIGHT      = 0.5;
+	static NBS_NOTICEABLE  = 1.5;
+	static NBS_APPRECIABLE = 3.0;
+	static NBS_MUCH        = 6.0;
+	static NBS_VERY_MUCH   = 12.0;
+
+	/**
+	 * Dental Materials J. 27(1), 139-144 (2008)
+	 */
+	static DE_TO_NBS = 0.92;
+
+	/**
+	 * Basic Categorical Colors
+	 */
+	static CATEGORICAL_COLORS = [
+		'white', 'black', 'red', 'green',
+		'yellow', 'blue', 'brown', 'purple',
+		'pink', 'orange', 'gray',
+	];
+	static _Y_TO_LUM = 60;
+	static _LUM_TABLE = [2, 5, 10, 20, 30, 40];
+
+	static _CC_TABLE = _CC_TABLE;
 }
-
-/**
- * They are sensual expressions of color difference by NBS unit.
- * The values represent the lower limit of each range.
- */
-Evaluation.NBS_TRACE       = 0.0;
-Evaluation.NBS_SLIGHT      = 0.5;
-Evaluation.NBS_NOTICEABLE  = 1.5;
-Evaluation.NBS_APPRECIABLE = 3.0;
-Evaluation.NBS_MUCH        = 6.0;
-Evaluation.NBS_VERY_MUCH   = 12.0;
-
-/**
- * Dental Materials J. 27(1), 139-144 (2008)
- */
-Evaluation.DE_TO_NBS = 0.92;
-
-/**
- * Basic Categorical Colors
- */
-Evaluation.CATEGORICAL_COLORS = [
-	'white', 'black', 'red', 'green',
-	'yellow', 'blue', 'brown', 'purple',
-	'pink', 'orange', 'gray',
-];
-Evaluation._Y_TO_LUM = 60;
-Evaluation._LUM_TABLE = [2, 5, 10, 20, 30, 40];
-
-// @include table/_cc-min.js

@@ -1,5 +1,4 @@
 /**
- *
  * This class converts the Munsell (HVC) color system.
  * D65 is used as tristimulus value.
  * Since conversion is performed by approximation based on the distance to the sample color, the conversion result is approximate value.
@@ -7,20 +6,25 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2020-12-08
- *
+ * @version 2024-07-17
  */
 
+import { _TBL_SRC_MIN } from './table/_hc2xy-real-min';
+import { XYZ } from './_cs-xyz';
+import { Yxy } from './_cs-yxy';
+import { PCCS } from './_cs-pccs';
 
-class Munsell {
+export class Munsell {
 
-	static _getXy(vi, h10, c) {
+	static isSaturated = false;
+
+	static _getXy(vi: number, h10: number, c: number) {
 		if (c === 0) return Munsell._ILLUMINANT_C;
 		return Munsell._TBL[vi][h10 / 25][c / 2];
 	}
 
 	// Find Y of XYZ (C) from Munsell's V (JIS).
-	static _v2y(v) {
+	static _v2y(v: number) {
 		if (v <= 1) return v * 0.0121;
 		const v2 = v * v, v3 = v2 * v;
 		const y = 0.0467 * v3 + 0.5602 * v2 - 0.1753 * v + 0.8007;
@@ -28,7 +32,7 @@ class Munsell {
 	}
 
 	// Munsell's V is obtained from Y of XYZ (C) (JIS, Newton's method).
-	static _y2v(y) {
+	static _y2v(y: number) {
 		if (y <= 0.0121) return y / 0.0121;
 		let v = 10;
 		while (true) {
@@ -41,16 +45,16 @@ class Munsell {
 		return v;
 	}
 
-	static _eq(a, b) {
+	static _eq(a: number, b: number) {
 		return Math.abs(a - b) < Munsell._EP;
 	}
 
-	static _eq0(a) {
+	static _eq0(a: number) {
 		return Math.abs(a) < Munsell._EP;
 	}
 
 	// Find the Munsell value from xyY (standard illuminant C).
-	static _yxy2mun([Y, x, y]) {
+	static _yxy2mun([Y, x, y]: [number, number, number]): [number, number, number] {
 		const v = Munsell._y2v(Y);  // Find Munsell lightness
 
 		// When the lightness is maximum 10
@@ -87,7 +91,7 @@ class Munsell {
 
 	// Acquires the hue and chroma for the chromaticity coordinates (x, y) on the surface of the given lightness index.
 	// If not included, -1 is returned.
-	static _interpolateHC(x, y, vi) {
+	static _interpolateHC(x: number, y: number, vi: number): [number, number] {
 		let h10_l, h10_u = -1, c_l = -1, c_u = -1;
 		let hv = null;
 
@@ -125,7 +129,7 @@ class Munsell {
 
 	// Whether a point (x, y) exists within the interior (including the boundary) of the clockwise triangle abc
 	// in the mathematical coordinate system (positive on the y axis is upward)
-	static _isInside(a, b, c, x, y) {
+	static _isInside(a: [number, number], b: [number, number], c: [number, number], x: number, y: number) {
 		// If x, y are on the right side of ab, the point is outside the triangle
 		if (Munsell._cross(x - a[0], y - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
 		// If x, y are on the right side of bc, the point is outside the triangle
@@ -135,7 +139,7 @@ class Munsell {
 		return true;
 	}
 
-	static _cross(ax, ay, bx, by) {
+	static _cross(ax: number, ay: number, bx: number, by: number): number {
 		return ax * by - ay * bx;
 	}
 
@@ -146,7 +150,7 @@ class Munsell {
 	 *  | A D
 	 *  ------> x
 	 */
-	static _interpolationRatio(x, y, a, d, b, c) {
+	static _interpolationRatio(x: number, y: number, a: [number, number], d: [number, number], b: [number, number], c: [number, number]): [number, number]|null {
 		// Find the ratio in the vertical direction
 		let v = -1;
 
@@ -192,10 +196,10 @@ class Munsell {
 	 * @param {string} hueName Name-based hue expression
 	 * @return {number} Hue value
 	 */
-	static hueNameToHueValue(hueName) {
+	static hueNameToHueValue(hueName: string): number {
 		if (hueName.length == 1) return -1;  // In case of achromatic color N
 
-		function isDigit(s) { return Number.isInteger(parseInt(s)); }
+		function isDigit(s: string) { return Number.isInteger(parseInt(s)); }
 		const slen = isDigit(hueName.charAt(hueName.length - 2)) ? 1 : 2;  // Length of color name
 		const n = hueName.substring(hueName.length - slen);
 
@@ -212,7 +216,7 @@ class Munsell {
 	 * @param {number} chroma Chroma value
 	 * @return {string} Name-based hue expression
 	 */
-	static hueValueToHueName(hue, chroma) {
+	static hueValueToHueName(hue: number, chroma: number): string {
 		if (hue == -1 || Munsell._eq0(chroma)) return 'N';
 		if (hue <= 0) hue += Munsell._MAX_HUE;
 		let h10 = (0 | hue * 10) % 100;
@@ -229,7 +233,7 @@ class Munsell {
 	 * @param {number[]} xyz XYZ color (standard illuminant D65)
 	 * @return {number[]} Munsell color
 	 */
-	static fromXYZ(xyz) {
+	static fromXYZ(xyz: [number, number, number]): [number, number, number] {
 		return Munsell._yxy2mun(Yxy.fromXYZ(XYZ.toIlluminantC(xyz)));
 	}
 
@@ -238,9 +242,9 @@ class Munsell {
 	 * @param {number[]} hvc Hue, value, chroma of Munsell color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ([h, v, c]) {
+	static toXYZ([h, v, c]: [number, number, number]): [number, number, number] {
 		if (Munsell._MAX_HUE <= h) h -= Munsell._MAX_HUE;
-		const dest = [Munsell._v2y(v), 0, 0];
+		const dest: [number, number, number] = [Munsell._v2y(v), 0, 0];
 		Munsell.isSaturated = false;
 
 		// When the lightness is 0 or achromatic (check this first)
@@ -261,7 +265,7 @@ class Munsell {
 		const vi_u = vi_l + 1;
 
 		// Obtain lower side
-		let xy_l = [0, 0];
+		let xy_l: [number, number, boolean] = [0, 0, false];
 		if (vi_l != -1) {
 			xy_l = Munsell._interpolateXY(h, c, vi_l);
 			if (!xy_l[2]) Munsell.isSaturated = true;
@@ -286,7 +290,7 @@ class Munsell {
 	 * @param {number[]} hvc Hue, value, chroma of Munsell color
 	 * @return {number[]} PCCS color
 	 */
-	static toPCCS(hvc) {
+	static toPCCS(hvc: [number, number, number]): [number, number, number] {
 		return PCCS.fromMunsell(hvc);
 	}
 
@@ -295,13 +299,13 @@ class Munsell {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {number[]} Munsell color
 	 */
-	static fromPCCS(hls) {
+	static fromPCCS(hls: [number, number, number]): [number, number, number] {
 		return PCCS.toMunsell(hls);
 	}
 
 	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
 	// Return false if it is out of the range of the table.
-	static _interpolateXY(h, c, vi) {
+	static _interpolateXY(h: number, c: number, vi: number): [number, number, boolean] {
 		const h10 = h * 10;
 		let h10_l = 0 | Math.floor(h10 / 25) * 25, h10_u = h10_l + 25;
 		const c_l = 0 | Math.floor(c / 2) * 2, c_u = c_l + 2;
@@ -359,7 +363,7 @@ class Munsell {
 	 * @param {number[]} hvc Hue, value, chroma of Munsell color
 	 * @return {string} String representation
 	 */
-	static toString([h, v, c]) {
+	static toString([h, v, c]: [number, number, number]) {
 		const vstr = Math.round(v * 10) / 10;
 		if (c < Munsell.MONO_LIMIT_C) {
 			return `N ${vstr}`;
@@ -370,21 +374,19 @@ class Munsell {
 		}
 	}
 
+	static MONO_LIMIT_C = 0.05;
+	static _TBL_SRC_MIN = _TBL_SRC_MIN;
+	static _TBL_V_REAL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+	static _TBL_V_ALL = [0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+	static _TBL_V = Munsell._TBL_V_REAL;
+	static _MIN_HUE = 0;
+	static _MAX_HUE = 100;  // Same as MIN_HUE
+	static _HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
+	static _EP = 0.0000000000001;
+	static _ILLUMINANT_C = [0.3101, 0.3162];  // Standard illuminant C, white point
+	static _TBL_MAX_C = new Array(Munsell._TBL_V.length);
+	static _TBL = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 }
-
-Munsell.isSaturated = false;
-
-Munsell.MONO_LIMIT_C = 0.05;
-const _TBL_V_REAL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-const _TBL_V_ALL = [0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-Munsell._TBL_V = _TBL_V_REAL;
-Munsell._MIN_HUE = 0;
-Munsell._MAX_HUE = 100;  // Same as MIN_HUE
-Munsell._HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
-Munsell._EP = 0.0000000000001;
-Munsell._ILLUMINANT_C = [0.3101, 0.3162];  // Standard illuminant C, white point
-Munsell._TBL_MAX_C = new Array(Munsell._TBL_V.length);
-Munsell._TBL = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 
 function _initTable() {
 	for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
@@ -394,7 +396,7 @@ function _initTable() {
 		for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell._TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
 
 		for (const cs of Munsell._TBL_SRC_MIN[vi]) {
-			const c0 = cs.shift();
+			const c0 = cs.shift() as number;
 			_integrate(cs);
 			_integrate(cs);
 			for (let i = 0; i < cs.length; i += 2) {
@@ -408,7 +410,7 @@ function _initTable() {
 			}
 		}
 	}
-	function _integrate(cs) {
+	function _integrate(cs: number[]) {
 		let c2_ = 0, c3_ = 0;
 		for (let i = 0; i < cs.length; i += 2) {
 			const c2 = cs[i], c3 = cs[i + 1];
@@ -419,7 +421,5 @@ function _initTable() {
 		}
 	}
 }
-
-// @include table/_hc2xy-real-min.js
 
 _initTable();

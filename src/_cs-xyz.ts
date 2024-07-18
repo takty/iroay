@@ -1,14 +1,17 @@
 /**
- *
  * This class converts the CIE 1931 XYZ color system.
  *
  * @author Takuto Yanagida
- * @version 2020-12-07
- *
+ * @version 2024-07-17
  */
 
+import { LRGB } from './_cs-lrgb';
+import { Yxy } from './_cs-yxy';
+import { Lab } from './_cs-lab';
+import { LMS } from './_cs-lms';
+import { Munsell } from './_cs-munsell';
 
-class XYZ {
+export class XYZ {
 
 
 	// Inverse Conversion Functions --------------------------------------------
@@ -19,8 +22,8 @@ class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return Linear RGB color
 	 */
-	static toLRGB(x, y, z) {
-		return LRGB.fromXYZ(x, y, z);
+	static toLRGB(xyz: [number, number, number]): [number, number, number] {
+		return LRGB.fromXYZ(xyz);
 	}
 
 	/**
@@ -28,7 +31,7 @@ class XYZ {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} XYZ color
 	 */
-	static fromLRGB(lrgb) {
+	static fromLRGB(lrgb: [number, number, number]): [number, number, number] {
 		return LRGB.toXYZ(lrgb);
 	}
 
@@ -37,7 +40,7 @@ class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} Yxy color
 	 */
-	static toYxy(xyz) {
+	static toYxy(xyz: [number, number, number]): [number, number, number] {
 		return Yxy.fromXYZ(xyz);
 	}
 
@@ -46,7 +49,7 @@ class XYZ {
 	 * @param {number[]} yxy Yxy color
 	 * @return {number[]} XYZ color
 	 */
-	static fromYxy(yxy) {
+	static fromYxy(yxy: [number, number, number]): [number, number, number] {
 		return Yxy.toXYZ(yxy);
 	}
 
@@ -55,7 +58,7 @@ class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} CIELAB color
 	 */
-	static toLab(xyz) {
+	static toLab(xyz: [number, number, number]): [number, number, number] {
 		return Lab.fromXYZ(xyz);
 	}
 
@@ -64,7 +67,7 @@ class XYZ {
 	 * @param {number[]} lab L*, a*, b* of CIELAB color
 	 * @return {number[]} XYZ color
 	 */
-	static fromLab(lab) {
+	static fromLab(lab: [number, number, number]): [number, number, number] {
 		return Lab.toXYZ(lab);
 	}
 
@@ -73,7 +76,7 @@ class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} LMS color
 	 */
-	static toLMS(xyz) {
+	static toLMS(xyz: [number, number, number]): [number, number, number] {
 		return LMS.fromXYZ(xyz);
 	}
 
@@ -82,7 +85,7 @@ class XYZ {
 	 * @param {number[]} lms LMS color
 	 * @return {number[]} XYZ color
 	 */
-	static fromLMS(lms) {
+	static fromLMS(lms: [number, number, number]): [number, number, number] {
 		return LMS.toXYZ(lms);
 	}
 
@@ -91,7 +94,7 @@ class XYZ {
 	 * @param {number[]} xyz XYZ color (standard illuminant D65)
 	 * @return {number[]} Munsell color
 	 */
-	static toMunsell(xyz) {
+	static toMunsell(xyz: [number, number, number]): [number, number, number] {
 		return Munsell.fromXYZ(xyz);
 	}
 
@@ -100,7 +103,7 @@ class XYZ {
 	 * @param {number[]} hvc Hue, value, chroma of Munsell color
 	 * @return {number[]} XYZ color
 	 */
-	static fromMunsell(hvc) {
+	static fromMunsell(hvc: [number, number, number]): [number, number, number] {
 		return Munsell.toXYZ(hvc);
 	}
 
@@ -114,7 +117,7 @@ class XYZ {
 	 * @param {number[]} xyz XYZ color (standard illuminant C)
 	 * @return {number[]} XYZ of standard illuminant D65
 	 */
-	static fromIlluminantC([x, y, z]) {
+	static fromIlluminantC([x, y, z]: [number, number, number]): [number, number, number] {
 		return [
 			 0.9972812 * x + -0.0093756 * y + -0.0154171 * z,
 			-0.0010298 * x +  1.0007636 * y +  0.0002084 * z,
@@ -128,12 +131,11 @@ class XYZ {
 	 * @param {number[]} xyz XYZ color (standard illuminant D65)
 	 * @return {number[]} XYZ of standard illuminant C
 	 */
-	static toIlluminantC([x, y, z]) {
+	static toIlluminantC([x, y, z]: [number, number, number]): [number, number, number] {
 		return [
 			1.0027359 * x +  0.0093941 * y +  0.0167846 * z,
 			0.0010319 * x +  0.9992466 * y + -0.0002089 * z,
 			                                  1.0858628 * z,
 		];
 	}
-
 }

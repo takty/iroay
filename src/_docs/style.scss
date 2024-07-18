@@ -1,0 +1,31 @@
+/**
+ * Styles for Sample
+ *
+ * @author Takuto Yanagida
+ * @version 2024-07-18
+ */
+
+@use 'sass:math';
+
+:root {
+	font-size  : 16px;
+	font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+main {
+	display       : flex;
+	flex-direction: column;
+	align-items   : flex-start;
+	gap           : 1rem;
+
+	> div {
+		display    : flex;
+		align-items: flex-start;
+		gap        : 1rem;
+	}
+
+	canvas {
+		width : 512px;
+		height: 512px;
+	}
+}

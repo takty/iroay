@@ -1,17 +1,20 @@
 /**
- *
  * This class converts the sRGB color system.
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2020-12-07
- *
+ * @version 2024-07-17
  */
 
+import { Lab } from './_cs-lab';
+import { XYZ } from './_cs-xyz';
+import { LRGB } from './_cs-lrgb';
+import { Yxy } from './_cs-yxy';
 
-class RGB {
+export class RGB {
+	static isSaturated = false;
 
-	static _checkRange(vs, min, max) {
+	static _checkRange(vs: [number, number, number], min: number, max: number): boolean {
 		let isSaturated = false;
 		if (vs[0] > max) { vs[0] = max; isSaturated = true; }
 		if (vs[0] < min) { vs[0] = min; isSaturated = true; }
@@ -23,12 +26,12 @@ class RGB {
 	}
 
 	// Convert sRGB to Linear RGB (gamma correction).
-	static _func(x) {
+	static _func(x: number): number {
 		return (x < 0.03928) ? (x / 12.92) : Math.pow((x + 0.055) / 1.055, 2.4);
 	}
 
 	// Convert Linear RGB to sRGB (inverse gamma correction).
-	static _invFunc(x) {
+	static _invFunc(x: number): number {
 		x = (x > 0.00304) ? (Math.pow(x, 1 / 2.4) * 1.055 - 0.055) : (x * 12.92);
 		return x;
 	}
@@ -38,7 +41,7 @@ class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} Linear RGB color
 	 */
-	static toLRGB([r, g, b]) {
+	static toLRGB([r, g, b]: [number, number, number]): [number, number, number] {
 		return [
 			RGB._func(r / 255),
 			RGB._func(g / 255),
@@ -51,8 +54,8 @@ class RGB {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} sRGB color
 	 */
-	static fromLRGB([lr, lg, lb]) {
-		const dest = [
+	static fromLRGB([lr, lg, lb]: [number, number, number]): [number, number, number] {
+		const dest: [number, number, number] = [
 			RGB._invFunc(lr) * 255 | 0,
 			RGB._invFunc(lg) * 255 | 0,
 			RGB._invFunc(lb) * 255 | 0,
@@ -70,7 +73,7 @@ class RGB {
 	 * @param {number} v Color integer
 	 * @return {number[]} Color vector
 	 */
-	static fromColorInteger(v) {
+	static fromColorInteger(v: number): [number, number, number] {
 		return [
 			(v >> 16) & 0xFF,
 			(v >>  8) & 0xFF,
@@ -83,7 +86,7 @@ class RGB {
 	 * @param {number[]} rgb RGB
 	 * @return {number} Color integer
 	 */
-	static toColorInteger([r, g, b]) {
+	static toColorInteger([r, g, b]: [number, number, number]): number {
 		return (r << 16) | (g << 8) | b | 0xff000000;
 	}
 
@@ -96,7 +99,7 @@ class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} CIELAB color
 	 */
-	static toLab(rgb) {
+	static toLab(rgb: [number, number, number]): [number, number, number] {
 		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 	}
 
@@ -105,7 +108,7 @@ class RGB {
 	 * @param {number[]} lab L*, a*, b* of CIELAB color
 	 * @return {number[]} sRGB color
 	 */
-	static fromLab(lab) {
+	static fromLab(lab: [number, number, number]): [number, number, number] {
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(lab)));
 	}
 
@@ -114,7 +117,7 @@ class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ(rgb) {
+	static toXYZ(rgb: [number, number, number]): [number, number, number] {
 		return LRGB.toXYZ(LRGB.fromRGB(rgb));
 	}
 
@@ -123,7 +126,7 @@ class RGB {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} sRGB color
 	 */
-	static fromXYZ(xyz) {
+	static fromXYZ(xyz: [number, number, number]): [number, number, number] {
 		return RGB.fromLRGB(LRGB.fromXYZ(xyz));
 	}
 
@@ -132,7 +135,7 @@ class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} Yxy color
 	 */
-	static toYxy(rgb) {
+	static toYxy(rgb: [number, number, number]): [number, number, number] {
 		return Yxy.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 	}
 
@@ -141,7 +144,7 @@ class RGB {
 	 * @param {number[]} yxy Yxy color
 	 * @return {number[]} sRGB color
 	 */
-	static fromYxy(yxy) {
+	static fromYxy(yxy: [number, number, number]): [number, number, number] {
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromYxy(yxy)));
 	}
 
@@ -154,11 +157,8 @@ class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} Lightness-only sRGB color
 	 */
-	static toLightness(rgb) {
+	static toLightness(rgb: [number, number, number]): [number, number, number] {
 		const l = Lab.lightnessFromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab([l, 0, 0])));
 	}
-
 }
-
-RGB.isSaturated = false;

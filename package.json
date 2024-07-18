@@ -2,23 +2,41 @@
 	"name": "colorjst",
 	"version": "1.0.0",
 	"description": "Color Library",
-	"productName": "Colorjst",
-	"scripts": {
-		"start": "gulp"
-	},
+	"license": "MIT",
+	"author": "Takuto Yanagida",
+	"type": "module",
+	"homepage": "https://github.com/takty/colorjst#readme",
+	"keywords": [
+		"js",
+		"css",
+		"html",
+		"style"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/takty/colorjst.git"
 	},
-	"author": "Takuto Yanagida",
-	"license": "MIT",
-	"homepage": "https://github.com/takty/colorjst#readme",
+	"bugs": {
+		"url": "https://github.com/takty/colorjst/issues"
+	},
+	"browserslist": [
+		"> 1%",
+		"last 2 versions",
+		"not dead"
+	],
+	"scripts": {
+		"build": "node ./build.js",
+		"docs": "vite build",
+		"dev": "vite src/_docs --base ./",
+		"debug": "tsc --noEmit -w"
+	},
 	"dependencies": {
-		"gulp": "^4.0.2",
-		"gulp-changed": "^4.0.3",
-		"gulp-plumber": "^1.2.1",
-		"gulp-preprocess": "^4.0.2",
-		"gulp-rename": "^2.0.0",
-		"gulp-terser": "^2.1.0"
+		"esbuild": "^0.23.0",
+		"esbuild-sass-plugin": "^3.3.1",
+		"glob": "^11.0.0",
+		"sass": "^1.77.8",
+		"klales": "github:takty/klales",
+		"typescript": "^5.5.3",
+		"vite": "^5.3.4"
 	}
 }

@@ -1,15 +1,15 @@
 /**
- *
  * This class simulates color vision characteristics.
  *
  * @author Takuto Yanagida
- * @version 2020-12-08
- *
+ * @version 2024-07-17
  */
 
+import { LMS } from './_cs-lms';
+import { XYZ } from './_cs-xyz';
+import { LRGB } from './_cs-lrgb';
 
-class ColorVisionSimulation {
-
+export class ColorVisionSimulation {
 	/*
 	 * Reference: Brettel, H.; Viénot, F. & Mollon, J. D.,
 	 * Computerized simulation of color appearance for dichromats,
@@ -21,7 +21,7 @@ class ColorVisionSimulation {
 	 * @param {number[]} lms LMS color
 	 * @return {number[]} LMS color in protanopia
 	 */
-	static brettelP([l, m, s]) {
+	static brettelP([l, m, s]: [number, number, number]): [number, number, number] {
 		return [
 			0.0 * l + 2.02344 * m + -2.52581 * s,
 			0.0 * l + 1.0     * m +  0.0     * s,
@@ -34,7 +34,7 @@ class ColorVisionSimulation {
 	 * @param {number[]} lms LMS color
 	 * @return {number[]} LMS color in deuteranopia
 	 */
-	static brettelD([l, m, s]) {
+	static brettelD([l, m, s]: [number, number, number]): [number, number, number] {
 		return [
 			1.0      * l + 0.0 * m + 0.0     * s,
 			0.494207 * l + 0.0 * m + 1.24827 * s,
@@ -55,7 +55,7 @@ class ColorVisionSimulation {
 	 * @param {number[]} base Base LMS color
 	 * @return {number[]} LMS color in protanopia
 	 */
-	static okajimaCorrectionP(m, [l2, m2, s2], base) {
+	static okajimaCorrectionP(m: number, [l2, m2, s2]: [number, number, number], base: [number, number, number]): [number, number, number] {
 		const sp1 = m / base[1];
 		const dp0 = l2 / base[0];
 		const dp1 = m2 / base[1];
@@ -75,7 +75,7 @@ class ColorVisionSimulation {
 	 * @param {number[]} base Base LMS color
 	 * @return {number[]} LMS color in deuteranopia
 	 */
-	static okajimaCorrectionD(l, [l2, m2, s2], base) {
+	static okajimaCorrectionD(l: number, [l2, m2, s2]: [number, number, number], base: [number, number, number]): [number, number, number] {
 		const sp0 = l / base[0];
 		const dp0 = l2 / base[0];
 		const dp1 = m2 / base[1];
@@ -98,7 +98,7 @@ class ColorVisionSimulation {
 	 * @param {boolean} doCorrection
 	 * @return {number[]} LMS color in protanopia
 	 */
-	static lmsToProtanopia(lms, doCorrection = false) {
+	static lmsToProtanopia(lms: [number, number, number], doCorrection = false): [number, number, number] {
 		const ds = ColorVisionSimulation.brettelP(lms);
 		if (!doCorrection) return ds;
 		return ColorVisionSimulation.okajimaCorrectionP(lms[1], ds, ColorVisionSimulation.LMS_BASE);
@@ -110,7 +110,7 @@ class ColorVisionSimulation {
 	 * @param {boolean} doCorrection
 	 * @return {number[]} LMS color in deuteranopia
 	 */
-	static lmsToDeuteranopia(lms, doCorrection = false) {
+	static lmsToDeuteranopia(lms: [number, number, number], doCorrection = false): [number, number, number] {
 		const ds = ColorVisionSimulation.brettelD(lms);
 		if (!doCorrection) return ds;
 		return ColorVisionSimulation.okajimaCorrectionD(lms[0], ds, ColorVisionSimulation.LMS_BASE);
@@ -126,13 +126,13 @@ class ColorVisionSimulation {
 	 * @param {boolean} doCorrection
 	 * @return {number[]} LMS color in protanopia
 	 */
-	static lrgbToProtanopia([lr, lg, lb], doCorrection = false) {
-		const lrgb2 = [
+	static lrgbToProtanopia([lr, lg, lb]: [number, number, number], doCorrection = false): [number, number, number] {
+		const lrgb2: [number, number, number] = [
 			0.992052 * lr + 0.003974,
 			0.992052 * lg + 0.003974,
 			0.992052 * lb + 0.003974,
 		];
-		const lms = COLOR_SPACE_NS.LMS.fromXYZ(COLOR_SPACE_NS.XYZ.fromLRGB(lrgb2));
+		const lms = LMS.fromXYZ(XYZ.fromLRGB(lrgb2));
 		const lms2 = ColorVisionSimulation.brettelP(lms);
 
 		let lms3;
@@ -141,7 +141,7 @@ class ColorVisionSimulation {
 		} else {
 			lms3 = lms2;
 		}
-		return COLOR_SPACE_NS.LRGB.fromXYZ(COLOR_SPACE_NS.XYZ.fromLMS(lms3));
+		return LRGB.fromXYZ(XYZ.fromLMS(lms3));
 	}
 
 	/**
@@ -150,13 +150,13 @@ class ColorVisionSimulation {
 	 * @param {boolean} doCorrection
 	 * @return {number[]} LMS color in deuteranopia
 	 */
-	static lrgbToDeuteranopia([lr, lg, lb], doCorrection = false) {
-		const lrgb2 = [
+	static lrgbToDeuteranopia([lr, lg, lb]: [number, number, number], doCorrection = false): [number, number, number] {
+		const lrgb2: [number, number, number] = [
 			0.957237 * lr + 0.0213814,
 			0.957237 * lg + 0.0213814,
 			0.957237 * lb + 0.0213814,
 		];
-		const lms = COLOR_SPACE_NS.LMS.fromXYZ(COLOR_SPACE_NS.XYZ.fromLRGB(lrgb2));
+		const lms = LMS.fromXYZ(XYZ.fromLRGB(lrgb2));
 		const lms2 = ColorVisionSimulation.brettelD(lms);
 
 		let lms3;
@@ -165,13 +165,12 @@ class ColorVisionSimulation {
 		} else {
 			lms3 = lms2;
 		}
-		return ColorVisionSimulation.LRGB.fromXYZ(COLOR_SPACE_NS.XYZ.fromLMS(lms3));
+		return LRGB.fromXYZ(XYZ.fromLMS(lms3));
 	}
 
+	static LMS_BASE  = LMS.fromXYZ([1, 1, 1]);
+	static LMS_BASE2 = LMS.fromXYZ(XYZ.fromLRGB([1, 1, 1]));
+
+	static ALPHA = 1;
+	static BETA  = 1;
 }
-
-ColorVisionSimulation.LMS_BASE  = COLOR_SPACE_NS.LMS.fromXYZ([1, 1, 1]);
-ColorVisionSimulation.LMS_BASE2 = COLOR_SPACE_NS.LMS.fromXYZ(COLOR_SPACE_NS.XYZ.fromLRGB([1, 1, 1]));
-
-ColorVisionSimulation.ALPHA = 1;
-ColorVisionSimulation.BETA  = 1;

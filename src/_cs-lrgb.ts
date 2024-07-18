@@ -1,23 +1,22 @@
 /**
- *
  * This class converts the Linear RGB color system.
  * It is targeted for Linear RGB which converted sRGB (D65).
  * Reference: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
  *
  * @author Takuto Yanagida
- * @version 2020-12-07
- *
+ * @version 2024-07-17
  */
 
+import { RGB } from './_cs-rgb';
+import { YIQ } from './_cs-yiq';
 
-class LRGB {
-
+export class LRGB {
 	/**
 	 * Convert Linear RGB to CIE 1931 XYZ.
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ([lr, lg, lb]) {
+	static toXYZ([lr, lg, lb]: [number, number, number]): [number, number, number] {
 		return [
 			0.4124564 * lr + 0.3575761 * lg + 0.1804375 * lb,
 			0.2126729 * lr + 0.7151522 * lg + 0.0721750 * lb,
@@ -30,7 +29,7 @@ class LRGB {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} Linear RGB color
 	 */
-	static fromXYZ([x, y, z]) {
+	static fromXYZ([x, y, z]: [number, number, number]): [number, number, number] {
 		return [
 			 3.2404542 * x + -1.5371385 * y + -0.4985314 * z,
 			-0.9692660 * x +  1.8760108 * y +  0.0415560 * z,
@@ -47,7 +46,7 @@ class LRGB {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} sRGB color
 	 */
-	static toRGB(lrgb) {
+	static toRGB(lrgb: [number, number, number]): [number, number, number] {
 		return RGB.fromLRGB(lrgb);
 	}
 
@@ -56,7 +55,7 @@ class LRGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} sRGB color
 	 */
-	static fromRGB(rgb) {
+	static fromRGB(rgb: [number, number, number]): [number, number, number] {
 		return RGB.toLRGB(rgb);
 	}
 
@@ -65,7 +64,7 @@ class LRGB {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} YIQ color
 	 */
-	static toYIQ(lrgb) {
+	static toYIQ(lrgb: [number, number, number]): [number, number, number] {
 		return YIQ.fromLRGB(lrgb);
 	}
 
@@ -74,8 +73,7 @@ class LRGB {
 	 * @param {number[]} yiq YIQ color
 	 * @return {number[]} Linear RGB color
 	 */
-	static fromYIQ(yiq) {
+	static fromYIQ(yiq: [number, number, number]): [number, number, number] {
 		return YIQ.toLRGB(yiq);
 	}
-
 }

@@ -1,21 +1,22 @@
 /**
- *
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2020-12-07
- *
+ * @version 2024-07-17
  */
 
+import { Lab } from './_cs-lab';
+import { Evaluation } from './_eval';
 
-class Yxy {
+export class Yxy {
+	static isSaturated = false;
 
 	/**
 	 * Convert CIE 1931 XYZ to Yxy.
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} Yxy color
 	 */
-	static fromXYZ([x, y, z]) {
+	static fromXYZ([x, y, z]: [number, number, number]): [number, number, number] {
 		const sum = x + y + z;
 		if (sum === 0) return [y, 0.31273, 0.32902];  // White point D65
 		return [y, x / sum, y / sum];
@@ -26,7 +27,7 @@ class Yxy {
 	 * @param {number[]} yxy Yxy color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ([y, sx, sy]) {
+	static toXYZ([y, sx, sy]: [number, number, number]): [number, number, number] {
 		const d0 = sx * y / sy;
 		if (Number.isNaN(d0)) {
 			Yxy.isSaturated = false;
@@ -47,10 +48,7 @@ class Yxy {
 	 * @param {number[]} yxy Yxy color
 	 * @return {string} Basic categorical color
 	 */
-	static categoryOf(yxy) {
+	static categoryOf(yxy: [number, number, number]): string {
 		return Evaluation.categoryOfYxy(yxy);
 	}
-
 }
-
-Yxy.isSaturated = false;

@@ -1,12 +1,9 @@
 /**
- *
  * Converter of original dat files
  *
  * @author Takuto Yanagida
  * @version 2020-11-26
- *
  */
-
 
 const DAT_FILE_REAL = 'real.dat';
 const DAT_FILE_ALL  = 'all.dat';
