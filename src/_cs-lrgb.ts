@@ -4,9 +4,10 @@
  * Reference: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
 
+import { Triplet } from './_triplet';
 import { RGB } from './_cs-rgb';
 import { YIQ } from './_cs-yiq';
 
@@ -16,7 +17,7 @@ export class LRGB {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ([lr, lg, lb]: [number, number, number]): [number, number, number] {
+	static toXYZ([lr, lg, lb]: Triplet): Triplet {
 		return [
 			0.4124564 * lr + 0.3575761 * lg + 0.1804375 * lb,
 			0.2126729 * lr + 0.7151522 * lg + 0.0721750 * lb,
@@ -29,7 +30,7 @@ export class LRGB {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} Linear RGB color
 	 */
-	static fromXYZ([x, y, z]: [number, number, number]): [number, number, number] {
+	static fromXYZ([x, y, z]: Triplet): Triplet {
 		return [
 			 3.2404542 * x + -1.5371385 * y + -0.4985314 * z,
 			-0.9692660 * x +  1.8760108 * y +  0.0415560 * z,
@@ -46,7 +47,7 @@ export class LRGB {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} sRGB color
 	 */
-	static toRGB(lrgb: [number, number, number]): [number, number, number] {
+	static toRGB(lrgb: Triplet): Triplet {
 		return RGB.fromLRGB(lrgb);
 	}
 
@@ -55,7 +56,7 @@ export class LRGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} sRGB color
 	 */
-	static fromRGB(rgb: [number, number, number]): [number, number, number] {
+	static fromRGB(rgb: Triplet): Triplet {
 		return RGB.toLRGB(rgb);
 	}
 
@@ -64,7 +65,7 @@ export class LRGB {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} YIQ color
 	 */
-	static toYIQ(lrgb: [number, number, number]): [number, number, number] {
+	static toYIQ(lrgb: Triplet): Triplet {
 		return YIQ.fromLRGB(lrgb);
 	}
 
@@ -73,7 +74,7 @@ export class LRGB {
 	 * @param {number[]} yiq YIQ color
 	 * @return {number[]} Linear RGB color
 	 */
-	static fromYIQ(yiq: [number, number, number]): [number, number, number] {
+	static fromYIQ(yiq: Triplet): Triplet {
 		return YIQ.toLRGB(yiq);
 	}
 }

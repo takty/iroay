@@ -2,9 +2,10 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
 
+import { Triplet } from './_triplet';
 import { Lab } from './_cs-lab';
 import { Evaluation } from './_eval';
 
@@ -16,7 +17,7 @@ export class Yxy {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} Yxy color
 	 */
-	static fromXYZ([x, y, z]: [number, number, number]): [number, number, number] {
+	static fromXYZ([x, y, z]: Triplet): Triplet {
 		const sum = x + y + z;
 		if (sum === 0) return [y, 0.31273, 0.32902];  // White point D65
 		return [y, x / sum, y / sum];
@@ -27,7 +28,7 @@ export class Yxy {
 	 * @param {number[]} yxy Yxy color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ([y, sx, sy]: [number, number, number]): [number, number, number] {
+	static toXYZ([y, sx, sy]: Triplet): Triplet {
 		const d0 = sx * y / sy;
 		if (Number.isNaN(d0)) {
 			Yxy.isSaturated = false;
@@ -48,7 +49,7 @@ export class Yxy {
 	 * @param {number[]} yxy Yxy color
 	 * @return {string} Basic categorical color
 	 */
-	static categoryOf(yxy: [number, number, number]): string {
+	static categoryOf(yxy: Triplet): string {
 		return Evaluation.categoryOfYxy(yxy);
 	}
 }

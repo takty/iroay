@@ -2,9 +2,10 @@
  * This class converts the CIE 1931 XYZ color system.
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
 
+import { Triplet } from './_triplet';
 import { LRGB } from './_cs-lrgb';
 import { Yxy } from './_cs-yxy';
 import { Lab } from './_cs-lab';
@@ -22,7 +23,7 @@ export class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return Linear RGB color
 	 */
-	static toLRGB(xyz: [number, number, number]): [number, number, number] {
+	static toLRGB(xyz: Triplet): Triplet {
 		return LRGB.fromXYZ(xyz);
 	}
 
@@ -31,7 +32,7 @@ export class XYZ {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} XYZ color
 	 */
-	static fromLRGB(lrgb: [number, number, number]): [number, number, number] {
+	static fromLRGB(lrgb: Triplet): Triplet {
 		return LRGB.toXYZ(lrgb);
 	}
 
@@ -40,7 +41,7 @@ export class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} Yxy color
 	 */
-	static toYxy(xyz: [number, number, number]): [number, number, number] {
+	static toYxy(xyz: Triplet): Triplet {
 		return Yxy.fromXYZ(xyz);
 	}
 
@@ -49,7 +50,7 @@ export class XYZ {
 	 * @param {number[]} yxy Yxy color
 	 * @return {number[]} XYZ color
 	 */
-	static fromYxy(yxy: [number, number, number]): [number, number, number] {
+	static fromYxy(yxy: Triplet): Triplet {
 		return Yxy.toXYZ(yxy);
 	}
 
@@ -58,7 +59,7 @@ export class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} CIELAB color
 	 */
-	static toLab(xyz: [number, number, number]): [number, number, number] {
+	static toLab(xyz: Triplet): Triplet {
 		return Lab.fromXYZ(xyz);
 	}
 
@@ -67,7 +68,7 @@ export class XYZ {
 	 * @param {number[]} lab L*, a*, b* of CIELAB color
 	 * @return {number[]} XYZ color
 	 */
-	static fromLab(lab: [number, number, number]): [number, number, number] {
+	static fromLab(lab: Triplet): Triplet {
 		return Lab.toXYZ(lab);
 	}
 
@@ -76,7 +77,7 @@ export class XYZ {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} LMS color
 	 */
-	static toLMS(xyz: [number, number, number]): [number, number, number] {
+	static toLMS(xyz: Triplet): Triplet {
 		return LMS.fromXYZ(xyz);
 	}
 
@@ -85,7 +86,7 @@ export class XYZ {
 	 * @param {number[]} lms LMS color
 	 * @return {number[]} XYZ color
 	 */
-	static fromLMS(lms: [number, number, number]): [number, number, number] {
+	static fromLMS(lms: Triplet): Triplet {
 		return LMS.toXYZ(lms);
 	}
 
@@ -94,7 +95,7 @@ export class XYZ {
 	 * @param {number[]} xyz XYZ color (standard illuminant D65)
 	 * @return {number[]} Munsell color
 	 */
-	static toMunsell(xyz: [number, number, number]): [number, number, number] {
+	static toMunsell(xyz: Triplet): Triplet {
 		return Munsell.fromXYZ(xyz);
 	}
 
@@ -103,7 +104,7 @@ export class XYZ {
 	 * @param {number[]} hvc Hue, value, chroma of Munsell color
 	 * @return {number[]} XYZ color
 	 */
-	static fromMunsell(hvc: [number, number, number]): [number, number, number] {
+	static fromMunsell(hvc: Triplet): Triplet {
 		return Munsell.toXYZ(hvc);
 	}
 
@@ -117,7 +118,7 @@ export class XYZ {
 	 * @param {number[]} xyz XYZ color (standard illuminant C)
 	 * @return {number[]} XYZ of standard illuminant D65
 	 */
-	static fromIlluminantC([x, y, z]: [number, number, number]): [number, number, number] {
+	static fromIlluminantC([x, y, z]: Triplet): Triplet {
 		return [
 			 0.9972812 * x + -0.0093756 * y + -0.0154171 * z,
 			-0.0010298 * x +  1.0007636 * y +  0.0002084 * z,
@@ -131,7 +132,7 @@ export class XYZ {
 	 * @param {number[]} xyz XYZ color (standard illuminant D65)
 	 * @return {number[]} XYZ of standard illuminant C
 	 */
-	static toIlluminantC([x, y, z]: [number, number, number]): [number, number, number] {
+	static toIlluminantC([x, y, z]: Triplet): Triplet {
 		return [
 			1.0027359 * x +  0.0093941 * y +  0.0167846 * z,
 			0.0010319 * x +  0.9992466 * y + -0.0002089 * z,

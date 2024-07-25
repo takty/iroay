@@ -2,10 +2,11 @@
  * Evaluation Methods
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
 
 import { _CC_TABLE } from './table/_cc-min';
+import { Triplet } from './_triplet';
 
 export class Evaluation {
 
@@ -21,7 +22,7 @@ export class Evaluation {
 	 * @return {number} Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
-	static conspicuityOfLab([, as, bs]: [number, number, number]): number {
+	static conspicuityOfLab([, as, bs]: Triplet): number {
 		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
 		const H = rad / (Math.PI * 2) * 360;
 		const a = 35;  // Constant
@@ -39,7 +40,7 @@ export class Evaluation {
 	 * @param {number[]} vs2 vector 2
 	 * @return {number} Distance
 	 */
-	static distance([v11, v12, v13]: [number, number, number], [v21, v22, v23]: [number, number, number]): number {
+	static distance([v11, v12, v13]: Triplet, [v21, v22, v23]: Triplet): number {
 		return Math.sqrt((v11 - v21) * (v11 - v21) + (v12 - v22) * (v12 - v22) + (v13 - v23) * (v13 - v23));
 	}
 
@@ -49,7 +50,7 @@ export class Evaluation {
 	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	 */
-	static CIE76([ls1, as1, bs1]: [number, number, number], [ls2, as2, bs2]: [number, number, number]): number {
+	static CIE76([ls1, as1, bs1]: Triplet, [ls2, as2, bs2]: Triplet): number {
 		return Math.sqrt((ls1 - ls2) * (ls1 - ls2) + (as1 - as2) * (as1 - as2) + (bs1 - bs2) * (bs1 - bs2));
 	}
 
@@ -61,7 +62,7 @@ export class Evaluation {
 	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	*/
-	static CIEDE2000([ls1, as1, bs1]: [number, number, number], [ls2, as2, bs2]: [number, number, number]): number {
+	static CIEDE2000([ls1, as1, bs1]: Triplet, [ls2, as2, bs2]: Triplet): number {
 		const C1 = Math.sqrt(as1 * as1 + bs1 * bs1), C2 = Math.sqrt(as2 * as2 + bs2 * bs2);
 		const Cb = (C1 + C2) / 2;
 		const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + Math.pow(25, 7))));
@@ -120,7 +121,7 @@ export class Evaluation {
 	 * @param {string} method Method of calculation
 	 * @return {number} Color difference
 	 */
-	static differenceBetweenLab(lab1: [number, number, number], lab2: [number, number, number], method = 'cie76'): number {
+	static differenceBetweenLab(lab1: Triplet, lab2: Triplet, method: string = 'cie76'): number {
 		if (method === 'cie76') {
 			return Evaluation.CIE76(lab1, lab2);
 		} else {
@@ -137,7 +138,7 @@ export class Evaluation {
 	 * @param {number[]} yxy Yxy color
 	 * @return {string} Basic categorical color
 	 */
-	static categoryOfYxy([y, sx, sy]: [number, number, number]): string {
+	static categoryOfYxy([y, sx, sy]: Triplet): string {
 		const lum = Math.pow(y * Evaluation._Y_TO_LUM, 0.9);  // magic number
 
 		let diff = Number.MAX_VALUE;
@@ -192,8 +193,8 @@ export class Evaluation {
 		'yellow', 'blue', 'brown', 'purple',
 		'pink', 'orange', 'gray',
 	];
-	static _Y_TO_LUM = 60;
-	static _LUM_TABLE = [2, 5, 10, 20, 30, 40];
+	private static _Y_TO_LUM = 60;
+	private static _LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
-	static _CC_TABLE = _CC_TABLE;
+	private static _CC_TABLE = _CC_TABLE;
 }

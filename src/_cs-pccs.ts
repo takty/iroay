@@ -6,9 +6,10 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
 
+import { Triplet } from './_triplet';
 import { Munsell } from './_cs-munsell';
 
 export class PCCS {
@@ -17,7 +18,7 @@ export class PCCS {
 	// Calculation of PCCS value (accurate) ------------------------------------
 
 
-	static _calcPccsH(H: number): number {
+	private static _calcPccsH(H: number): number {
 		let h1 = -1, h2 = -1;
 		for (let i = 1; i < PCCS._MUNSELL_H.length; ++i) {
 			if (PCCS._MUNSELL_H[i] <= H) h1 = i;
@@ -31,14 +32,14 @@ export class PCCS {
 		return h1 + (h2 - h1) * (H - PCCS._MUNSELL_H[h1]) / (PCCS._MUNSELL_H[h2] - PCCS._MUNSELL_H[h1]);
 	}
 
-	static _calcPccsS(V: number, C: number, h: number) {
+	private static _calcPccsS(V: number, C: number, h: number) {
 		const a = PCCS._calcInterpolatedCoefficients(h);
 		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
 		const a0 = -C / (1 - Math.exp(-g * V));
 		return PCCS._solveEquation(PCCS._simplyCalcPccsS(V, C, h), a[3], a[2], a[1], a0);
 	}
 
-	static _calcInterpolatedCoefficients(h: number) {
+	private static _calcInterpolatedCoefficients(h: number) {
 		if (PCCS._MAX_HUE < h) h -= PCCS._MAX_HUE;
 		let hf = 0 | Math.floor(h);
 		if (hf % 2 != 0) --hf;
@@ -52,7 +53,7 @@ export class PCCS {
 		return a;
 	}
 
-	static _solveEquation(x0: number, a3: number, a2: number, a1: number, a0: number): number {
+	private static _solveEquation(x0: number, a3: number, a2: number, a1: number, a0: number): number {
 		let x = x0;
 		while (true) {
 			const y = a3 * x * x * x + a2 * x * x + a1 * x + a0;
@@ -68,14 +69,14 @@ export class PCCS {
 	// Calculation of Munsell value (accurate) ---------------------------------
 
 
-	static _calcMunsellH(h: number): number {
+	private static _calcMunsellH(h: number): number {
 		const h1 = 0 | Math.floor(h), h2 = h1 + 1;
 		let H1 = PCCS._MUNSELL_H[h1], H2 = PCCS._MUNSELL_H[h2];
 		if (H1 > H2) H2 = 100;
 		return H1 + (H2 - H1) * (h - h1) / (h2 - h1);
 	}
 
-	static _calcMunsellC(h: number, l: number, s: number): number {
+	private static _calcMunsellC(h: number, l: number, s: number): number {
 		const a = PCCS._calcInterpolatedCoefficients(h);
 		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
 		return (a[3] * s * s * s + a[2] * s * s + a[1] * s) * (1 - Math.exp(-g * l));
@@ -85,14 +86,14 @@ export class PCCS {
 	// Calculation of PCCS value (concise) -------------------------------------
 
 
-	static _simplyCalcPccsH(H: number): number {
+	private static _simplyCalcPccsH(H: number): number {
 		const y = H * Math.PI / 50;
 		return 24 * y / (2 * Math.PI) + 1.24
 				+ 0.02 * Math.cos(y) - 0.1 * Math.cos(2 * y) - 0.11  * Math.cos(3 * y)
 				+ 0.68 * Math.sin(y) - 0.3 * Math.sin(2 * y) + 0.013 * Math.sin(3 * y);
 	}
 
-	static _simplyCalcPccsS(V: number, C: number, h: number): number {
+	private static _simplyCalcPccsS(V: number, C: number, h: number): number {
 		const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
 		const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
 		const e2 = 0.004, e1 = 0.077, e0 = -C / (Ct * (1 - Math.exp(-gt * V)));
@@ -103,14 +104,14 @@ export class PCCS {
 	// Calculation of Munsell value (concise) ----------------------------------
 
 
-	static _simplyCalcMunsellH(h: number): number {
+	private static _simplyCalcMunsellH(h: number): number {
 		const x = (h - 1) * Math.PI / 12;
 		return 100 * x / (2 * Math.PI) - 1
 				+ 0.12 * Math.cos(x) + 0.34 * Math.cos(2 * x) + 0.4 * Math.cos(3 * x)
 				- 2.7  * Math.sin(x) + 1.5  * Math.sin(2 * x) - 0.4 * Math.sin(3 * x);
 	}
 
-	static _simplyCalcMunsellC(h: number, l: number, s: number): number {
+	private static _simplyCalcMunsellC(h: number, l: number, s: number): number {
 		const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
 		const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
 		return Ct * (0.077 * s + 0.0040 * s * s) * (1 - Math.exp(-gt * l));
@@ -121,7 +122,7 @@ export class PCCS {
 	 * @param {number[]} hvc Hue, value, chroma of Munsell color
 	 * @return {number[]} PCCS color
 	 */
-	static fromMunsell([H, V, C]: [number, number, number]): [number, number, number] {
+	static fromMunsell([H, V, C]: Triplet): Triplet {
 		if (Munsell._MAX_HUE <= H) H -= Munsell._MAX_HUE;
 		let h = 0, l = V, s = 0;
 
@@ -138,7 +139,7 @@ export class PCCS {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {number[]} Munsell color
 	 */
-	static toMunsell([h, l, s]: [number, number, number]): [number, number, number] {
+	static toMunsell([h, l, s]: Triplet): Triplet {
 		let H = 0, V = l, C = 0;
 
 		H = PCCS.conversionMethod._calcMunsellH(h);
@@ -155,7 +156,7 @@ export class PCCS {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {number} Tone
 	 */
-	static tone(hls: [number, number, number]): number {
+	static tone(hls: Triplet): number {
 		const s = hls[2];
 		const t = PCCS.relativeLightness(hls);
 		const tu = s * -3 / 10 + 8.5, td = s * 3 / 10 + 2.5;
@@ -188,7 +189,7 @@ export class PCCS {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {number[]} Relative lightness L
 	 */
-	static relativeLightness([h, l, s]: [number, number, number]): number {
+	static relativeLightness([h, l, s]: Triplet): number {
 		return l - (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
 	}
 
@@ -197,7 +198,7 @@ export class PCCS {
 	 * @param {number[]} hLs Tone coordinate color
 	 * @return {number[]} Absolute lightness l
 	 */
-	static absoluteLightness([h, L, s]: [number, number, number]): number {
+	static absoluteLightness([h, L, s]: Triplet): number {
 		return L + (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
 	}
 
@@ -206,7 +207,7 @@ export class PCCS {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {number[]} Tone coordinate color
 	 */
-	static toToneCoordinate(hls: [number, number, number]): [number, number, number] {
+	static toToneCoordinate(hls: Triplet): Triplet {
 		return [hls[0], PCCS.relativeLightness(hls), hls[2]];
 	}
 
@@ -215,7 +216,7 @@ export class PCCS {
 	 * @param {number[]} hLs Tone coordinate color
 	 * @return {number[]} PCCS color
 	 */
-	static toNormalCoordinate(hLs: [number, number, number]): [number, number, number] {
+	static toNormalCoordinate(hLs: Triplet): Triplet {
 		return [hLs[0], PCCS.absoluteLightness(hLs), hLs[2]];
 	}
 
@@ -224,15 +225,15 @@ export class PCCS {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {string} String representation
 	 */
-	static toString(hls: [number, number, number]): string {
-		const lstr = Math.round(hls[1] * 10) / 10;
+	static toString(hls: Triplet): string {
+		const str_l = Math.round(hls[1] * 10) / 10;
 		if (hls[2] < PCCS._MONO_LIMIT_S) {
-			if (9.5 <= hls[1]) return `W N-${lstr}`;
-			if (hls[1] <= 1.5) return `Bk N-${lstr}`;
-			return `Gy-${lstr} N-${lstr}`;
+			if (9.5 <= hls[1]) return `W N-${str_l}`;
+			if (hls[1] <= 1.5) return `Bk N-${str_l}`;
+			return `Gy-${str_l} N-${str_l}`;
 		} else {
-			const hstr = Math.round(hls[0] * 10) / 10;
-			const sstr = Math.round(hls[2] * 10) / 10;
+			const str_h = Math.round(hls[0] * 10) / 10;
+			const str_s = Math.round(hls[2] * 10) / 10;
 
 			let tn = Math.round(hls[0]);
 			if (tn <= 0) tn = PCCS._MAX_HUE;
@@ -240,8 +241,8 @@ export class PCCS {
 			const hue = PCCS._HUE_NAMES[tn];
 			const tone = PCCS._TONE_NAMES[PCCS.tone(hls)];
 
-			if (tone == 'none') return `${hstr}:${hue}-${lstr}-${sstr}s`;
-			return `${tone}${hstr} ${hstr}:${hue}-${lstr}-${sstr}s`;
+			if (tone == 'none') return `${str_h}:${hue}-${str_l}-${str_s}s`;
+			return `${tone}${str_h} ${str_h}:${hue}-${str_l}-${str_s}s`;
 		}
 	}
 
@@ -250,7 +251,7 @@ export class PCCS {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {string} String representation of hues
 	 */
-	static toHueString([h,, s]: [number, number, number]): string {
+	static toHueString([h,, s]: Triplet): string {
 		if (s < PCCS._MONO_LIMIT_S) {
 			return 'N';
 		} else {
@@ -266,7 +267,7 @@ export class PCCS {
 	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
 	 * @return {string} String representation of tones
 	 */
-	static toToneString(hls: [number, number, number]): string {
+	static toToneString(hls: Triplet): string {
 		if (hls[2] < PCCS._MONO_LIMIT_S) {
 			if (9.5 <= hls[1]) return 'W';
 			if (hls[1] <= 1.5) return 'Bk';
@@ -277,17 +278,16 @@ export class PCCS {
 	}
 
 	// Hue [0, 24), 24 is also acceptable
-	static _MIN_HUE = 0;
-	static _MAX_HUE = 24;  // same as MIN_HUE
-	static _MONO_LIMIT_S = 0.01;
-	static _HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
-	static _TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
-	static _MUNSELL_H = [
+	private static _MAX_HUE = 24;  // same as MIN_HUE
+	private static _MONO_LIMIT_S = 0.01;
+	private static _HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
+	private static _TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
+	private static _MUNSELL_H = [
 		96,  // Dummy
 		0,  4,  7, 10, 14, 18, 22, 25, 28, 33, 38, 43,
 		49, 55, 60, 65, 70, 73, 76, 79, 83, 87, 91, 96, 100
 	];
-	static _COEFFICIENTS = [
+	private static _COEFFICIENTS = [
 		[0.853642,  0.084379, -0.002798],  // 0 == 24
 		[1.042805,  0.046437,  0.001607],  // 2
 		[1.079160,  0.025470,  0.003052],  // 4

@@ -4,19 +4,20 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
 
+import { Triplet } from './_triplet';
 import { Evaluation } from './_eval';
 
 export class Lab {
 	// Conversion function
-	static _func(v: number): number {
+	private static _func(v: number): number {
 		return (v > Lab._C1) ? Math.pow(v, 1 / 3) : (v / Lab._C2 + 4 / 29);
 	}
 
 	// Inverse conversion function
-	static _invFunc(v: number): number {
+	private static _invFunc(v: number): number {
 		return (v > Lab._C3) ? Math.pow(v, 3) : ((v - 4 / 29) * Lab._C2);
 	}
 
@@ -25,7 +26,7 @@ export class Lab {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} CIELAB color
 	 */
-	static fromXYZ([x, y, z]: [number, number, number]): [number, number, number] {
+	static fromXYZ([x, y, z]: Triplet): Triplet {
 		const fx = Lab._func(x / Lab.XYZ_TRISTIMULUS_VALUES[0]);
 		const fy = Lab._func(y / Lab.XYZ_TRISTIMULUS_VALUES[1]);
 		const fz = Lab._func(z / Lab.XYZ_TRISTIMULUS_VALUES[2]);
@@ -41,7 +42,7 @@ export class Lab {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number} L*
 	 */
-	static lightnessFromXYZ([, y,]: [number, number, number]): number {
+	static lightnessFromXYZ([, y,]: Triplet): number {
 		const fy = Lab._func(y / Lab.XYZ_TRISTIMULUS_VALUES[1]);
 		return 116 * fy - 16;
 	}
@@ -51,7 +52,7 @@ export class Lab {
 	 * @param {number[]} lab L*, a*, b* of CIELAB color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ([ls, as, bs]: [number, number, number]): [number, number, number] {
+	static toXYZ([ls, as, bs]: Triplet): Triplet {
 		const fy = (ls + 16) / 116;
 		const fx = fy + as / 500;
 		const fz = fy - bs / 200;
@@ -74,7 +75,7 @@ export class Lab {
 	 * @return {number} Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
-	static conspicuityOf(lab: [number, number, number]): number {
+	static conspicuityOf(lab: Triplet): number {
 		return Evaluation.conspicuityOfLab(lab);
 	}
 
@@ -84,7 +85,7 @@ export class Lab {
 	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	 */
-	static differenceBetween(lab1: [number, number, number], lab2: [number, number, number]): number {
+	static differenceBetween(lab1: Triplet, lab2: Triplet): number {
 		return Evaluation.differenceBetweenLab(lab1, lab2);
 	}
 
@@ -97,7 +98,7 @@ export class Lab {
 	 * @param {number[]} lab L*, a*, b* of rectangular coordinate format (CIELAB)
 	 * @return {number[]} Color in polar format
 	 */
-	static toPolarCoordinate([ls, as, bs]: [number, number, number]): [number, number, number] {
+	static toPolarCoordinate([ls, as, bs]: Triplet): Triplet {
 		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
 		const cs = Math.sqrt(as * as + bs * bs);
 		const h = rad * 360 / (Math.PI * 2);
@@ -109,7 +110,7 @@ export class Lab {
 	 * @param {number[]} lab L*, C*, h of polar format (CIELAB)
 	 * @return {number[]} Color in rectangular coordinate format
 	 */
-	static toOrthogonalCoordinate([ls, cs, h]: [number, number, number]): [number, number, number] {
+	static toOrthogonalCoordinate([ls, cs, h]: Triplet): Triplet {
 		const rad = h * (Math.PI * 2) / 360;
 		const as = Math.cos(rad) * cs;
 		const bs = Math.sin(rad) * cs;
@@ -117,9 +118,9 @@ export class Lab {
 	}
 
 	// Constants for simplification of calculation
-	static _C1 = Math.pow(6, 3) / Math.pow(29, 3);      // (6/29)^3 = 0.0088564516790356308171716757554635
-	static _C2 = 3 * Math.pow(6, 2) / Math.pow(29, 2);  // 3*(6/29)^2 = 0.12841854934601664684898929845422
-	static _C3 = 6 / 29;                                // 6/29 = 0.20689655172413793103448275862069
+	private static _C1 = Math.pow(6, 3) / Math.pow(29, 3);      // (6/29)^3 = 0.0088564516790356308171716757554635
+	private static _C2 = 3 * Math.pow(6, 2) / Math.pow(29, 2);  // 3*(6/29)^2 = 0.12841854934601664684898929845422
+	private static _C3 = 6 / 29;                                // 6/29 = 0.20689655172413793103448275862069
 
 	/**
 	 * D50 tristimulus value

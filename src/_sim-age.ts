@@ -2,8 +2,10 @@
  * This class performs various simulations of color space.
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
+
+import { Triplet } from './_triplet';
 
 export class AgeSimulation {
 	/*
@@ -12,12 +14,12 @@ export class AgeSimulation {
 	 * IEICE technical report 109(249), 43-48, 2009-10-15.
 	 */
 
-	static _hueDiff(a: number, b: number): number {
+	private static _hueDiff(a: number, b: number): number {
 		const p = (b > 0) ? Math.atan2(b, a) : (Math.atan2(-b, -a) + Math.PI);
 		return 4.5 * Math.cos(2 * Math.PI * (p - 28.8) / 50.9) + 4.4;
 	}
 
-	static _chromaRatio(a: number, b: number): number {
+	private static _chromaRatio(a: number, b: number): number {
 		const c = Math.sqrt(a * a + b * b);
 		return 0.83 * Math.exp(-c / 13.3) - (1 / 8) * Math.exp(-(c - 50) * (c - 50) / (3000 * 3000)) + 1;
 	}
@@ -27,7 +29,7 @@ export class AgeSimulation {
 	 * @param {number[]} lab L*, a*, b* of CIELAB color (young person)
 	 * @return {number[]} CIELAB color in color vision of elderly people
 	 */
-	static labToElderlyAB([ls, as, bs]: [number, number, number]): [number, number, number] {
+	static labToElderlyAB([ls, as, bs]: Triplet): Triplet {
 		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) + AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) * AgeSimulation._chromaRatio(as, bs);
 		return [
@@ -42,7 +44,7 @@ export class AgeSimulation {
 	 * @param {number[]} lab L*, a*, b* of CIELAB color (elderly person)
 	 * @return {number[]} CIELAB color in color vision of young people
 	 */
-	static labToYoungAB([ls, as, bs]: [number, number, number]): [number, number, number] {
+	static labToYoungAB([ls, as, bs]: Triplet): Triplet {
 		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) - AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) / AgeSimulation._chromaRatio(as, bs);
 		return [

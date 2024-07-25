@@ -2,8 +2,10 @@
  * This class converts the LMS color system.
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
+
+import { Triplet } from './_triplet';
 
 export class LMS {
 	/**
@@ -11,7 +13,7 @@ export class LMS {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} LMS color
 	 */
-	static fromXYZ([x, y, z]: [number, number, number]): [number, number, number] {
+	static fromXYZ([x, y, z]: Triplet): Triplet {
 		return [
 			LMS.matrix[0][0] * x + LMS.matrix[0][1] * y + LMS.matrix[0][2] * z,
 			LMS.matrix[1][0] * x + LMS.matrix[1][1] * y + LMS.matrix[1][2] * z,
@@ -24,7 +26,7 @@ export class LMS {
 	 * @param {number[]} lms LMS color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ([l, m, s]: [number, number, number]): [number, number, number] {
+	static toXYZ([l, m, s]: Triplet): Triplet {
 		return [
 			LMS.matrixInverse[0][0] * l + LMS.matrixInverse[0][1] * m + LMS.matrixInverse[0][2] * s,
 			LMS.matrixInverse[1][0] * l + LMS.matrixInverse[1][1] * m + LMS.matrixInverse[1][2] * s,

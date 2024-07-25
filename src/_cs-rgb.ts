@@ -3,9 +3,10 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2024-07-17
+ * @version 2024-07-25
  */
 
+import { Triplet } from './_triplet';
 import { Lab } from './_cs-lab';
 import { XYZ } from './_cs-xyz';
 import { LRGB } from './_cs-lrgb';
@@ -14,7 +15,7 @@ import { Yxy } from './_cs-yxy';
 export class RGB {
 	static isSaturated = false;
 
-	static _checkRange(vs: [number, number, number], min: number, max: number): boolean {
+	private static _checkRange(vs: Triplet, min: number, max: number): boolean {
 		let isSaturated = false;
 		if (vs[0] > max) { vs[0] = max; isSaturated = true; }
 		if (vs[0] < min) { vs[0] = min; isSaturated = true; }
@@ -26,12 +27,12 @@ export class RGB {
 	}
 
 	// Convert sRGB to Linear RGB (gamma correction).
-	static _func(x: number): number {
+	private static _func(x: number): number {
 		return (x < 0.03928) ? (x / 12.92) : Math.pow((x + 0.055) / 1.055, 2.4);
 	}
 
 	// Convert Linear RGB to sRGB (inverse gamma correction).
-	static _invFunc(x: number): number {
+	private static _invFunc(x: number): number {
 		x = (x > 0.00304) ? (Math.pow(x, 1 / 2.4) * 1.055 - 0.055) : (x * 12.92);
 		return x;
 	}
@@ -41,7 +42,7 @@ export class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} Linear RGB color
 	 */
-	static toLRGB([r, g, b]: [number, number, number]): [number, number, number] {
+	static toLRGB([r, g, b]: Triplet): Triplet {
 		return [
 			RGB._func(r / 255),
 			RGB._func(g / 255),
@@ -54,8 +55,8 @@ export class RGB {
 	 * @param {number[]} lrgb Linear RGB color
 	 * @return {number[]} sRGB color
 	 */
-	static fromLRGB([lr, lg, lb]: [number, number, number]): [number, number, number] {
-		const dest: [number, number, number] = [
+	static fromLRGB([lr, lg, lb]: Triplet): Triplet {
+		const dest: Triplet = [
 			RGB._invFunc(lr) * 255 | 0,
 			RGB._invFunc(lg) * 255 | 0,
 			RGB._invFunc(lb) * 255 | 0,
@@ -73,7 +74,7 @@ export class RGB {
 	 * @param {number} v Color integer
 	 * @return {number[]} Color vector
 	 */
-	static fromColorInteger(v: number): [number, number, number] {
+	static fromColorInteger(v: number): Triplet {
 		return [
 			(v >> 16) & 0xFF,
 			(v >>  8) & 0xFF,
@@ -86,7 +87,7 @@ export class RGB {
 	 * @param {number[]} rgb RGB
 	 * @return {number} Color integer
 	 */
-	static toColorInteger([r, g, b]: [number, number, number]): number {
+	static toColorInteger([r, g, b]: Triplet): number {
 		return (r << 16) | (g << 8) | b | 0xff000000;
 	}
 
@@ -99,7 +100,7 @@ export class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} CIELAB color
 	 */
-	static toLab(rgb: [number, number, number]): [number, number, number] {
+	static toLab(rgb: Triplet): Triplet {
 		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 	}
 
@@ -108,7 +109,7 @@ export class RGB {
 	 * @param {number[]} lab L*, a*, b* of CIELAB color
 	 * @return {number[]} sRGB color
 	 */
-	static fromLab(lab: [number, number, number]): [number, number, number] {
+	static fromLab(lab: Triplet): Triplet {
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(lab)));
 	}
 
@@ -117,7 +118,7 @@ export class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} XYZ color
 	 */
-	static toXYZ(rgb: [number, number, number]): [number, number, number] {
+	static toXYZ(rgb: Triplet): Triplet {
 		return LRGB.toXYZ(LRGB.fromRGB(rgb));
 	}
 
@@ -126,7 +127,7 @@ export class RGB {
 	 * @param {number[]} xyz XYZ color
 	 * @return {number[]} sRGB color
 	 */
-	static fromXYZ(xyz: [number, number, number]): [number, number, number] {
+	static fromXYZ(xyz: Triplet): Triplet {
 		return RGB.fromLRGB(LRGB.fromXYZ(xyz));
 	}
 
@@ -135,7 +136,7 @@ export class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} Yxy color
 	 */
-	static toYxy(rgb: [number, number, number]): [number, number, number] {
+	static toYxy(rgb: Triplet): Triplet {
 		return Yxy.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 	}
 
@@ -144,7 +145,7 @@ export class RGB {
 	 * @param {number[]} yxy Yxy color
 	 * @return {number[]} sRGB color
 	 */
-	static fromYxy(yxy: [number, number, number]): [number, number, number] {
+	static fromYxy(yxy: Triplet): Triplet {
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromYxy(yxy)));
 	}
 
@@ -157,7 +158,7 @@ export class RGB {
 	 * @param {number[]} rgb sRGB color
 	 * @return {number[]} Lightness-only sRGB color
 	 */
-	static toLightness(rgb: [number, number, number]): [number, number, number] {
+	static toLightness(rgb: Triplet): Triplet {
 		const l = Lab.lightnessFromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab([l, 0, 0])));
 	}
