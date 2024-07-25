@@ -2,18 +2,18 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-07-18
+ * @version 2024-07-25
  */
 
 import 'klales/klales.min.css';
-import { convert, isRGBSaturated, isMunsellSaturated } from '../colorjst.ts';
+import { Triplet, convert, isRGBSaturated, isMunsellSaturated } from '../colorjst.ts';
 
 document.addEventListener('DOMContentLoaded', () => {
-	const sel = document.querySelector('select');
-	const sli = document.querySelector('input[type="range"]');
+	const sel = document.querySelector('select') as HTMLSelectElement;
+	const sli = document.querySelector('input[type="range"]') as HTMLInputElement;
 	const can = document.querySelector('canvas');
 	if (can) {
-		const ctx = can.getContext('2d');
+		const ctx = can.getContext('2d') as CanvasRenderingContext2D;
 
 		draw(ctx, sel, sli);
 		sel?.addEventListener('change', () => {
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 });
 
-function draw(ctx, sel, sli): void {
+function draw(ctx: CanvasRenderingContext2D, sel: HTMLSelectElement, sli: HTMLInputElement): void {
 	ctx.save();
 	ctx.fillStyle = 'rgb(127, 127, 127)';
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
@@ -42,7 +42,7 @@ function draw(ctx, sel, sli): void {
 	];
 	const idx = parseInt(sel.value, 10);
 	ctx.save();
-	fns[idx](ctx, sli.value / 255);
+	fns[idx](ctx, parseInt(sli.value) / 255);
 	ctx.restore();
 };
 
@@ -129,10 +129,9 @@ function drawChartPCCS(ctx: CanvasRenderingContext2D, v: number): void {
 	}
 }
 
-function setPixel(ctx: CanvasRenderingContext2D, x, y, [r = 0, g = 0, b = 0, a = 255]) {
-	ctx.strokeStyle = `rgba(${r},${g},${b},${a})`;
+function setPixel(ctx: CanvasRenderingContext2D, x: number, y: number, [r = 0, g = 0, b = 0]: Triplet) {
+	ctx.strokeStyle = `rgb(${r},${g},${b}`;
 	ctx.beginPath();
 	ctx.rect(x, y, 1, 1);
 	ctx.stroke();
-	return ctx;
 }
