@@ -42,6 +42,8 @@ export class Color {
 
 	public set(cs: ColorSpace, t: Triplet): void {
 		this.ts.clear();
+		this.us.clear();
+
 		this.ts.set(cs, t);
 		this.cs = cs;
 	}
