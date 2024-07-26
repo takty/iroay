@@ -2,11 +2,13 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-07-26
  */
 
 import 'klales/klales.min.css';
-import { Triplet, convert, isRGBSaturated, isMunsellSaturated } from '../colorjst.ts';
+import { convert, isRGBSaturated, isMunsellSaturated } from '../colorjst.ts';
+
+type Triplet = [number, number, number];
 
 document.addEventListener('DOMContentLoaded', () => {
 	const sel = document.querySelector('select') as HTMLSelectElement;

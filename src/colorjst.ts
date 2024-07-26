@@ -1,4 +1,3 @@
-export { Triplet } from './_triplet';
 export { Color } from './_color';
 export { Lab } from './_cs-lab';
 export { LMS } from './_cs-lms';
