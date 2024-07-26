@@ -1,4 +1,4 @@
-export { Color } from './_color';
+export { Color, ColorSpace } from './_color';
 export { Lab } from './_cs-lab';
 export { LMS } from './_cs-lms';
 export { LRGB } from './_cs-lrgb';
