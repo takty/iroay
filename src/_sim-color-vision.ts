@@ -2,13 +2,12 @@
  * This class simulates color vision characteristics.
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-07-26
  */
 
 import { Triplet } from './_triplet';
 import { LMS } from './_cs-lms';
 import { XYZ } from './_cs-xyz';
-import { LRGB } from './_cs-lrgb';
 
 export class ColorVisionSimulation {
 	/*
@@ -99,10 +98,12 @@ export class ColorVisionSimulation {
 	 * @param {boolean} doCorrection
 	 * @return {number[]} LMS color in protanopia
 	 */
-	static lmsToProtanopia(lms: Triplet, doCorrection = false): Triplet {
+	static lmsToProtanopia(lms: Triplet, doCorrection: boolean = false): Triplet {
 		const ds = ColorVisionSimulation.brettelP(lms);
-		if (!doCorrection) return ds;
-		return ColorVisionSimulation.okajimaCorrectionP(lms[1], ds, ColorVisionSimulation.LMS_BASE);
+		if (doCorrection) {
+			return ColorVisionSimulation.okajimaCorrectionP(lms[1], ds, ColorVisionSimulation.LMS_BASE);
+		}
+		return ds;
 	}
 
 	/**
@@ -111,10 +112,12 @@ export class ColorVisionSimulation {
 	 * @param {boolean} doCorrection
 	 * @return {number[]} LMS color in deuteranopia
 	 */
-	static lmsToDeuteranopia(lms: Triplet, doCorrection = false): Triplet {
+	static lmsToDeuteranopia(lms: Triplet, doCorrection: boolean = false): Triplet {
 		const ds = ColorVisionSimulation.brettelD(lms);
-		if (!doCorrection) return ds;
-		return ColorVisionSimulation.okajimaCorrectionD(lms[0], ds, ColorVisionSimulation.LMS_BASE);
+		if (doCorrection) {
+			return ColorVisionSimulation.okajimaCorrectionD(lms[0], ds, ColorVisionSimulation.LMS_BASE);
+		}
+		return ds;
 	}
 
 
@@ -127,22 +130,19 @@ export class ColorVisionSimulation {
 	 * @param {boolean} doCorrection
 	 * @return {number[]} LMS color in protanopia
 	 */
-	static lrgbToProtanopia([lr, lg, lb]: Triplet, doCorrection = false): Triplet {
+	static lrgbToProtanopia([lr, lg, lb]: Triplet, doCorrection: boolean = false): Triplet {
 		const lrgb2: Triplet = [
 			0.992052 * lr + 0.003974,
 			0.992052 * lg + 0.003974,
 			0.992052 * lb + 0.003974,
 		];
 		const lms = LMS.fromXYZ(XYZ.fromLRGB(lrgb2));
-		const lms2 = ColorVisionSimulation.brettelP(lms);
+		const ds = ColorVisionSimulation.brettelP(lms);
 
-		let lms3;
 		if (doCorrection) {
-			lms3 = ColorVisionSimulation.okajimaCorrectionP(lms[1], lms2, ColorVisionSimulation.LMS_BASE2);
-		} else {
-			lms3 = lms2;
+			return ColorVisionSimulation.okajimaCorrectionP(lms[1], ds, ColorVisionSimulation.LMS_BASE2);
 		}
-		return LRGB.fromXYZ(XYZ.fromLMS(lms3));
+		return ds;
 	}
 
 	/**
@@ -158,15 +158,12 @@ export class ColorVisionSimulation {
 			0.957237 * lb + 0.0213814,
 		];
 		const lms = LMS.fromXYZ(XYZ.fromLRGB(lrgb2));
-		const lms2 = ColorVisionSimulation.brettelD(lms);
+		const ds = ColorVisionSimulation.brettelD(lms);
 
-		let lms3;
 		if (doCorrection) {
-			lms3 = ColorVisionSimulation.okajimaCorrectionD(lms[0], lms2, ColorVisionSimulation.LMS_BASE2);
-		} else {
-			lms3 = lms2;
+			return ColorVisionSimulation.okajimaCorrectionD(lms[0], ds, ColorVisionSimulation.LMS_BASE2);
 		}
-		return LRGB.fromXYZ(XYZ.fromLMS(lms3));
+		return ds;
 	}
 
 	static LMS_BASE  = LMS.fromXYZ([1, 1, 1]);
