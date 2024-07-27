@@ -9,5 +9,5 @@ await build({
 	minify      : true,
 	sourcemap   : true,
 	bundle      : true,
-	format: "esm",
+	format      : "esm",
 });
