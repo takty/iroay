@@ -162,8 +162,6 @@ function drawChartTone(ctx: CanvasRenderingContext2D, v: number): void {
 }
 
 function setPixel(ctx: CanvasRenderingContext2D, x: number, y: number, [r = 0, g = 0, b = 0]: Triplet) {
-	ctx.strokeStyle = `rgb(${r},${g},${b}`;
-	ctx.beginPath();
-	ctx.rect(x, y, 1, 1);
-	ctx.stroke();
+	ctx.fillStyle = `rgb(${r},${g},${b}`;
+	ctx.fillRect(x, y, 1, 1);
 }
