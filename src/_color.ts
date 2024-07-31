@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-07-26
+ * @version 2024-07-31
  */
 
 import { Triplet } from './_triplet';
@@ -31,7 +31,7 @@ export enum ColorSpace {
 
 export class Color {
 	private ts = new Map<ColorSpace, Triplet>();
-	private us = new Map<string, string>();
+	private us = new Map<string, string|number>();
 	private cs: ColorSpace | null = null;
 
 	public constructor(cs: ColorSpace|null = null, t: Triplet|null = null) {
@@ -73,7 +73,7 @@ export class Color {
 		}
 		const t: Triplet = RGB.fromLRGB(this.asLRGB());
 		this.ts.set(ColorSpace.RGB, t);
-		if (RGB.isSaturated) this.us.set('rgb_sat', '');
+		if (RGB.isSaturated) this.us.set('rgb_saturation', '');
 		return t;
 	}
 
@@ -110,7 +110,7 @@ export class Color {
 				break;
 			case ColorSpace.Yxy:
 				t = Yxy.toXYZ(this.asYxy());
-				if (Yxy.isSaturated) this.us.set('yxy_sat', '');
+				if (Yxy.isSaturated) this.us.set('yxy_saturation', '');
 				break;
 			case ColorSpace.LMS:
 				t = LMS.toXYZ(this.asLMS());
@@ -119,7 +119,7 @@ export class Color {
 			case ColorSpace.PCCS:
 			case ColorSpace.Tone:
 				t = Munsell.toXYZ(this.asMunsell());
-				if (Munsell.isSaturated) this.us.set('mun_sat', '');
+				if (Munsell.isSaturated) this.us.set('munsell_saturation', '');
 				break;
 		}
 		this.ts.set(ColorSpace.XYZ, t);
@@ -219,15 +219,15 @@ export class Color {
 
 
 	public isRGBSaturated(): boolean {
-		return this.us.has('rgb_sat');
+		return this.us.has('rgb_saturation');
 	}
 
 	public isYxySaturated(): boolean {
-		return this.us.has('yxy_sat');
+		return this.us.has('yxy_saturation');
 	}
 
 	public isMunsellSaturated(): boolean {
-		return this.us.has('mun_sat');
+		return this.us.has('munsell_saturation');
 	}
 
 
@@ -235,29 +235,20 @@ export class Color {
 
 
 	public asMunsellNotation(): string {
-		if (this.us.has('mun_not')) {
-			return this.us.get('mun_not') as string;
+		if (this.us.has('munsell_notation')) {
+			return this.us.get('munsell_notation') as string;
 		}
 		const s = Munsell.toString(this.asMunsell());
-		this.us.set('mun_not', s);
+		this.us.set('munsell_notation', s);
 		return s;
 	}
 
 	public asPCCSNotation(): string {
-		if (this.us.has('pccs_not')) {
-			return this.us.get('pccs_not') as string;
+		if (this.us.has('pccs_notation')) {
+			return this.us.get('pccs_notation') as string;
 		}
 		const s = PCCS.toString(this.asPCCS());
-		this.us.set('pccs_not', s);
-		return s;
-	}
-
-	public asCategory(): string {
-		if (this.us.has('cat')) {
-			return this.us.get('cat') as string;
-		}
-		const s = Evaluation.categoryOfYxy(this.asYxy());
-		this.us.set('cat', s);
+		this.us.set('pccs_notation', s);
 		return s;
 	}
 
@@ -265,23 +256,61 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public toProtanopia(method: 1|2 = 2, doCorrection: boolean = false): Color {
-		if (1 === method) {
-			const lms = ColorVisionSimulation.lmsToProtanopia(this.asLMS(), doCorrection);
-			return new Color(ColorSpace.LMS, lms);
-		} else {
-			const lms = ColorVisionSimulation.lrgbToProtanopia(this.asLRGB(), doCorrection);
-			return new Color(ColorSpace.LMS, lms);
+	public asConspicuity(): number {
+		if (this.us.has('conspicuity')) {
+			return this.us.get('conspicuity') as number;
+		}
+		const s = Evaluation.conspicuityOfLab(this.asLab());
+		this.us.set('conspicuity', s);
+		return s;
+	}
+
+	public asCategory(): string {
+		if (this.us.has('category')) {
+			return this.us.get('category') as string;
+		}
+		const n = Evaluation.categoryOfYxy(this.asYxy());
+		this.us.set('category', n);
+		return n;
+	}
+
+	public distanceTo(c: Color, method: 'sqrt'|'cie76'|'ciede2000' = 'ciede2000'): number {
+		switch (method) {
+			case 'sqrt':
+				return Evaluation.distance(this.asLab(), c.asLab());
+			case 'cie76':
+				return Evaluation.CIE76(this.asLab(), c.asLab());
+			case 'ciede2000':
+			default:
+				return Evaluation.CIEDE2000(this.asLab(), c.asLab());
 		}
 	}
 
-	public toDeuteranopia(method: 1|2 = 2, doCorrection: boolean = false): Color {
-		if (1 === method) {
-			const lms = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS(), doCorrection);
-			return new Color(ColorSpace.LMS, lms);
-		} else {
-			const lms = ColorVisionSimulation.lrgbToDeuteranopia(this.asLRGB(), doCorrection);
-			return new Color(ColorSpace.LMS, lms);
+
+	// -------------------------------------------------------------------------
+
+
+	public toProtanopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+		switch (method) {
+			case 'lms':
+				const lms0 = ColorVisionSimulation.lmsToProtanopia(this.asLMS(), doCorrection);
+				return new Color(ColorSpace.LMS, lms0);
+			case 'lrgb':
+			default:
+				const lms1 = ColorVisionSimulation.lrgbToProtanopia(this.asLRGB(), doCorrection);
+				return new Color(ColorSpace.LMS, lms1);
+		}
+	}
+
+	public toDeuteranopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+		switch (method) {
+			case 'lms':
+				const lms0 = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS(), doCorrection);
+				return new Color(ColorSpace.LMS, lms0);
+			case 'lrgb':
+			default:
+				const lms1 = ColorVisionSimulation.lrgbToDeuteranopia(this.asLRGB(), doCorrection);
+				return new Color(ColorSpace.LMS, lms1);
 		}
 	}
 }
