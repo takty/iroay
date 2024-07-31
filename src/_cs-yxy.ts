@@ -2,7 +2,7 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-07-31
  */
 
 import { Triplet } from './_triplet';
@@ -30,7 +30,7 @@ export class Yxy {
 	 */
 	static toXYZ([y, sx, sy]: Triplet): Triplet {
 		const d0 = sx * y / sy;
-		if (Number.isNaN(d0)) {
+		if (!Number.isFinite(d0)) {
 			Yxy.isSaturated = false;
 			return [0, 0, 0];
 		}
