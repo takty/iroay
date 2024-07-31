@@ -25,10 +25,18 @@
 				<option value="3">Lab</option>
 				<option value="4">Yxy</option>
 				<option value="5">Munsell</option>
-				<option value="6">PCCS</option>
-				<option value="7">Tone</option>
+				<option value="6">Munsell (Polar)</option>
+				<option value="7">PCCS</option>
+				<option value="8">PCCS (Polar)</option>
+				<option value="9">Tone</option>
 			</select>
-			<input type="range" min="0" max="255">
+
+			<input id="value" type="range" min="0" max="255">
+
+			<label>
+				<input id="show-saturation" type="checkbox">
+				Show Saturation
+			</label>
 		</div>
 
 		<canvas width="256" height="256"></canvas>
