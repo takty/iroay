@@ -6,10 +6,10 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-07-31
  */
 
-import { _TBL_SRC_MIN } from './table/_hc2xy-real-min';
+import { _TBL_SRC_MIN } from './table/_hc2xy-all-min';
 import { Triplet } from './_triplet';
 import { XYZ } from './_cs-xyz';
 import { Yxy } from './_cs-yxy';
@@ -84,7 +84,7 @@ export class Munsell {
 		const v_l = ((vi_l == -1) ? 0 : Munsell._TBL_V[vi_l]), v_h = Munsell._TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
-		if (Munsell._MAX_HUE <= h) h -= Munsell._MAX_HUE;
+		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
 		let c = (hc_u[1] - hc_l[1]) * r + hc_l[1];
 		if (c < Munsell.MONO_LIMIT_C) c = 0;
 		return [h, v, c];
@@ -206,7 +206,7 @@ export class Munsell {
 
 		let hv = parseFloat(hueName.substring(0, hueName.length - len));
 		hv += Munsell._HUE_NAMES.indexOf(n) * 10;
-		if (Munsell._MAX_HUE <= hv) hv -= Munsell._MAX_HUE;
+		if (Munsell.MAX_HUE <= hv) hv -= Munsell.MAX_HUE;
 		return hv;
 	}
 
@@ -219,7 +219,7 @@ export class Munsell {
 	 */
 	static hueValueToHueName(hue: number, chroma: number): string {
 		if (hue == -1 || Munsell._eq0(chroma)) return 'N';
-		if (hue <= 0) hue += Munsell._MAX_HUE;
+		if (hue <= 0) hue += Munsell.MAX_HUE;
 		let h10 = (0 | hue * 10) % 100;
 		let c = 0 | (hue / 10);
 		if (h10 === 0) {
@@ -244,7 +244,7 @@ export class Munsell {
 	 * @return {number[]} XYZ color
 	 */
 	static toXYZ([h, v, c]: Triplet): Triplet {
-		if (Munsell._MAX_HUE <= h) h -= Munsell._MAX_HUE;
+		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
 		const dest: Triplet = [Munsell._v2y(v), 0, 0];
 		Munsell.isSaturated = false;
 
@@ -375,52 +375,55 @@ export class Munsell {
 		}
 	}
 
+	static MIN_HUE = 0;
+	static MAX_HUE = 100;  // Same as MIN_HUE
 	static MONO_LIMIT_C = 0.05;
+
 	static _TBL_SRC_MIN = _TBL_SRC_MIN;
 	static _TBL_V_REAL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 	static _TBL_V_ALL = [0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-	static _TBL_V = Munsell._TBL_V_REAL;
-	static _MIN_HUE = 0;
-	static _MAX_HUE = 100;  // Same as MIN_HUE
+	static _TBL_V = Munsell._TBL_V_ALL;
 	static _HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
 	static _EP = 0.0000000000001;
 	static _ILLUMINANT_C = [0.3101, 0.3162];  // Standard illuminant C, white point
 	static _TBL_MAX_C = new Array(Munsell._TBL_V.length);
 	static _TBL = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
-}
 
-function _initTable() {
-	for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
-		Munsell._TBL_MAX_C[vi] = new Array(1000 / 25);
-		Munsell._TBL_MAX_C[vi].fill(0);
-		Munsell._TBL[vi] = new Array(1000 / 25);
-		for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell._TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
+	static {
+		Munsell.initTable();
+	}
 
-		for (const cs of Munsell._TBL_SRC_MIN[vi]) {
-			const c0 = cs.shift() as number;
-			_integrate(cs);
-			_integrate(cs);
-			for (let i = 0; i < cs.length; i += 2) {
-				const c1 = i / 2 + 1;
-				const c2 = cs[i + 0] / 1000;
-				const c3 = cs[i + 1] / 1000;
-				Munsell._TBL[vi][c0][c1] = [c2, c3];
-				if (Munsell._TBL_MAX_C[vi][c0] < c1 * 2) {
-					Munsell._TBL_MAX_C[vi][c0] = c1 * 2;
+	static initTable() {
+		for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
+			Munsell._TBL_MAX_C[vi] = new Array(1000 / 25);
+			Munsell._TBL_MAX_C[vi].fill(0);
+			Munsell._TBL[vi] = new Array(1000 / 25);
+			for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell._TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
+
+			for (const cs of Munsell._TBL_SRC_MIN[vi]) {
+				const c0 = cs.shift() as number;
+				_integrate(cs);
+				_integrate(cs);
+				for (let i = 0; i < cs.length; i += 2) {
+					const c1 = i / 2 + 1;
+					const c2 = cs[i + 0] / 1000;
+					const c3 = cs[i + 1] / 1000;
+					Munsell._TBL[vi][c0][c1] = [c2, c3];
+					if (Munsell._TBL_MAX_C[vi][c0] < c1 * 2) {
+						Munsell._TBL_MAX_C[vi][c0] = c1 * 2;
+					}
 				}
 			}
 		}
-	}
-	function _integrate(cs: number[]) {
-		let c2_ = 0, c3_ = 0;
-		for (let i = 0; i < cs.length; i += 2) {
-			const c2 = cs[i], c3 = cs[i + 1];
-			cs[i]     = c2 + c2_;
-			cs[i + 1] = c3 + c3_;
-			c2_ += c2;
-			c3_ += c3;
+		function _integrate(cs: number[]) {
+			let c2_ = 0, c3_ = 0;
+			for (let i = 0; i < cs.length; i += 2) {
+				const c2 = cs[i], c3 = cs[i + 1];
+				cs[i]     = c2 + c2_;
+				cs[i + 1] = c3 + c3_;
+				c2_ += c2;
+				c3_ += c3;
+			}
 		}
 	}
 }
-
-_initTable();

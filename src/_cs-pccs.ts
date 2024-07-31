@@ -6,7 +6,7 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-07-31
  */
 
 import { Triplet } from './_triplet';
@@ -40,11 +40,11 @@ export class PCCS {
 	}
 
 	private static _calcInterpolatedCoefficients(h: number) {
-		if (PCCS._MAX_HUE < h) h -= PCCS._MAX_HUE;
+		if (PCCS.MAX_HUE < h) h -= PCCS.MAX_HUE;
 		let hf = 0 | Math.floor(h);
 		if (hf % 2 != 0) --hf;
 		let hc = hf + 2;
-		if (PCCS._MAX_HUE < hc) hc -= PCCS._MAX_HUE;
+		if (PCCS.MAX_HUE < hc) hc -= PCCS.MAX_HUE;
 
 		const af = PCCS._COEFFICIENTS[hf / 2], ac = PCCS._COEFFICIENTS[hc / 2], a = [0, 0, 0, 0];
 		for (let i = 0; i < 3; ++i) {
@@ -123,14 +123,14 @@ export class PCCS {
 	 * @return {number[]} PCCS color
 	 */
 	static fromMunsell([H, V, C]: Triplet): Triplet {
-		if (Munsell._MAX_HUE <= H) H -= Munsell._MAX_HUE;
+		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 		let h = 0, l = V, s = 0;
 
 		h = PCCS.conversionMethod._calcPccsH(H);
 		if (Munsell.MONO_LIMIT_C <= C) {
 			s = PCCS.conversionMethod._calcPccsS(V, C, h);
 		}
-		if (PCCS._MAX_HUE <= h) h -= PCCS._MAX_HUE;
+		if (PCCS.MAX_HUE <= h) h -= PCCS.MAX_HUE;
 		return [h, l, s];
 	}
 
@@ -143,11 +143,11 @@ export class PCCS {
 		let H = 0, V = l, C = 0;
 
 		H = PCCS.conversionMethod._calcMunsellH(h);
-		if (PCCS._MONO_LIMIT_S <= s) {
+		if (PCCS.MONO_LIMIT_S <= s) {
 			C = PCCS.conversionMethod._calcMunsellC(h, l, s);
 		}
-		if (H < 0) H += Munsell._MAX_HUE;
-		if (Munsell._MAX_HUE <= H) H -= Munsell._MAX_HUE;
+		if (H < 0) H += Munsell.MAX_HUE;
+		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 		return [H, V, C];
 	}
 
@@ -227,7 +227,7 @@ export class PCCS {
 	 */
 	static toString(hls: Triplet): string {
 		const str_l = Math.round(hls[1] * 10) / 10;
-		if (hls[2] < PCCS._MONO_LIMIT_S) {
+		if (hls[2] < PCCS.MONO_LIMIT_S) {
 			if (9.5 <= hls[1]) return `W N-${str_l}`;
 			if (hls[1] <= 1.5) return `Bk N-${str_l}`;
 			return `Gy-${str_l} N-${str_l}`;
@@ -236,8 +236,8 @@ export class PCCS {
 			const str_s = Math.round(hls[2] * 10) / 10;
 
 			let tn = Math.round(hls[0]);
-			if (tn <= 0) tn = PCCS._MAX_HUE;
-			if (PCCS._MAX_HUE < tn) tn -= PCCS._MAX_HUE;
+			if (tn <= 0) tn = PCCS.MAX_HUE;
+			if (PCCS.MAX_HUE < tn) tn -= PCCS.MAX_HUE;
 			const hue = PCCS._HUE_NAMES[tn];
 			const tone = PCCS._TONE_NAMES[PCCS.tone(hls)];
 
@@ -252,12 +252,12 @@ export class PCCS {
 	 * @return {string} String representation of hues
 	 */
 	static toHueString([h,, s]: Triplet): string {
-		if (s < PCCS._MONO_LIMIT_S) {
+		if (s < PCCS.MONO_LIMIT_S) {
 			return 'N';
 		} else {
 			let tn = Math.round(h);
-			if (tn <= 0) tn = PCCS._MAX_HUE;
-			if (PCCS._MAX_HUE < tn) tn -= PCCS._MAX_HUE;
+			if (tn <= 0) tn = PCCS.MAX_HUE;
+			if (PCCS.MAX_HUE < tn) tn -= PCCS.MAX_HUE;
 			return PCCS._HUE_NAMES[tn];
 		}
 	}
@@ -268,7 +268,7 @@ export class PCCS {
 	 * @return {string} String representation of tones
 	 */
 	static toToneString(hls: Triplet): string {
-		if (hls[2] < PCCS._MONO_LIMIT_S) {
+		if (hls[2] < PCCS.MONO_LIMIT_S) {
 			if (9.5 <= hls[1]) return 'W';
 			if (hls[1] <= 1.5) return 'Bk';
 			return 'Gy';
@@ -278,8 +278,10 @@ export class PCCS {
 	}
 
 	// Hue [0, 24), 24 is also acceptable
-	private static _MAX_HUE = 24;  // same as MIN_HUE
-	private static _MONO_LIMIT_S = 0.01;
+	static MIN_HUE = 0;
+	static MAX_HUE = 24;
+	static MONO_LIMIT_S = 0.01;
+
 	private static _HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
 	private static _TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
 	private static _MUNSELL_H = [
