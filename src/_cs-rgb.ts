@@ -3,10 +3,10 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { Lab } from './_cs-lab';
 import { XYZ } from './_cs-xyz';
 import { LRGB } from './_cs-lrgb';
@@ -39,8 +39,8 @@ export class RGB {
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to Linear RGB.
-	 * @param {number[]} rgb sRGB color
-	 * @return {number[]} Linear RGB color
+	 * @param {Triplet} rgb sRGB color
+	 * @return {Triplet} Linear RGB color
 	 */
 	static toLRGB([r, g, b]: Triplet): Triplet {
 		return [
@@ -52,8 +52,8 @@ export class RGB {
 
 	/**
 	 * Convert Linear RGB to sRGB (Gamma 2.2).
-	 * @param {number[]} lrgb Linear RGB color
-	 * @return {number[]} sRGB color
+	 * @param {Triplet} lrgb Linear RGB color
+	 * @return {Triplet} sRGB color
 	 */
 	static fromLRGB([lr, lg, lb]: Triplet): Triplet {
 		const dest: Triplet = [
@@ -72,7 +72,7 @@ export class RGB {
 	/**
 	 * Convert color integer to sRGB.
 	 * @param {number} v Color integer
-	 * @return {number[]} Color vector
+	 * @return {Triplet} Color vector
 	 */
 	static fromColorInteger(v: number): Triplet {
 		return [
@@ -84,7 +84,7 @@ export class RGB {
 
 	/**
 	 * Convert sRGB to color integer.
-	 * @param {number[]} rgb RGB
+	 * @param {Triplet} rgb RGB
 	 * @return {number} Color integer
 	 */
 	static toColorInteger([r, g, b]: Triplet): number {
@@ -97,8 +97,8 @@ export class RGB {
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to CIELAB (L*a*b*).
-	 * @param {number[]} rgb sRGB color
-	 * @return {number[]} CIELAB color
+	 * @param {Triplet} rgb sRGB color
+	 * @return {Triplet} CIELAB color
 	 */
 	static toLab(rgb: Triplet): Triplet {
 		return Lab.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
@@ -106,8 +106,8 @@ export class RGB {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to sRGB (Gamma 2.2).
-	 * @param {number[]} lab L*, a*, b* of CIELAB color
-	 * @return {number[]} sRGB color
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color
+	 * @return {Triplet} sRGB color
 	 */
 	static fromLab(lab: Triplet): Triplet {
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab(lab)));
@@ -115,8 +115,8 @@ export class RGB {
 
 	/**
 	 * Convert sRGB to CIE 1931 XYZ.
-	 * @param {number[]} rgb sRGB color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} rgb sRGB color
+	 * @return {Triplet} XYZ color
 	 */
 	static toXYZ(rgb: Triplet): Triplet {
 		return LRGB.toXYZ(LRGB.fromRGB(rgb));
@@ -124,8 +124,8 @@ export class RGB {
 
 	/**
 	 * Convert CIE 1931 XYZ to sRGB.
-	 * @param {number[]} xyz XYZ color
-	 * @return {number[]} sRGB color
+	 * @param {Triplet} xyz XYZ color
+	 * @return {Triplet} sRGB color
 	 */
 	static fromXYZ(xyz: Triplet): Triplet {
 		return RGB.fromLRGB(LRGB.fromXYZ(xyz));
@@ -133,8 +133,8 @@ export class RGB {
 
 	/**
 	 * Convert sRGB (Gamma 2.2) to Yxy.
-	 * @param {number[]} rgb sRGB color
-	 * @return {number[]} Yxy color
+	 * @param {Triplet} rgb sRGB color
+	 * @return {Triplet} Yxy color
 	 */
 	static toYxy(rgb: Triplet): Triplet {
 		return Yxy.fromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
@@ -142,8 +142,8 @@ export class RGB {
 
 	/**
 	 * Convert Yxy to sRGB (Gamma 2.2).
-	 * @param {number[]} yxy Yxy color
-	 * @return {number[]} sRGB color
+	 * @param {Triplet} yxy Yxy color
+	 * @return {Triplet} sRGB color
 	 */
 	static fromYxy(yxy: Triplet): Triplet {
 		return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromYxy(yxy)));
@@ -155,8 +155,8 @@ export class RGB {
 
 	/**
 	 * Convert sRGB to Lightness-only sRGB.
-	 * @param {number[]} rgb sRGB color
-	 * @return {number[]} Lightness-only sRGB color
+	 * @param {Triplet} rgb sRGB color
+	 * @return {Triplet} Lightness-only sRGB color
 	 */
 	static toLightness(rgb: Triplet): Triplet {
 		const l = Lab.lightnessFromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));

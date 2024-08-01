@@ -4,10 +4,10 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { Evaluation } from './_eval';
 
 export class Lab {
@@ -23,8 +23,8 @@ export class Lab {
 
 	/**
 	 * Convert CIE 1931 XYZ to CIE 1976 (L*, a*, b*).
-	 * @param {number[]} xyz XYZ color
-	 * @return {number[]} CIELAB color
+	 * @param {Triplet} xyz XYZ color
+	 * @return {Triplet} CIELAB color
 	 */
 	static fromXYZ([x, y, z]: Triplet): Triplet {
 		const fx = Lab._func(x / Lab.XYZ_TRISTIMULUS_VALUES[0]);
@@ -39,7 +39,7 @@ export class Lab {
 
 	/**
 	 * Convert CIE 1931 XYZ to L* of CIE 1976 (L*, a*, b*).
-	 * @param {number[]} xyz XYZ color
+	 * @param {Triplet} xyz XYZ color
 	 * @return {number} L*
 	 */
 	static lightnessFromXYZ([, y,]: Triplet): number {
@@ -49,8 +49,8 @@ export class Lab {
 
 	/**
 	 * Convert CIE 1976 (L*, a*, b*) to CIE 1931 XYZ.
-	 * @param {number[]} lab L*, a*, b* of CIELAB color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color
+	 * @return {Triplet} XYZ color
 	 */
 	static toXYZ([ls, as, bs]: Triplet): Triplet {
 		const fy = (ls + 16) / 116;
@@ -71,7 +71,7 @@ export class Lab {
 	 * Calculate the conspicuity degree.
 	 * Reference: Effective use of color conspicuity for Re-Coloring system,
 	 * Correspondences on Human interface Vol. 12, No. 1, SIG-DE-01, 2010.
-	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color
 	 * @return {number} Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
@@ -81,8 +81,8 @@ export class Lab {
 
 	/**
 	 * Calculate the color difference between the two colors.
-	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
-	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @param {Triplet} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {Triplet} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	 */
 	static differenceBetween(lab1: Triplet, lab2: Triplet): number {
@@ -95,8 +95,8 @@ export class Lab {
 
 	/**
 	 * Convert CIELAB (L*a*b*) from rectangular coordinate format to polar coordinate format.
-	 * @param {number[]} lab L*, a*, b* of rectangular coordinate format (CIELAB)
-	 * @return {number[]} Color in polar format
+	 * @param {Triplet} lab L*, a*, b* of rectangular coordinate format (CIELAB)
+	 * @return {Triplet} Color in polar format
 	 */
 	static toPolarCoordinate([ls, as, bs]: Triplet): Triplet {
 		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
@@ -107,8 +107,8 @@ export class Lab {
 
 	/**
 	 * Convert CIELAB (L*a*b*) from polar coordinate format to rectangular coordinate format.
-	 * @param {number[]} lab L*, C*, h of polar format (CIELAB)
-	 * @return {number[]} Color in rectangular coordinate format
+	 * @param {Triplet} lab L*, C*, h of polar format (CIELAB)
+	 * @return {Triplet} Color in rectangular coordinate format
 	 */
 	static toOrthogonalCoordinate([ls, cs, h]: Triplet): Triplet {
 		const rad = h * (Math.PI * 2) / 360;
@@ -126,15 +126,15 @@ export class Lab {
 	 * D50 tristimulus value
 	 * Reference: http://www.babelcolor.com/download/A%20review%20of%20RGB%20color%20spaces.pdf
 	 */
-	static D50_xyz = [0.34567, 0.35850, 0.29583];
-	static D50_XYZ = [Lab.D50_xyz[0] / Lab.D50_xyz[1], 1, Lab.D50_xyz[2] / Lab.D50_xyz[1]];
+	static D50_xyz: Triplet = [0.34567, 0.35850, 0.29583];
+	static D50_XYZ: Triplet = [Lab.D50_xyz[0] / Lab.D50_xyz[1], 1, Lab.D50_xyz[2] / Lab.D50_xyz[1]];
 
 	/**
 	 * D65 tristimulus value
 	 * Reference: http://www.babelcolor.com/download/A%20review%20of%20RGB%20color%20spaces.pdf
 	 */
-	static D65_xyz = [0.31273, 0.32902, 0.35825];
-	static D65_XYZ = [Lab.D65_xyz[0] / Lab.D65_xyz[1], 1, Lab.D65_xyz[2] / Lab.D65_xyz[1]];
+	static D65_xyz: Triplet = [0.31273, 0.32902, 0.35825];
+	static D65_XYZ: Triplet = [Lab.D65_xyz[0] / Lab.D65_xyz[1], 1, Lab.D65_xyz[2] / Lab.D65_xyz[1]];
 
 	/**
 	 * XYZ tristimulus value

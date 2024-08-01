@@ -2,10 +2,10 @@
  * This class simulates color vision characteristics.
  *
  * @author Takuto Yanagida
- * @version 2024-07-26
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { LMS } from './_cs-lms';
 import { XYZ } from './_cs-xyz';
 
@@ -18,8 +18,8 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Simulate protanopia
-	 * @param {number[]} lms LMS color
-	 * @return {number[]} LMS color in protanopia
+	 * @param {Triplet} lms LMS color
+	 * @return {Triplet} LMS color in protanopia
 	 */
 	static brettelP([l, m, s]: Triplet): Triplet {
 		return [
@@ -31,8 +31,8 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Simulate deuteranopia
-	 * @param {number[]} lms LMS color
-	 * @return {number[]} LMS color in deuteranopia
+	 * @param {Triplet} lms LMS color
+	 * @return {Triplet} LMS color in deuteranopia
 	 */
 	static brettelD([l, m, s]: Triplet): Triplet {
 		return [
@@ -51,9 +51,9 @@ export class ColorVisionSimulation {
 	/**
 	 * Correct simulation of protanopia
 	 * @param {number} m Original M of LMS color
-	 * @param {number[]} lms LMS color of protanopia simulation
-	 * @param {number[]} base Base LMS color
-	 * @return {number[]} LMS color in protanopia
+	 * @param {Triplet} lms LMS color of protanopia simulation
+	 * @param {Triplet} base Base LMS color
+	 * @return {Triplet} LMS color in protanopia
 	 */
 	static okajimaCorrectionP(m: number, [l2, m2, s2]: Triplet, base: Triplet): Triplet {
 		const sp1 = m / base[1];
@@ -71,9 +71,9 @@ export class ColorVisionSimulation {
 	/**
 	 * Correct simulation of deuteranopia
 	 * @param {number} l Original L of LMS color
-	 * @param {number[]} lms LMS color of deuteranopia simulation
-	 * @param {number[]} base Base LMS color
-	 * @return {number[]} LMS color in deuteranopia
+	 * @param {Triplet} lms LMS color of deuteranopia simulation
+	 * @param {Triplet} base Base LMS color
+	 * @return {Triplet} LMS color in deuteranopia
 	 */
 	static okajimaCorrectionD(l: number, [l2, m2, s2]: Triplet, base: Triplet): Triplet {
 		const sp0 = l / base[0];
@@ -94,9 +94,9 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Convert LMS to LMS in protanopia (Method 1).
-	 * @param {number[]} lms LMS color
+	 * @param {Triplet} lms LMS color
 	 * @param {boolean} doCorrection
-	 * @return {number[]} LMS color in protanopia
+	 * @return {Triplet} LMS color in protanopia
 	 */
 	static lmsToProtanopia(lms: Triplet, doCorrection: boolean = false): Triplet {
 		const ds = ColorVisionSimulation.brettelP(lms);
@@ -108,9 +108,9 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Convert LMS to LMS in deuteranopia (Method 1).
-	 * @param {number[]} lms LMS color
+	 * @param {Triplet} lms LMS color
 	 * @param {boolean} doCorrection
-	 * @return {number[]} LMS color in deuteranopia
+	 * @return {Triplet} LMS color in deuteranopia
 	 */
 	static lmsToDeuteranopia(lms: Triplet, doCorrection: boolean = false): Triplet {
 		const ds = ColorVisionSimulation.brettelD(lms);
@@ -126,9 +126,9 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Convert Linear RGB to LMS in protanopia (Method 2).
-	 * @param {number[]} lrgb Linear RGB color
+	 * @param {Triplet} lrgb Linear RGB color
 	 * @param {boolean} doCorrection
-	 * @return {number[]} LMS color in protanopia
+	 * @return {Triplet} LMS color in protanopia
 	 */
 	static lrgbToProtanopia([lr, lg, lb]: Triplet, doCorrection: boolean = false): Triplet {
 		const lrgb2: Triplet = [
@@ -147,9 +147,9 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Convert Linear RGB to LMS in deuteranopia (Method 2).
-	 * @param {number[]} lrgb Linear RGB color
+	 * @param {Triplet} lrgb Linear RGB color
 	 * @param {boolean} doCorrection
-	 * @return {number[]} LMS color in deuteranopia
+	 * @return {Triplet} LMS color in deuteranopia
 	 */
 	static lrgbToDeuteranopia([lr, lg, lb]: Triplet, doCorrection: boolean = false): Triplet {
 		const lrgb2: Triplet = [

@@ -6,10 +6,10 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2024-07-31
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet, Quartet } from './_type';
 import { Munsell } from './_cs-munsell';
 
 export class PCCS {
@@ -27,26 +27,26 @@ export class PCCS {
 				break;
 			}
 		}
-		if (h1 == -1) console.error("h1 is -1, H = " + H);
-		if (h2 == -1) console.error("h2 is -1, H = " + H);
+		if (h1 === -1) console.error("h1 is -1, H = " + H);
+		if (h2 === -1) console.error("h2 is -1, H = " + H);
 		return h1 + (h2 - h1) * (H - PCCS._MUNSELL_H[h1]) / (PCCS._MUNSELL_H[h2] - PCCS._MUNSELL_H[h1]);
 	}
 
-	private static _calcPccsS(V: number, C: number, h: number) {
+	private static _calcPccsS(V: number, C: number, h: number): number {
 		const a = PCCS._calcInterpolatedCoefficients(h);
 		const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
 		const a0 = -C / (1 - Math.exp(-g * V));
 		return PCCS._solveEquation(PCCS._simplyCalcPccsS(V, C, h), a[3], a[2], a[1], a0);
 	}
 
-	private static _calcInterpolatedCoefficients(h: number) {
+	private static _calcInterpolatedCoefficients(h: number): Quartet {
 		if (PCCS.MAX_HUE < h) h -= PCCS.MAX_HUE;
 		let hf = 0 | Math.floor(h);
 		if (hf % 2 != 0) --hf;
 		let hc = hf + 2;
 		if (PCCS.MAX_HUE < hc) hc -= PCCS.MAX_HUE;
 
-		const af = PCCS._COEFFICIENTS[hf / 2], ac = PCCS._COEFFICIENTS[hc / 2], a = [0, 0, 0, 0];
+		const af: Triplet = PCCS._COEFFICIENTS[hf / 2], ac: Triplet = PCCS._COEFFICIENTS[hc / 2], a: Quartet = [0, 0, 0, 0];
 		for (let i = 0; i < 3; ++i) {
 			a[i + 1] = (h - hf) / (hc - hf) * (ac[i]- af[i]) + af[i];
 		}
@@ -119,8 +119,8 @@ export class PCCS {
 
 	/**
 	 * Convert Munsell (HVC) to PCCS (hls).
-	 * @param {number[]} hvc Hue, value, chroma of Munsell color
-	 * @return {number[]} PCCS color
+	 * @param {Triplet} hvc Hue, value, chroma of Munsell color
+	 * @return {Triplet} PCCS color
 	 */
 	static fromMunsell([H, V, C]: Triplet): Triplet {
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
@@ -136,8 +136,8 @@ export class PCCS {
 
 	/**
 	 * Convert PCCS (hls) to Munsell (HVC).
-	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
-	 * @return {number[]} Munsell color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
+	 * @return {Triplet} Munsell color
 	 */
 	static toMunsell([h, l, s]: Triplet): Triplet {
 		let H = 0, V = l, C = 0;
@@ -153,7 +153,7 @@ export class PCCS {
 
 	/**
 	 * Calculate tone.
-	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
 	 * @return {number} Tone
 	 */
 	static tone(hls: Triplet): number {
@@ -186,8 +186,8 @@ export class PCCS {
 
 	/**
 	 * Return relative lightness (lightness in tone coordinate system).
-	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
-	 * @return {number[]} Relative lightness L
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
+	 * @return {Triplet} Relative lightness L
 	 */
 	static relativeLightness([h, l, s]: Triplet): number {
 		return l - (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
@@ -195,8 +195,8 @@ export class PCCS {
 
 	/**
 	 * Return absolute lightness (lightness in PCCS).
-	 * @param {number[]} hLs Tone coordinate color
-	 * @return {number[]} Absolute lightness l
+	 * @param {Triplet} hLs Tone coordinate color
+	 * @return {Triplet} Absolute lightness l
 	 */
 	static absoluteLightness([h, L, s]: Triplet): number {
 		return L + (0.25 - 0.34 * Math.sqrt(1 - Math.sin((h - 2) * Math.PI / 12))) * s;
@@ -204,8 +204,8 @@ export class PCCS {
 
 	/**
 	 * Convert PCCS color to tone coordinate color.
-	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
-	 * @return {number[]} Tone coordinate color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
+	 * @return {Triplet} Tone coordinate color
 	 */
 	static toToneCoordinate(hls: Triplet): Triplet {
 		return [hls[0], PCCS.relativeLightness(hls), hls[2]];
@@ -213,8 +213,8 @@ export class PCCS {
 
 	/**
 	 * Convert tone coordinate color to PCCS color.
-	 * @param {number[]} hLs Tone coordinate color
-	 * @return {number[]} PCCS color
+	 * @param {Triplet} hLs Tone coordinate color
+	 * @return {Triplet} PCCS color
 	 */
 	static toNormalCoordinate(hLs: Triplet): Triplet {
 		return [hLs[0], PCCS.absoluteLightness(hLs), hLs[2]];
@@ -222,7 +222,7 @@ export class PCCS {
 
 	/**
 	 * Returns the string representation of PCCS numerical representation.
-	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
 	 * @return {string} String representation
 	 */
 	static toString(hls: Triplet): string {
@@ -241,14 +241,14 @@ export class PCCS {
 			const hue = PCCS._HUE_NAMES[tn];
 			const tone = PCCS._TONE_NAMES[PCCS.tone(hls)];
 
-			if (tone == 'none') return `${str_h}:${hue}-${str_l}-${str_s}s`;
+			if (tone === 'none') return `${str_h}:${hue}-${str_l}-${str_s}s`;
 			return `${tone}${str_h} ${str_h}:${hue}-${str_l}-${str_s}s`;
 		}
 	}
 
 	/**
 	 * Returns the string representation of PCCS hues.
-	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
 	 * @return {string} String representation of hues
 	 */
 	static toHueString([h,, s]: Triplet): string {
@@ -264,7 +264,7 @@ export class PCCS {
 
 	/**
 	 * Returns the string representation of PCCS tones.
-	 * @param {number[]} hls Hue, lightness, saturation of PCCS color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
 	 * @return {string} String representation of tones
 	 */
 	static toToneString(hls: Triplet): string {
@@ -289,8 +289,8 @@ export class PCCS {
 		0,  4,  7, 10, 14, 18, 22, 25, 28, 33, 38, 43,
 		49, 55, 60, 65, 70, 73, 76, 79, 83, 87, 91, 96, 100
 	];
-	private static _COEFFICIENTS = [
-		[0.853642,  0.084379, -0.002798],  // 0 == 24
+	private static _COEFFICIENTS: Triplet[] = [
+		[0.853642,  0.084379, -0.002798],  // 0 === 24
 		[1.042805,  0.046437,  0.001607],  // 2
 		[1.079160,  0.025470,  0.003052],  // 4
 		[1.039472,  0.054749, -0.000511],  // 6

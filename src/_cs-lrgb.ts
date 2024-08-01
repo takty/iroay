@@ -7,15 +7,15 @@
  * @version 2024-07-25
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { RGB } from './_cs-rgb';
 import { YIQ } from './_cs-yiq';
 
 export class LRGB {
 	/**
 	 * Convert Linear RGB to CIE 1931 XYZ.
-	 * @param {number[]} lrgb Linear RGB color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} lrgb Linear RGB color
+	 * @return {Triplet} XYZ color
 	 */
 	static toXYZ([lr, lg, lb]: Triplet): Triplet {
 		return [
@@ -27,8 +27,8 @@ export class LRGB {
 
 	/**
 	 * Convert CIE 1931 XYZ to Linear RGB.
-	 * @param {number[]} xyz XYZ color
-	 * @return {number[]} Linear RGB color
+	 * @param {Triplet} xyz XYZ color
+	 * @return {Triplet} Linear RGB color
 	 */
 	static fromXYZ([x, y, z]: Triplet): Triplet {
 		return [
@@ -44,8 +44,8 @@ export class LRGB {
 
 	/**
 	 * Convert Linear RGB to sRGB (Gamma 2.2).
-	 * @param {number[]} lrgb Linear RGB color
-	 * @return {number[]} sRGB color
+	 * @param {Triplet} lrgb Linear RGB color
+	 * @return {Triplet} sRGB color
 	 */
 	static toRGB(lrgb: Triplet): Triplet {
 		return RGB.fromLRGB(lrgb);
@@ -53,8 +53,8 @@ export class LRGB {
 
 	/**
 	 * Convert sRGB to Linear RGB (Gamma 2.2).
-	 * @param {number[]} rgb sRGB color
-	 * @return {number[]} sRGB color
+	 * @param {Triplet} rgb sRGB color
+	 * @return {Triplet} sRGB color
 	 */
 	static fromRGB(rgb: Triplet): Triplet {
 		return RGB.toLRGB(rgb);
@@ -62,8 +62,8 @@ export class LRGB {
 
 	/**
 	 * Convert Linear RGB to YIQ.
-	 * @param {number[]} lrgb Linear RGB color
-	 * @return {number[]} YIQ color
+	 * @param {Triplet} lrgb Linear RGB color
+	 * @return {Triplet} YIQ color
 	 */
 	static toYIQ(lrgb: Triplet): Triplet {
 		return YIQ.fromLRGB(lrgb);
@@ -71,8 +71,8 @@ export class LRGB {
 
 	/**
 	 * Convert YIQ to Linear RGB.
-	 * @param {number[]} yiq YIQ color
-	 * @return {number[]} Linear RGB color
+	 * @param {Triplet} yiq YIQ color
+	 * @return {Triplet} Linear RGB color
 	 */
 	static fromYIQ(yiq: Triplet): Triplet {
 		return YIQ.toLRGB(yiq);

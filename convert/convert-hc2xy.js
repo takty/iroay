@@ -2,9 +2,8 @@
  * Converter of original hc2xy data for minimizing
  *
  * @author Takuto Yanagida
- * @version 2020-11-27
+ * @version 2024-08-01
  */
-
 
 const _HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
 const _MAX_HUE = 100.0;
@@ -72,20 +71,20 @@ function invert() {
 }
 
 function hueNameToHueValue(hueName) {
-	if (hueName.length == 1) return -1.0;  // In case of achromatic color N
+	if (hueName.length === 1) return -1;  // In case of achromatic color N
 
 	function isDigit(s) { return Number.isInteger(parseInt(s)); }
-	const slen = isDigit(hueName.charAt(hueName.length - 2)) ? 1 : 2;  // Length of color name
-	const n = hueName.substring(hueName.length - slen);
+	const len = isDigit(hueName.charAt(hueName.length - 2)) ? 1 : 2;  // Length of color name
+	const n = hueName.substring(hueName.length - len);
 
-	let hv = parseFloat(hueName.substring(0, hueName.length - slen));
+	let hv = parseFloat(hueName.substring(0, hueName.length - len));
 	hv += _HUE_NAMES.indexOf(n) * 10;
 	if (_MAX_HUE <= hv) hv -= _MAX_HUE;
 	return hv;
 }
 
 function hueValueToHueName(hue) {
-	if (hue == -1.0) return 'N';
+	if (hue === -1) return 'N';
 	if (hue <= 0) hue += _MAX_HUE;
 	let h10 = (0 | hue * 10) % 100;
 	let c = 0 | (hue / 10);

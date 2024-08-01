@@ -2,10 +2,10 @@
  * This class performs various simulations of color space.
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 
 export class AgeSimulation {
 	/*
@@ -26,8 +26,8 @@ export class AgeSimulation {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of elderly people (70 years old) (conversion other than lightness).
-	 * @param {number[]} lab L*, a*, b* of CIELAB color (young person)
-	 * @return {number[]} CIELAB color in color vision of elderly people
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color (young person)
+	 * @return {Triplet} CIELAB color in color vision of elderly people
 	 */
 	static labToElderlyAB([ls, as, bs]: Triplet): Triplet {
 		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) + AgeSimulation._hueDiff(as, bs);
@@ -41,8 +41,8 @@ export class AgeSimulation {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of young people (20 years old) (conversion other than lightness).
-	 * @param {number[]} lab L*, a*, b* of CIELAB color (elderly person)
-	 * @return {number[]} CIELAB color in color vision of young people
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color (elderly person)
+	 * @return {Triplet} CIELAB color in color vision of young people
 	 */
 	static labToYoungAB([ls, as, bs]: Triplet): Triplet {
 		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) - AgeSimulation._hueDiff(as, bs);

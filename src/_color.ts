@@ -5,7 +5,7 @@
  * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { RGB } from './_cs-rgb';
 import { Lab } from './_cs-lab';
 import { Yxy } from './_cs-yxy';

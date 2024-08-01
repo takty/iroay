@@ -2,10 +2,10 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2024-07-31
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { Lab } from './_cs-lab';
 import { Evaluation } from './_eval';
 
@@ -14,8 +14,8 @@ export class Yxy {
 
 	/**
 	 * Convert CIE 1931 XYZ to Yxy.
-	 * @param {number[]} xyz XYZ color
-	 * @return {number[]} Yxy color
+	 * @param {Triplet} xyz XYZ color
+	 * @return {Triplet} Yxy color
 	 */
 	static fromXYZ([x, y, z]: Triplet): Triplet {
 		const sum = x + y + z;
@@ -25,8 +25,8 @@ export class Yxy {
 
 	/**
 	 * Convert Yxy to CIE 1931 XYZ.
-	 * @param {number[]} yxy Yxy color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} yxy Yxy color
+	 * @return {Triplet} XYZ color
 	 */
 	static toXYZ([y, sx, sy]: Triplet): Triplet {
 		const d0 = sx * y / sy;
@@ -46,7 +46,7 @@ export class Yxy {
 
 	/**
 	 * Calculate the basic categorical color of the specified color.
-	 * @param {number[]} yxy Yxy color
+	 * @param {Triplet} yxy Yxy color
 	 * @return {string} Basic categorical color
 	 */
 	static categoryOf(yxy: Triplet): string {

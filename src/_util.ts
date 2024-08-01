@@ -2,10 +2,10 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-07-27
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { Lab } from './_cs-lab';
 import { LMS } from './_cs-lms';
 import { LRGB } from './_cs-lrgb';
@@ -18,10 +18,10 @@ import { PCCS } from './_cs-pccs';
 
 /**
  * Convert a color from one color space to another.
- * @param {number[]} vs a color of the color space 'from'
+ * @param {Triplet} vs a color of the color space 'from'
  * @param {string} from a color space name
  * @param {string=} [to='rgb'] a color space name
- * @return {number[]} a color of the color space 'to'
+ * @return {Triplet} a color of the color space 'to'
  */
 export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb'): Triplet {
 	const type = from.toLowerCase() + '-' + to.toLowerCase();

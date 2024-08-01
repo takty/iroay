@@ -2,11 +2,11 @@
  * Evaluation Methods
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-08-01
  */
 
 import { _CC_TABLE } from './table/_cc-min';
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 
 export class Evaluation {
 
@@ -18,7 +18,7 @@ export class Evaluation {
 	 * Calculate the conspicuity degree.
 	 * Reference: Effective use of color conspicuity for Re-Coloring system,
 	 * Correspondences on Human interface Vol. 12, No. 1, SIG-DE-01, 2010.
-	 * @param {number[]} lab L*, a*, b* of CIELAB color
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color
 	 * @return {number} Conspicuity degree [0, 180]
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
@@ -36,8 +36,8 @@ export class Evaluation {
 
 	/**
 	 * Calculate distance of two vectors
-	 * @param {number[]} vs1 vector 1
-	 * @param {number[]} vs2 vector 2
+	 * @param {Triplet} vs1 vector 1
+	 * @param {Triplet} vs2 vector 2
 	 * @return {number} Distance
 	 */
 	static distance([v11, v12, v13]: Triplet, [v21, v22, v23]: Triplet): number {
@@ -46,8 +46,8 @@ export class Evaluation {
 
 	/**
 	 * Color difference calculation method by CIE 76
-	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
-	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @param {Triplet} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {Triplet} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	 */
 	static CIE76([ls1, as1, bs1]: Triplet, [ls2, as2, bs2]: Triplet): number {
@@ -58,8 +58,8 @@ export class Evaluation {
 	* Color difference calculation method by CIEDE2000
 	* Reference: http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
 	* http://d.hatena.ne.jp/yoneh/20071227/1198758604
-	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
-	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @param {Triplet} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {Triplet} lab2 L*, a*, b* of CIELAB color 2
 	 * @return {number} Color difference
 	*/
 	static CIEDE2000([ls1, as1, bs1]: Triplet, [ls2, as2, bs2]: Triplet): number {
@@ -68,7 +68,7 @@ export class Evaluation {
 		const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + Math.pow(25, 7))));
 		const ap1 = (1 + G) * as1, ap2 = (1 + G) * as2;
 		const Cp1 = Math.sqrt(ap1 * ap1 + bs1 * bs1), Cp2 = Math.sqrt(ap2 * ap2 + bs2 * bs2);
-		const hp1 = (bs1 == 0 && ap1 == 0) ? 0 : atan(bs1, ap1), hp2 = (bs2 == 0 && ap2 == 0) ? 0 : atan(bs2, ap2);
+		const hp1 = (bs1 === 0 && ap1 === 0) ? 0 : atan(bs1, ap1), hp2 = (bs2 === 0 && ap2 === 0) ? 0 : atan(bs2, ap2);
 
 		const DLp = ls2 - ls1;
 		const DCp = Cp2 - Cp1;
@@ -116,8 +116,8 @@ export class Evaluation {
 
 	/**
 	 * Calculate the color difference between the two colors.
-	 * @param {number[]} lab1 L*, a*, b* of CIELAB color 1
-	 * @param {number[]} lab2 L*, a*, b* of CIELAB color 2
+	 * @param {Triplet} lab1 L*, a*, b* of CIELAB color 1
+	 * @param {Triplet} lab2 L*, a*, b* of CIELAB color 2
 	 * @param {string} method Method of calculation
 	 * @return {number} Color difference
 	 */
@@ -135,7 +135,7 @@ export class Evaluation {
 
 	/**
 	 * Find the basic categorical color of the specified color.
-	 * @param {number[]} yxy Yxy color
+	 * @param {Triplet} yxy Yxy color
 	 * @return {string} Basic categorical color
 	 */
 	static categoryOfYxy([y, sx, sy]: Triplet): string {

@@ -2,10 +2,10 @@
  * This class converts the CIE 1931 XYZ color system.
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 import { LRGB } from './_cs-lrgb';
 import { Yxy } from './_cs-yxy';
 import { Lab } from './_cs-lab';
@@ -20,7 +20,7 @@ export class XYZ {
 
 	/**
 	 * Convert CIE 1931 XYZ to Linear RGB.
-	 * @param {number[]} xyz XYZ color
+	 * @param {Triplet} xyz XYZ color
 	 * @return Linear RGB color
 	 */
 	static toLRGB(xyz: Triplet): Triplet {
@@ -29,8 +29,8 @@ export class XYZ {
 
 	/**
 	 * Convert Linear RGB to CIE 1931 XYZ.
-	 * @param {number[]} lrgb Linear RGB color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} lrgb Linear RGB color
+	 * @return {Triplet} XYZ color
 	 */
 	static fromLRGB(lrgb: Triplet): Triplet {
 		return LRGB.toXYZ(lrgb);
@@ -38,8 +38,8 @@ export class XYZ {
 
 	/**
 	 * Convert CIE 1931 XYZ to Yxy.
-	 * @param {number[]} xyz XYZ color
-	 * @return {number[]} Yxy color
+	 * @param {Triplet} xyz XYZ color
+	 * @return {Triplet} Yxy color
 	 */
 	static toYxy(xyz: Triplet): Triplet {
 		return Yxy.fromXYZ(xyz);
@@ -47,8 +47,8 @@ export class XYZ {
 
 	/**
 	 * Convert Yxy to CIE 1931 XYZ.
-	 * @param {number[]} yxy Yxy color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} yxy Yxy color
+	 * @return {Triplet} XYZ color
 	 */
 	static fromYxy(yxy: Triplet): Triplet {
 		return Yxy.toXYZ(yxy);
@@ -56,8 +56,8 @@ export class XYZ {
 
 	/**
 	 * Convert CIE 1931 XYZ to CIE 1976 (L*, a*, b*).
-	 * @param {number[]} xyz XYZ color
-	 * @return {number[]} CIELAB color
+	 * @param {Triplet} xyz XYZ color
+	 * @return {Triplet} CIELAB color
 	 */
 	static toLab(xyz: Triplet): Triplet {
 		return Lab.fromXYZ(xyz);
@@ -65,8 +65,8 @@ export class XYZ {
 
 	/**
 	 * Convert CIE 1976 (L*, a*, b*) to CIE 1931 XYZ.
-	 * @param {number[]} lab L*, a*, b* of CIELAB color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color
+	 * @return {Triplet} XYZ color
 	 */
 	static fromLab(lab: Triplet): Triplet {
 		return Lab.toXYZ(lab);
@@ -74,8 +74,8 @@ export class XYZ {
 
 	/**
 	 * Convert CIE 1931 XYZ to LMS.
-	 * @param {number[]} xyz XYZ color
-	 * @return {number[]} LMS color
+	 * @param {Triplet} xyz XYZ color
+	 * @return {Triplet} LMS color
 	 */
 	static toLMS(xyz: Triplet): Triplet {
 		return LMS.fromXYZ(xyz);
@@ -83,8 +83,8 @@ export class XYZ {
 
 	/**
 	 * Convert LMS to CIE 1931 XYZ.
-	 * @param {number[]} lms LMS color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} lms LMS color
+	 * @return {Triplet} XYZ color
 	 */
 	static fromLMS(lms: Triplet): Triplet {
 		return LMS.toXYZ(lms);
@@ -92,8 +92,8 @@ export class XYZ {
 
 	/**
 	 * Convert CIE 1931 XYZ to Munsell (HVC).
-	 * @param {number[]} xyz XYZ color (standard illuminant D65)
-	 * @return {number[]} Munsell color
+	 * @param {Triplet} xyz XYZ color (standard illuminant D65)
+	 * @return {Triplet} Munsell color
 	 */
 	static toMunsell(xyz: Triplet): Triplet {
 		return Munsell.fromXYZ(xyz);
@@ -101,8 +101,8 @@ export class XYZ {
 
 	/**
 	 * Convert Munsell (HVC) to CIE 1931 XYZ.
-	 * @param {number[]} hvc Hue, value, chroma of Munsell color
-	 * @return {number[]} XYZ color
+	 * @param {Triplet} hvc Hue, value, chroma of Munsell color
+	 * @return {Triplet} XYZ color
 	 */
 	static fromMunsell(hvc: Triplet): Triplet {
 		return Munsell.toXYZ(hvc);
@@ -115,8 +115,8 @@ export class XYZ {
 	/**
 	 * Convert CIE 1931 XYZ of standard illuminant C to CIE 1931 XYZ of standard illuminant D65.
 	 * Reference: http://www.brucelindbloom.com/index.html?MunsellCalculator.html (Von Kries method)
-	 * @param {number[]} xyz XYZ color (standard illuminant C)
-	 * @return {number[]} XYZ of standard illuminant D65
+	 * @param {Triplet} xyz XYZ color (standard illuminant C)
+	 * @return {Triplet} XYZ of standard illuminant D65
 	 */
 	static fromIlluminantC([x, y, z]: Triplet): Triplet {
 		return [
@@ -129,8 +129,8 @@ export class XYZ {
 	/**
 	 * Convert CIE 1931 XYZ of standard illuminant D65 to CIE 1931 XYZ of standard illuminant C.
 	 * Reference: http://www.brucelindbloom.com/index.html?MunsellCalculator.html (Von Kries method)
-	 * @param {number[]} xyz XYZ color (standard illuminant D65)
-	 * @return {number[]} XYZ of standard illuminant C
+	 * @param {Triplet} xyz XYZ color (standard illuminant D65)
+	 * @return {Triplet} XYZ of standard illuminant C
 	 */
 	static toIlluminantC([x, y, z]: Triplet): Triplet {
 		return [

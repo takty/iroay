@@ -3,16 +3,16 @@
  * Reference: http://en.wikipedia.org/wiki/YIQ
  *
  * @author Takuto Yanagida
- * @version 2024-07-25
+ * @version 2024-08-01
  */
 
-import { Triplet } from './_triplet';
+import { Triplet } from './_type';
 
 export class YIQ {
 	/**
 	 * Convert Linear RGB to YIQ.
-	 * @param {number[]} lrgb Linear RGB color
-	 * @return {number[]} YIQ color
+	 * @param {Triplet} lrgb Linear RGB color
+	 * @return {Triplet} YIQ color
 	 */
 	static fromLRGB([lr, lg, lb]: Triplet): Triplet {
 		return [
@@ -24,8 +24,8 @@ export class YIQ {
 
 	/**
 	 * Convert YIQ to Linear RGB.
-	 * @param {number[]} yiq YIQ color
-	 * @return {number[]} Linear RGB color
+	 * @param {Triplet} yiq YIQ color
+	 * @return {Triplet} Linear RGB color
 	 */
 	static toLRGB([y, i, q]: Triplet): Triplet {
 		return [
