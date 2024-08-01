@@ -71,7 +71,7 @@ export class Munsell {
 		let vi_l = -1;
 		while (Munsell._TBL_V[vi_l + 1] <= v) ++vi_l;
 		let hc_l = [0, 0];  // Hue and chroma of the lower side
-		if (vi_l != -1) hc_l = Munsell._interpolateHC(x, y, vi_l);
+		if (vi_l !== -1) hc_l = Munsell._interpolateHC(x, y, vi_l);
 
 		// Obtain upper side
 		const vi_u = vi_l + 1;
@@ -118,7 +118,7 @@ export class Munsell {
 				} else {
 					if (Munsell._isInside(a, c, d, x, y) || Munsell._isInside(a, b, c, x, y)) hv = Munsell._interpolationRatio(x, y, a, d, b, c);
 				}
-				if (hv != null) break out;
+				if (hv !== null) break out;
 			}
 		}
 		if (hv === null) {
@@ -267,7 +267,7 @@ export class Munsell {
 
 		// Obtain lower side
 		let xy_l: [number, number, boolean] = [0, 0, false];
-		if (vi_l != -1) {
+		if (vi_l !== -1) {
 			xy_l = Munsell._interpolateXY(h, c, vi_l);
 			if (!xy_l[2]) Munsell.isSaturated = true;
 		} else {  // When the lightness of the lower side is the minimum 0, use standard illuminant.

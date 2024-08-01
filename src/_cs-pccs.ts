@@ -42,7 +42,7 @@ export class PCCS {
 	private static _calcInterpolatedCoefficients(h: number): Quartet {
 		if (PCCS.MAX_HUE < h) h -= PCCS.MAX_HUE;
 		let hf = 0 | Math.floor(h);
-		if (hf % 2 != 0) --hf;
+		if (hf % 2 !== 0) --hf;
 		let hc = hf + 2;
 		if (PCCS.MAX_HUE < hc) hc -= PCCS.MAX_HUE;
 
