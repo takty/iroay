@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-07-31
+ * @version 2024-08-01
  */
 
 import { Triplet } from './_triplet';
@@ -31,7 +31,7 @@ export enum ColorSpace {
 
 export class Color {
 	private ts = new Map<ColorSpace, Triplet>();
-	private us = new Map<string, string|number>();
+	private us = new Map<string, string|boolean|number>();
 	private cs: ColorSpace | null = null;
 
 	public constructor(cs: ColorSpace|null = null, t: Triplet|null = null) {
@@ -73,7 +73,7 @@ export class Color {
 		}
 		const t: Triplet = RGB.fromLRGB(this.asLRGB());
 		this.ts.set(ColorSpace.RGB, t);
-		if (RGB.isSaturated) this.us.set('rgb_saturation', '');
+		this.us.set('rgb_saturation', RGB.isSaturated);
 		return t;
 	}
 
@@ -110,7 +110,7 @@ export class Color {
 				break;
 			case ColorSpace.Yxy:
 				t = Yxy.toXYZ(this.asYxy());
-				if (Yxy.isSaturated) this.us.set('yxy_saturation', '');
+				this.us.set('yxy_saturation', Yxy.isSaturated);
 				break;
 			case ColorSpace.LMS:
 				t = LMS.toXYZ(this.asLMS());
@@ -119,7 +119,7 @@ export class Color {
 			case ColorSpace.PCCS:
 			case ColorSpace.Tone:
 				t = Munsell.toXYZ(this.asMunsell());
-				if (Munsell.isSaturated) this.us.set('munsell_saturation', '');
+				this.us.set('munsell_saturation', Munsell.isSaturated);
 				break;
 		}
 		this.ts.set(ColorSpace.XYZ, t);
@@ -218,16 +218,19 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public isRGBSaturated(): boolean {
-		return this.us.has('rgb_saturation');
+	public isRGBSaturated(forceToCheck: boolean = false): boolean {
+		if (forceToCheck && !this.us.has('rgb_saturation')) {
+			this.asRGB();
+		}
+		return (this.us.get('rgb_saturation') ?? false) as boolean;
 	}
 
 	public isYxySaturated(): boolean {
-		return this.us.has('yxy_saturation');
+		return (this.us.get('yxy_saturation') ?? false) as boolean;
 	}
 
 	public isMunsellSaturated(): boolean {
-		return this.us.has('munsell_saturation');
+		return (this.us.get('munsell_saturation') ?? false) as boolean;
 	}
 
 
