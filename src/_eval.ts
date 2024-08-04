@@ -5,7 +5,7 @@
  * @version 2024-08-01
  */
 
-import { _CC_TABLE } from './table/_cc-min';
+import { CC_TABLE } from './table/_cc-min';
 import { Triplet } from './_type';
 
 export class Evaluation {
@@ -196,5 +196,5 @@ export class Evaluation {
 	private static _Y_TO_LUM = 60;
 	private static _LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
-	private static _CC_TABLE = _CC_TABLE;
+	private static _CC_TABLE = CC_TABLE;
 }
