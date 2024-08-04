@@ -468,8 +468,9 @@ export class Munsell {
 			Munsell.TBL_MAX_C[vi] = new Array(1000 / 25);
 			Munsell.TBL_MAX_C[vi].fill(0);
 			Munsell.TBL[vi] = new Array(1000 / 25);
-			for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
-
+			for (let i = 0, n = 1000 / 25; i < n; i += 1) {
+				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
+			}
 			for (const cs of tbl_src_min[vi]) {
 				const c0 = cs.shift() as number;
 				_integrate(cs);
