@@ -1,4 +1,6 @@
-export const _TBL_SRC_MIN = [
+export const TBL_V = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+
+export const TBL_SRC_MIN = [
 	[
 		[0,363,271,-334,-300,-6,4,-2,0,-5,4,-1,1],
 		[1,377,282,-337,-307,-5,1,-6,1,-4,3],

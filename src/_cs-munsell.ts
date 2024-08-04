@@ -6,10 +6,11 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-04
  */
 
-import { _TBL_SRC_MIN } from './table/_hc2xy-all-min';
+import { TBL_SRC_MIN, TBL_V } from './table/_hc2xy-all-min';
+
 import { Pair, Triplet } from './_type';
 import { XYZ } from './_cs-xyz';
 import { Yxy } from './_cs-yxy';
@@ -17,11 +18,49 @@ import { PCCS } from './_cs-pccs';
 
 export class Munsell {
 
+	private static _eq0(x: number): boolean {
+		return Math.abs(x) < Munsell.EP;
+	}
+
+	private static _eq(x0: number, x1: number): boolean {
+		return Math.abs(x0 - x1) < Munsell.EP;
+	}
+
+	private static _div(a: Pair, b: Pair, r: number): Pair {
+		return [(b[0] - a[0]) * r + a[0], (b[1] - a[1]) * r + a[1]];
+	}
+
+	private static _cross(ax: number, ay: number, bx: number, by: number): number {
+		return ax * by - ay * bx;
+	}
+
+	// Whether a point (x, y) exists within the interior (including the boundary) of the clockwise triangle abc
+	// in the mathematical coordinate system (positive on the y axis is upward)
+	private static _inside(a: Pair, b: Pair, c: Pair, x: number, y: number) {
+		// If x, y are on the right side of ab, the point is outside the triangle
+		if (Munsell._cross(x - a[0], y - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
+		// If x, y are on the right side of bc, the point is outside the triangle
+		if (Munsell._cross(x - b[0], y - b[1], c[0] - b[0], c[1] - b[1]) < 0) return false;
+		// If x, y are on the right side of ca, the point is outside the triangle
+		if (Munsell._cross(x - c[0], y - c[1], a[0] - c[0], a[1] - c[1]) < 0) return false;
+		return true;
+	}
+
+	private static HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
+	private static EP = 0.0000000000001;
+	private static ILLUMINANT_C: Pair = [0.3101, 0.3162];  // Standard illuminant C, white point
+	private static TBL_MAX_C: number[][];
+	private static TBL: Pair[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
+
+	static MIN_HUE = 0;
+	static MAX_HUE = 100;  // Same as MIN_HUE
+	static MONO_LIMIT_C = 0.05;
+
 	static isSaturated = false;
 
 	private static _getXy(vi: number, h10: number, c: number): Pair {
-		if (c === 0) return Munsell._ILLUMINANT_C;
-		return Munsell._TBL[vi][h10 / 25][c / 2] as Pair;
+		if (c === 0) return Munsell.ILLUMINANT_C;
+		return Munsell.TBL[vi][h10 / 25][c / 2] as Pair;
 	}
 
 	// Find Y of XYZ (C) from Munsell's V (JIS).
@@ -46,30 +85,22 @@ export class Munsell {
 		return v;
 	}
 
-	private static _eq(a: number, b: number) {
-		return Math.abs(a - b) < Munsell._EP;
-	}
-
-	private static _eq0(a: number) {
-		return Math.abs(a) < Munsell._EP;
-	}
-
 	// Find the Munsell value from xyY (standard illuminant C).
 	private static _yxy2mun([Y, x, y]: Triplet): Triplet {
 		const v = Munsell._y2v(Y);  // Find Munsell lightness
 
 		// When the lightness is maximum 10
-		if (Munsell._eq(v, Munsell._TBL_V[Munsell._TBL_V.length - 1])) {
-			const hc = Munsell._interpolateHC(x, y, Munsell._TBL_V.length - 1);
+		if (Munsell._eq(v, TBL_V[TBL_V.length - 1])) {
+			const hc = Munsell._interpolateHC(x, y, TBL_V.length - 1);
 			return [hc[0], v, hc[1]];
 		}
 		// When the lightness is 0 or the lightness is larger than the maximum 10, or when it is an achromatic color (standard illuminant C)
-		if (Munsell._eq0(v) || Munsell._TBL_V[Munsell._TBL_V.length - 1] < v || (Munsell._eq(x, Munsell._ILLUMINANT_C[0]) && Munsell._eq(y, Munsell._ILLUMINANT_C[1]))) {
+		if (Munsell._eq0(v) || TBL_V[TBL_V.length - 1] < v || (Munsell._eq(x, Munsell.ILLUMINANT_C[0]) && Munsell._eq(y, Munsell.ILLUMINANT_C[1]))) {
 			return [0, v, 0];
 		}
 		// Obtain lower side
 		let vi_l = -1;
-		while (Munsell._TBL_V[vi_l + 1] <= v) ++vi_l;
+		while (TBL_V[vi_l + 1] <= v) ++vi_l;
 		let hc_l = [0, 0];  // Hue and chroma of the lower side
 		if (vi_l !== -1) hc_l = Munsell._interpolateHC(x, y, vi_l);
 
@@ -81,7 +112,7 @@ export class Munsell {
 		if (vi_l === -1) {
 			hc_l[0] = hc_u[0]; hc_l[1] = 0;
 		}
-		const v_l = ((vi_l === -1) ? 0 : Munsell._TBL_V[vi_l]), v_h = Munsell._TBL_V[vi_u];
+		const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]), v_h = TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
 		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
@@ -114,9 +145,9 @@ export class Munsell {
 				//  | A D
 				//  ------> x
 				if (a[0] === b[0] && a[1] === b[1]) {
-					if (Munsell._isInside(a, c, d, x, y)) hv = Munsell._interpolationRatio(x, y, a, d, b, c);
+					if (Munsell._inside(a, c, d, x, y)) hv = Munsell._interpolationRatio(x, y, a, d, b, c);
 				} else {
-					if (Munsell._isInside(a, c, d, x, y) || Munsell._isInside(a, b, c, x, y)) hv = Munsell._interpolationRatio(x, y, a, d, b, c);
+					if (Munsell._inside(a, c, d, x, y) || Munsell._inside(a, b, c, x, y)) hv = Munsell._interpolationRatio(x, y, a, d, b, c);
 				}
 				if (hv !== null) break out;
 			}
@@ -126,22 +157,6 @@ export class Munsell {
 		}
 		if (h10_u === 0) h10_u = 1000;
 		return [((h10_u - h10_l) * hv[0] + h10_l) / 10, (c_u - c_l) * hv[1] + c_l];
-	}
-
-	// Whether a point (x, y) exists within the interior (including the boundary) of the clockwise triangle abc
-	// in the mathematical coordinate system (positive on the y axis is upward)
-	private static _isInside(a: Pair, b: Pair, c: Pair, x: number, y: number) {
-		// If x, y are on the right side of ab, the point is outside the triangle
-		if (Munsell._cross(x - a[0], y - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
-		// If x, y are on the right side of bc, the point is outside the triangle
-		if (Munsell._cross(x - b[0], y - b[1], c[0] - b[0], c[1] - b[1]) < 0) return false;
-		// If x, y are on the right side of ca, the point is outside the triangle
-		if (Munsell._cross(x - c[0], y - c[1], a[0] - c[0], a[1] - c[1]) < 0) return false;
-		return true;
-	}
-
-	private static _cross(ax: number, ay: number, bx: number, by: number): number {
-		return ax * by - ay * bx;
 	}
 
 	/*
@@ -191,6 +206,148 @@ export class Munsell {
 		return [h, v];
 	}
 
+	static _mun2yxy([h, v, c]: Triplet): Triplet {
+		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
+		const Y = Munsell._v2y(v);
+		Munsell.isSaturated = false;
+
+		// When the lightness is 0 or achromatic (check this first)
+		if (Munsell._eq0(v) || h < 0 || c < Munsell.MONO_LIMIT_C) {
+			Munsell.isSaturated = Munsell._eq0(v) && 0 < c;
+			return [Y, ...Munsell.ILLUMINANT_C];
+		}
+		// When the lightness is the maximum value 10 or more
+		const v_max = TBL_V[TBL_V.length - 1];
+		if (v_max <= v) {
+			const xy = Munsell._interpolateXY(h, c, TBL_V.length - 1);
+			Munsell.isSaturated = (v_max < v);
+			return [Y, xy[0], xy[1]];
+		}
+		let vi_l = -1;
+		while (TBL_V[vi_l + 1] <= v) ++vi_l;
+		const vi_u = vi_l + 1;
+
+		// Obtain lower side
+		let xy_l;
+		if (vi_l !== -1) {
+			xy_l = Munsell._interpolateXY(h, c, vi_l);
+		} else {  // When the lightness of the lower side is the minimum 0, use standard illuminant.
+			xy_l = [...Munsell.ILLUMINANT_C, false];
+			Munsell.isSaturated = true;
+		}
+		// Obtain upper side
+		const xy_u = Munsell._interpolateXY(h, c, vi_u);
+
+		const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]);
+		const v_u = TBL_V[vi_u];
+
+		if (!xy_l[2] && !xy_u[2]) {
+			Munsell.isSaturated = true;
+		} else if (!xy_l[2] || !xy_u[2]) {
+			if (v < 0.5 * (v_l + v_u)) {
+				if (!xy_l[2]) Munsell.isSaturated = true;
+			} else {
+				if (!xy_u[2]) Munsell.isSaturated = true;
+			}
+		}
+		const r = (v - v_l) / (v_u - v_l);
+		const xy = Munsell._div(xy_l as unknown as Pair, xy_u as unknown as Pair, r);
+		return [Y, ...xy];
+	}
+
+	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
+	// Return false if it is out of the range of the table.
+	private static _interpolateXY(h: number, c: number, vi: number): [number, number, boolean] {
+		const h10 = h * 10;
+		const c_l = 0 | Math.floor(c / 2) * 2;
+		const c_u = c_l + 2;
+
+		let h10_l = 0 | Math.floor(h10 / 25) * 25;
+		let h10_u = h10_l + 25;
+
+		if (h10_u === 1000) h10_u = 0;
+		let maxC_hl = Munsell.TBL_MAX_C[vi][h10_l / 25];
+		let maxC_hu = Munsell.TBL_MAX_C[vi][h10_u / 25];
+
+		if (maxC_hl === 0) {
+			h10_l -= 25;
+			if (h10_l < 0) h10_l = 1000 - 25;
+			maxC_hl = Munsell.TBL_MAX_C[vi][h10_l / 25];
+		}
+		if (maxC_hu === 0) {
+			h10_u += 25;
+			if (h10_u === 1000) h10_u = 0;
+			maxC_hu = Munsell.TBL_MAX_C[vi][h10_u / 25];
+		}
+
+		if (c < maxC_hl && maxC_hu <= c) {
+			for (let c_l = maxC_hu; c_l <= maxC_hl - 2; c_l += 2) {
+				if (Munsell._inside([h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2], h10, c)) {
+					const xy = interpolate3(vi, [h10, c], [h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2]);
+					return [...xy, true];
+				}
+			}
+		}
+		if (maxC_hl <= c && c < maxC_hu) {
+			for (let c_c = maxC_hl; c_c <= maxC_hu - 2; c_c += 2) {
+				if (Munsell._inside([h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c], h10, c)) {
+					const xy = interpolate3(vi, [h10, c], [h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c]);
+					return [...xy, true];
+				}
+			}
+		}
+		if (maxC_hl <= c || maxC_hu <= c) {
+			const xy = interpolate2(vi, [h10, c], [h10_l, maxC_hl], [h10_u, maxC_hu]);
+			return [...xy, false];
+		}
+		const xy = interpolate4(vi, [h10, c], [h10_l, c_l], [h10_u, c_l], [h10_u, c_u], [h10_l, c_u]);
+		return [...xy, true];
+
+		function interpolate2(vi: number, p: Pair, a: Pair, b: Pair): Pair {
+			const rx = (p[0] - a[0]) / (b[0] - a[0]);
+
+			const wa = Munsell._getXy(vi, ...a);
+			const wb = Munsell._getXy(vi, ...b);
+
+			return Munsell._div(wa, wb, rx);
+		}
+
+		function interpolate3(vi: number, p: Pair, a: Pair, b: Pair, c: Pair): Pair {
+			// Barycentric coordinates for 2D interpolation
+			const f = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1]);
+			const w1 = ((b[1] - c[1]) * (p[0] - c[0]) + (c[0] - b[0]) * (p[1] - c[1])) / f;
+			const w2 = ((c[1] - a[1]) * (p[0] - c[0]) + (a[0] - c[0]) * (p[1] - c[1])) / f;
+			const w3 = 1 - w1 - w2;
+
+			const wa = Munsell._getXy(vi, ...a);
+			const wb = Munsell._getXy(vi, ...b);
+			const wc = Munsell._getXy(vi, ...c);
+
+			return [
+				wa[0] * w1 + wb[0] * w2 + wc[0] * w3,
+				wa[1] * w1 + wb[1] * w2 + wc[1] * w3,
+			];
+		}
+
+		// d c
+		// a b
+		function interpolate4(vi: number, p: Pair, a: Pair, b: Pair, c: Pair, d: Pair): Pair {
+			const rx = (p[0] - a[0]) / (b[0] - a[0]);
+			const ry = (p[1] - a[1]) / (d[1] - a[1]);
+
+			const wa = Munsell._getXy(vi, ...a);
+			const wb = Munsell._getXy(vi, ...b);
+			const wc = Munsell._getXy(vi, ...c);
+			const wd = Munsell._getXy(vi, ...d);
+
+			// Checking (wa === wb) in case both are ILLUMINANT_C.
+			const wab = (wa === wb) ? wa : Munsell._div(wa, wb, rx);
+			const wdc = Munsell._div(wd, wc, rx);
+
+			return Munsell._div(wab, wdc, ry);
+		}
+	}
+
 	/**
 	 * Convert name-based hue expression to hue value.
 	 * If the Name-based hue expression is N, -1 is returned.
@@ -205,7 +362,7 @@ export class Munsell {
 		const n = hueName.substring(hueName.length - len);
 
 		let hv = parseFloat(hueName.substring(0, hueName.length - len));
-		hv += Munsell._HUE_NAMES.indexOf(n) * 10;
+		hv += Munsell.HUE_NAMES.indexOf(n) * 10;
 		if (Munsell.MAX_HUE <= hv) hv -= Munsell.MAX_HUE;
 		return hv;
 	}
@@ -226,7 +383,7 @@ export class Munsell {
 			h10 = 100;
 			c -= 1;
 		}
-		return (Math.round(h10 * 10) / 100) + Munsell._HUE_NAMES[c];
+		return (Math.round(h10 * 10) / 100) + Munsell.HUE_NAMES[c];
 	}
 
 	/**
@@ -244,46 +401,7 @@ export class Munsell {
 	 * @return {Triplet} XYZ color
 	 */
 	static toXYZ([h, v, c]: Triplet): Triplet {
-		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
-		const dest: Triplet = [Munsell._v2y(v), 0, 0];
-		Munsell.isSaturated = false;
-
-		// When the lightness is 0 or achromatic (check this first)
-		if (Munsell._eq0(v) || h < 0 || c < Munsell.MONO_LIMIT_C) {
-			dest[1] = Munsell._ILLUMINANT_C[0]; dest[2] = Munsell._ILLUMINANT_C[1];
-			Munsell.isSaturated = Munsell._eq0(v) && 0 < c;
-			return XYZ.fromIlluminantC(Yxy.toXYZ(dest));
-		}
-		// When the lightness is the maximum value 10 or more
-		if (Munsell._TBL_V[Munsell._TBL_V.length - 1] <= v) {
-			const xy = Munsell._interpolateXY(h, c, Munsell._TBL_V.length - 1);
-			dest[1] = xy[0]; dest[2] = xy[1];
-			Munsell.isSaturated = (Munsell._TBL_V[Munsell._TBL_V.length - 1] < v);
-			return XYZ.fromIlluminantC(Yxy.toXYZ(dest));
-		}
-		let vi_l = -1;
-		while (Munsell._TBL_V[vi_l + 1] <= v) ++vi_l;
-		const vi_u = vi_l + 1;
-
-		// Obtain lower side
-		let xy_l: [number, number, boolean] = [0, 0, false];
-		if (vi_l !== -1) {
-			xy_l = Munsell._interpolateXY(h, c, vi_l);
-			if (!xy_l[2]) Munsell.isSaturated = true;
-		} else {  // When the lightness of the lower side is the minimum 0, use standard illuminant.
-			xy_l[0] = Munsell._ILLUMINANT_C[0]; xy_l[1] = Munsell._ILLUMINANT_C[1];
-			Munsell.isSaturated = true;
-		}
-		// Obtain upper side
-		const xy_u = Munsell._interpolateXY(h, c, vi_u);
-		if (!xy_u[2]) Munsell.isSaturated = true;
-
-		const v_l = ((vi_l === -1) ? 0 : Munsell._TBL_V[vi_l]), v_h = Munsell._TBL_V[vi_u];
-		const r = (v - v_l) / (v_h - v_l);
-		const x = (xy_u[0] - xy_l[0]) * r + xy_l[0], y = (xy_u[1] - xy_l[1]) * r + xy_l[1];
-		dest[1] = x; dest[2] = y;
-
-		return XYZ.fromIlluminantC(Yxy.toXYZ(dest));
+		return XYZ.fromIlluminantC(Yxy.toXYZ(Munsell._mun2yxy([h, v, c])));
 	}
 
 	/**
@@ -304,61 +422,6 @@ export class Munsell {
 		return PCCS.toMunsell(hls);
 	}
 
-	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
-	// Return false if it is out of the range of the table.
-	private static _interpolateXY(h: number, c: number, vi: number): [number, number, boolean] {
-		const h10 = h * 10;
-		let h10_l = 0 | Math.floor(h10 / 25) * 25, h10_u = h10_l + 25;
-		const c_l = 0 | Math.floor(c / 2) * 2, c_u = c_l + 2;
-
-		const rh = (h10 - h10_l) / (h10_u - h10_l);
-		const rc = (c - c_l) / (c_u - c_l);
-
-		if (h10_u === 1000) h10_u = 0;
-		const maxC_hl = Munsell._TBL_MAX_C[vi][h10_l / 25], maxC_hu = Munsell._TBL_MAX_C[vi][h10_u / 25];
-
-		if (maxC_hl <= c_l || maxC_hu <= c_l) {
-			let xy_hl: Pair = [0, 0], xy_hu: Pair = [0, 0];
-
-			if (c_l < maxC_hl) {
-				const a = Munsell._getXy(vi, h10_l, c_l), d = Munsell._getXy(vi, h10_l, c_u);
-				xy_hl[0] = (d[0] - a[0]) * rc + a[0]; xy_hl[1] = (d[1] - a[1]) * rc + a[1];
-			} else {
-				xy_hl = Munsell._getXy(vi, h10_l, maxC_hl);
-			}
-			if (c_l < maxC_hu) {
-				const a = Munsell._getXy(vi, h10_u, c_l), d = Munsell._getXy(vi, h10_u, c_u);
-				xy_hu[0] = (d[0] - a[0]) * rc + a[0]; xy_hu[1] = (d[1] - a[1]) * rc + a[1];
-			} else {
-				xy_hu = Munsell._getXy(vi, h10_u, maxC_hu);
-			}
-			return [
-				(xy_hu[0] - xy_hl[0]) * rh + xy_hl[0],
-				(xy_hu[1] - xy_hl[1]) * rh + xy_hl[1],
-				false
-			];
-		}
-		if (c_l === 0) {
-			const o = Munsell._ILLUMINANT_C, d = Munsell._getXy(vi, h10_l, c_u), C = Munsell._getXy(vi, h10_u, c_u);
-			const cd_x = (C[0] - d[0]) * rh + d[0], cd_y = (C[1] - d[1]) * rh + d[1];
-			return [
-				(cd_x - o[0]) * rc + o[0],
-				(cd_y - o[1]) * rc + o[1],
-				true
-			];
-		} else {
-			const a = Munsell._getXy(vi, h10_l, c_l), d = Munsell._getXy(vi, h10_l, c_u);
-			const b = Munsell._getXy(vi, h10_u, c_l), C = Munsell._getXy(vi, h10_u, c_u);
-			const ab_x = (b[0] - a[0]) * rh + a[0], ab_y = (b[1] - a[1]) * rh + a[1];
-			const cd_x = (C[0] - d[0]) * rh + d[0], cd_y = (C[1] - d[1]) * rh + d[1];
-			return [
-				(cd_x - ab_x) * rc + ab_x,
-				(cd_y - ab_y) * rc + ab_y,
-				true
-			];
-		}
-	}
-
 	/**
 	 * Returns the string representation of Munsell numerical representation.
 	 * @param {Triplet} hvc Hue, value, chroma of Munsell color
@@ -375,32 +438,21 @@ export class Munsell {
 		}
 	}
 
-	static MIN_HUE = 0;
-	static MAX_HUE = 100;  // Same as MIN_HUE
-	static MONO_LIMIT_C = 0.05;
-
-	static _TBL_SRC_MIN = _TBL_SRC_MIN;
-	static _TBL_V_REAL = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-	static _TBL_V_ALL = [0.2, 0.4, 0.6, 0.8, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-	static _TBL_V = Munsell._TBL_V_ALL;
-	static _HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
-	static _EP = 0.0000000000001;
-	static _ILLUMINANT_C: Pair = [0.3101, 0.3162];  // Standard illuminant C, white point
-	static _TBL_MAX_C = new Array(Munsell._TBL_V.length);
-	static _TBL = new Array(Munsell._TBL_V.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
-
 	static {
-		Munsell.initTable();
+		Munsell.initTable(TBL_V, TBL_SRC_MIN);
 	}
 
-	static initTable() {
-		for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
-			Munsell._TBL_MAX_C[vi] = new Array(1000 / 25);
-			Munsell._TBL_MAX_C[vi].fill(0);
-			Munsell._TBL[vi] = new Array(1000 / 25);
-			for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell._TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
+	static initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
+		Munsell.TBL_MAX_C = new Array(tbl_v.length);
+		Munsell.TBL = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 
-			for (const cs of Munsell._TBL_SRC_MIN[vi]) {
+		for (let vi = 0; vi < tbl_v.length; vi += 1) {
+			Munsell.TBL_MAX_C[vi] = new Array(1000 / 25);
+			Munsell.TBL_MAX_C[vi].fill(0);
+			Munsell.TBL[vi] = new Array(1000 / 25);
+			for (let i = 0, n = 1000 / 25; i < n; i += 1) Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
+
+			for (const cs of tbl_src_min[vi]) {
 				const c0 = cs.shift() as number;
 				_integrate(cs);
 				_integrate(cs);
@@ -408,9 +460,9 @@ export class Munsell {
 					const c1 = i / 2 + 1;
 					const c2 = cs[i + 0] / 1000;
 					const c3 = cs[i + 1] / 1000;
-					Munsell._TBL[vi][c0][c1] = [c2, c3];
-					if (Munsell._TBL_MAX_C[vi][c0] < c1 * 2) {
-						Munsell._TBL_MAX_C[vi][c0] = c1 * 2;
+					Munsell.TBL[vi][c0][c1] = [c2, c3];
+					if (Munsell.TBL_MAX_C[vi][c0] < c1 * 2) {
+						Munsell.TBL_MAX_C[vi][c0] = c1 * 2;
 					}
 				}
 			}
