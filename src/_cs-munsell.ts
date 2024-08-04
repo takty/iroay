@@ -66,7 +66,8 @@ export class Munsell {
 	// Find Y of XYZ (C) from Munsell's V (JIS).
 	private static _v2y(v: number) {
 		if (v <= 1) return v * 0.0121;
-		const v2 = v * v, v3 = v2 * v;
+		const v2 = v * v;
+		const v3 = v2 * v;
 		const y = 0.0467 * v3 + 0.5602 * v2 - 0.1753 * v + 0.8007;
 		return y / 100;
 	}
@@ -110,9 +111,11 @@ export class Munsell {
 
 		// When the lightness on the lower side is the minimum 0, the hue is matched with the upper side, and the chroma is set to 0
 		if (vi_l === -1) {
-			hc_l[0] = hc_u[0]; hc_l[1] = 0;
+			hc_l[0] = hc_u[0];
+			hc_l[1] = 0;
 		}
-		const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]), v_h = TBL_V[vi_u];
+		const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]);
+		const v_h = TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
 		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
@@ -124,7 +127,10 @@ export class Munsell {
 	// Acquires the hue and chroma for the chromaticity coordinates (x, y) on the surface of the given lightness index.
 	// If not included, -1 is returned.
 	private static _interpolateHC(x: number, y: number, vi: number): Pair {
-		let h10_l, h10_u = -1, c_l = -1, c_u = -1;
+		let h10_l;
+		let h10_u = -1;
+		let c_l = -1;
+		let c_u = -1;
 		let hv = null;
 
 		out:
@@ -132,22 +138,31 @@ export class Munsell {
 			h10_u = h10_l + 25;
 			if (h10_u === 1000) h10_u = 0;
 
+			const maxC_hl = Munsell.TBL_MAX_C[vi][h10_l / 25];
+			const maxC_hu = Munsell.TBL_MAX_C[vi][h10_u / 25];
+
 			inner:
 			for (c_l = 0; c_l <= 50; c_l += 2) {  // c 0-50 step 2;
 				c_u = c_l + 2;
 
-				const a = Munsell._getXy(vi, h10_l, c_l), d = Munsell._getXy(vi, h10_l, c_u);
-				const b = Munsell._getXy(vi, h10_u, c_l), c = Munsell._getXy(vi, h10_u, c_u);
-				if (a === null && b === null) break inner;
-				if (a === null || b === null || c === null || d === null) continue;
+				const wa = c_l <= maxC_hl ? Munsell._getXy(vi, h10_l, c_l) : null;
+				const wb = c_l <= maxC_hu ? Munsell._getXy(vi, h10_u, c_l) : null;
+				const wc = c_u <= maxC_hu ? Munsell._getXy(vi, h10_u, c_u) : null;
+				const wd = c_u <= maxC_hl ? Munsell._getXy(vi, h10_l, c_u) : null;
+				if (wa === null && wb === null) break inner;
+				if (wa === null || wb === null || wc === null || wd === null) continue;
 				//  ^
 				// y| B C      ↖H (Direction of rotation) ↗C (Radial direction)
 				//  | A D
 				//  ------> x
-				if (a[0] === b[0] && a[1] === b[1]) {
-					if (Munsell._inside(a, c, d, x, y)) hv = Munsell._interpolationRatio(x, y, a, d, b, c);
+				if (wa[0] === wb[0] && wa[1] === wb[1]) {
+					if (Munsell._inside(wa, wc, wd, x, y)) {
+						hv = Munsell._interpolationRatio(x, y, wa, wd, wb, wc);
+					}
 				} else {
-					if (Munsell._inside(a, c, d, x, y) || Munsell._inside(a, b, c, x, y)) hv = Munsell._interpolationRatio(x, y, a, d, b, c);
+					if (Munsell._inside(wa, wc, wd, x, y) || Munsell._inside(wa, wb, wc, x, y)) {
+						hv = Munsell._interpolationRatio(x, y, wa, wd, wb, wc);
+					}
 				}
 				if (hv !== null) break out;
 			}
@@ -156,7 +171,10 @@ export class Munsell {
 			return [0, 0];
 		}
 		if (h10_u === 0) h10_u = 1000;
-		return [((h10_u - h10_l) * hv[0] + h10_l) / 10, (c_u - c_l) * hv[1] + c_l];
+		return [
+			((h10_u - h10_l) * hv[0] + h10_l) / 10,
+			(c_u - c_l) * hv[1] + c_l
+		];
 	}
 
 	/*
