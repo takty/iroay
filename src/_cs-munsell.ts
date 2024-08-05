@@ -76,12 +76,11 @@ export class Munsell {
 	private static _y2v(y: number) {
 		if (y <= 0.0121) return y / 0.0121;
 		let v = 10;
-		while (true) {
-			const f = Munsell._v2y(v) * 100 - y * 100;
-			const fp = 3 * 0.0467 * (v * v) + 2 * 0.5602 * v - 0.1753;
-			const v1 = -f / fp + v;
-			if (Math.abs(v1 - v) < 0.01) break;
-			v = v1;
+		for (let i = 0; i < 1000; ++i) {  // Max iteration is 1000.
+			const f = Munsell._v2y(v) - y;
+			const fp =  (v <= 1) ? 0.0121 : ((3 * 0.0467 * (v * v) + 2 * 0.5602 * v - 0.1753) / 100);
+			if (Math.abs(f) < 0.0001) break;
+			v = v - f / fp;
 		}
 		return v;
 	}
