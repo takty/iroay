@@ -36,13 +36,13 @@ export class Munsell {
 
 	// Whether a point (x, y) exists within the interior (including the boundary) of the clockwise triangle abc
 	// in the mathematical coordinate system (positive on the y axis is upward)
-	private static _inside(a: Pair, b: Pair, c: Pair, x: number, y: number) {
+	private static _inside(p: Pair, a: Pair, b: Pair, c: Pair) {
 		// If x, y are on the right side of ab, the point is outside the triangle
-		if (Munsell._cross(x - a[0], y - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
+		if (Munsell._cross(p[0] - a[0], p[1] - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
 		// If x, y are on the right side of bc, the point is outside the triangle
-		if (Munsell._cross(x - b[0], y - b[1], c[0] - b[0], c[1] - b[1]) < 0) return false;
+		if (Munsell._cross(p[0] - b[0], p[1] - b[1], c[0] - b[0], c[1] - b[1]) < 0) return false;
 		// If x, y are on the right side of ca, the point is outside the triangle
-		if (Munsell._cross(x - c[0], y - c[1], a[0] - c[0], a[1] - c[1]) < 0) return false;
+		if (Munsell._cross(p[0] - c[0], p[1] - c[1], a[0] - c[0], a[1] - c[1]) < 0) return false;
 		return true;
 	}
 
@@ -276,6 +276,8 @@ export class Munsell {
 	// Return false if it is out of the range of the table.
 	private static _interpolateXY(h: number, c: number, vi: number): [number, number, boolean] {
 		const h10 = h * 10;
+		const p = [h10, c] as Pair;
+
 		const c_l = 0 | Math.floor(c / 2) * 2;
 		const c_u = c_l + 2;
 
@@ -299,25 +301,25 @@ export class Munsell {
 
 		if (c < maxC_hl && maxC_hu <= c) {
 			for (let c_l = maxC_hu; c_l <= maxC_hl - 2; c_l += 2) {
-				if (Munsell._inside([h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2], h10, c)) {
-					const xy = interpolate3(vi, [h10, c], [h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2]);
+				if (Munsell._inside(p, [h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2])) {
+					const xy = interpolate3(vi, p, [h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2]);
 					return [...xy, true];
 				}
 			}
 		}
 		if (maxC_hl <= c && c < maxC_hu) {
 			for (let c_c = maxC_hl; c_c <= maxC_hu - 2; c_c += 2) {
-				if (Munsell._inside([h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c], h10, c)) {
-					const xy = interpolate3(vi, [h10, c], [h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c]);
+				if (Munsell._inside(p, [h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c])) {
+					const xy = interpolate3(vi, p, [h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c]);
 					return [...xy, true];
 				}
 			}
 		}
 		if (maxC_hl <= c || maxC_hu <= c) {
-			const xy = interpolate2(vi, [h10, c], [h10_l, maxC_hl], [h10_u, maxC_hu]);
+			const xy = interpolate2(vi, p, [h10_l, maxC_hl], [h10_u, maxC_hu]);
 			return [...xy, false];
 		}
-		const xy = interpolate4(vi, [h10, c], [h10_l, c_l], [h10_u, c_l], [h10_u, c_u], [h10_l, c_u]);
+		const xy = interpolate4(vi, p, [h10_l, c_l], [h10_u, c_l], [h10_u, c_u], [h10_l, c_u]);
 		return [...xy, true];
 
 		function interpolate2(vi: number, p: Pair, a: Pair, b: Pair): Pair {
