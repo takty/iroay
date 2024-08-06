@@ -132,6 +132,8 @@ export class Munsell {
 	// Acquires the hue and chroma for the chromaticity coordinates (x, y) on the surface of the given lightness index.
 	// If not included, -1 is returned.
 	private static _interpolateHC(x: number, y: number, vi: number): Pair {
+		const p = [x, y] as Pair;
+
 		let h10_l;
 		let h10_u = -1;
 		let c_l = -1;
@@ -161,12 +163,12 @@ export class Munsell {
 				//  | A D
 				//  ------> x
 				if (wa[0] === wb[0] && wa[1] === wb[1]) {
-					if (Munsell._inside(wa, wc, wd, x, y)) {
-						hv = Munsell._interpolationRatio(x, y, wa, wd, wb, wc);
+					if (Munsell._inside(p, wa, wc, wd)) {
+						hv = Munsell._interpolationRatio(p, wa, wd, wb, wc);
 					}
 				} else {
-					if (Munsell._inside(wa, wc, wd, x, y) || Munsell._inside(wa, wb, wc, x, y)) {
-						hv = Munsell._interpolationRatio(x, y, wa, wd, wb, wc);
+					if (Munsell._inside(p, wa, wc, wd) || Munsell._inside(p, wa, wb, wc)) {
+						hv = Munsell._interpolationRatio(p, wa, wd, wb, wc);
 					}
 				}
 				if (hv !== null) break out;
