@@ -116,6 +116,12 @@ export class Munsell {
 		const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]);
 		const v_h = TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
+
+		if (Math.abs(hc_u[0] - hc_l[0]) > Munsell.MAX_HUE * 0.5) {
+			if (hc_l[0] < hc_u[0]) hc_l[0] += Munsell.MAX_HUE;
+			else if (hc_l[0] > hc_u[0]) hc_u[0] += Munsell.MAX_HUE;
+		}
+
 		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
 		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
 		let c = (hc_u[1] - hc_l[1]) * r + hc_l[1];
