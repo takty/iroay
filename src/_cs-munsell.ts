@@ -6,7 +6,7 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-08-04
+ * @version 2024-08-06
  */
 
 import { TBL_SRC_MIN, TBL_V } from './table/_hc2xy-all-min';
@@ -50,7 +50,7 @@ export class Munsell {
 	private static EP = 0.0000000000001;
 	private static ILLUMINANT_C: Pair = [0.3101, 0.3162];  // Standard illuminant C, white point
 	private static TBL_MAX_C: number[][];
-	private static TBL: Pair[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
+	private static TBL: (Pair|null)[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
 
 	static MIN_HUE = 0;
 	static MAX_HUE = 100;  // Same as MIN_HUE
@@ -58,9 +58,9 @@ export class Munsell {
 
 	static isSaturated = false;
 
-	private static _getXy(vi: number, h10: number, c: number): Pair {
+	private static _getXy(vi: number, h10: number, c: number): Pair|null {
 		if (c === 0) return Munsell.ILLUMINANT_C;
-		return Munsell.TBL[vi][h10 / 25][c / 2] as Pair;
+		return Munsell.TBL[vi][h10 / 25][c / 2];
 	}
 
 	// Find Y of XYZ (C) from Munsell's V (JIS).
@@ -145,17 +145,21 @@ export class Munsell {
 			h10_u = h10_l + 25;
 			if (h10_u === 1000) h10_u = 0;
 
-			const maxC_hl = Munsell.TBL_MAX_C[vi][h10_l / 25];
-			const maxC_hu = Munsell.TBL_MAX_C[vi][h10_u / 25];
-
 			inner:
 			for (c_l = 0; c_l <= 50; c_l += 2) {  // c 0-50 step 2;
 				c_u = c_l + 2;
 
-				const wa = c_l <= maxC_hl ? Munsell._getXy(vi, h10_l, c_l) : null;
-				const wb = c_l <= maxC_hu ? Munsell._getXy(vi, h10_u, c_l) : null;
-				const wc = c_u <= maxC_hu ? Munsell._getXy(vi, h10_u, c_u) : null;
-				const wd = c_u <= maxC_hl ? Munsell._getXy(vi, h10_l, c_u) : null;
+				const wa = Munsell._getXy(vi, h10_l, c_l);
+				const wb = Munsell._getXy(vi, h10_u, c_l);
+				let wc = Munsell._getXy(vi, h10_u, c_u);
+				let wd = Munsell._getXy(vi, h10_l, c_u);
+
+				if (wa && wb && wc && !wd) {
+					wd = [wa[0] + (wc[0] - wb[0]), wa[1] + (wc[1] - wb[1])]
+				} else if (wa && wb && !wc && wd) {
+					wc = [wb[0] + (wd[0] - wa[0]), wb[1] + (wd[1] - wa[1])]
+				}
+
 				if (wa === null && wb === null) break inner;
 				if (wa === null || wb === null || wc === null || wd === null) continue;
 				//  ^
@@ -333,8 +337,8 @@ export class Munsell {
 		function interpolate2(vi: number, p: Pair, a: Pair, b: Pair): Pair {
 			const rx = (p[0] - a[0]) / (b[0] - a[0]);
 
-			const wa = Munsell._getXy(vi, ...a);
-			const wb = Munsell._getXy(vi, ...b);
+			const wa = Munsell._getXy(vi, ...a) as Pair;
+			const wb = Munsell._getXy(vi, ...b) as Pair;
 
 			return Munsell._div(wa, wb, rx);
 		}
@@ -346,9 +350,9 @@ export class Munsell {
 			const w2 = ((c[1] - a[1]) * (p[0] - c[0]) + (a[0] - c[0]) * (p[1] - c[1])) / f;
 			const w3 = 1 - w1 - w2;
 
-			const wa = Munsell._getXy(vi, ...a);
-			const wb = Munsell._getXy(vi, ...b);
-			const wc = Munsell._getXy(vi, ...c);
+			const wa = Munsell._getXy(vi, ...a) as Pair;
+			const wb = Munsell._getXy(vi, ...b) as Pair;
+			const wc = Munsell._getXy(vi, ...c) as Pair;
 
 			return [
 				wa[0] * w1 + wb[0] * w2 + wc[0] * w3,
@@ -362,10 +366,10 @@ export class Munsell {
 			const rx = (p[0] - a[0]) / (b[0] - a[0]);
 			const ry = (p[1] - a[1]) / (d[1] - a[1]);
 
-			const wa = Munsell._getXy(vi, ...a);
-			const wb = Munsell._getXy(vi, ...b);
-			const wc = Munsell._getXy(vi, ...c);
-			const wd = Munsell._getXy(vi, ...d);
+			const wa = Munsell._getXy(vi, ...a) as Pair;
+			const wb = Munsell._getXy(vi, ...b) as Pair;
+			const wc = Munsell._getXy(vi, ...c) as Pair;
+			const wd = Munsell._getXy(vi, ...d) as Pair;
 
 			// Checking (wa === wb) in case both are ILLUMINANT_C.
 			const wab = (wa === wb) ? wa : Munsell._div(wa, wb, rx);
@@ -479,6 +483,7 @@ export class Munsell {
 			Munsell.TBL[vi] = new Array(1000 / 25);
 			for (let i = 0, n = 1000 / 25; i < n; i += 1) {
 				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
+				Munsell.TBL[vi][i].fill(null);
 			}
 			for (const cs of tbl_src_min[vi]) {
 				const c0 = cs.shift() as number;
