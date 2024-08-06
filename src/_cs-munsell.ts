@@ -183,14 +183,14 @@ export class Munsell {
 	 *  | A D
 	 *  ------> x
 	 */
-	private static _interpolationRatio(x: number, y: number, a: Pair, d: Pair, b: Pair, c: Pair): Pair|null {
+	private static _interpolationRatio(p: Pair, a: Pair, d: Pair, b: Pair, c: Pair): Pair|null {
 		// Find the ratio in the vertical direction
 		let v = -1;
 
 		// Solve a v^2 + b v + c = 0
 		const ea = (a[0] - d[0]) * (a[1] + c[1] - b[1] - d[1]) - (a[0] + c[0] - b[0] - d[0]) * (a[1] - d[1]);
-		const eb = (x - a[0]) * (a[1] + c[1] - b[1] - d[1]) + (a[0] - d[0]) * (b[1] - a[1]) - (a[0] + c[0] - b[0] - d[0]) * (y - a[1]) - (b[0] - a[0]) * (a[1] - d[1]);
-		const ec = (x - a[0]) * (b[1] - a[1]) - (y - a[1]) * (b[0] - a[0]);
+		const eb = (p[0] - a[0]) * (a[1] + c[1] - b[1] - d[1]) + (a[0] - d[0]) * (b[1] - a[1]) - (a[0] + c[0] - b[0] - d[0]) * (p[1] - a[1]) - (b[0] - a[0]) * (a[1] - d[1]);
+		const ec = (p[0] - a[0]) * (b[1] - a[1]) - (p[1] - a[1]) * (b[0] - a[0]);
 
 		if (Munsell._eq0(ea)) {
 			if (!Munsell._eq0(eb)) v = -ec / eb;
@@ -212,8 +212,8 @@ export class Munsell {
 		const deX = (a[0] - d[0] - b[0] + c[0]) * v - a[0] + b[0];
 		const deY = (a[1] - d[1] - b[1] + c[1]) * v - a[1] + b[1];
 
-		if (!Munsell._eq0(deX)) h1 = ((a[0] - d[0]) * v + x - a[0]) / deX;
-		if (!Munsell._eq0(deY)) h2 = ((a[1] - d[1]) * v + y - a[1]) / deY;
+		if (!Munsell._eq0(deX)) h1 = ((a[0] - d[0]) * v + p[0] - a[0]) / deX;
+		if (!Munsell._eq0(deY)) h2 = ((a[1] - d[1]) * v + p[1] - a[1]) / deY;
 
 		if      (0 <= h1 && h1 <= 1) h = h1;
 		else if (0 <= h2 && h2 <= 1) h = h2;
