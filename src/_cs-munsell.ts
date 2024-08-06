@@ -90,12 +90,12 @@ export class Munsell {
 		const v = Munsell._y2v(Y);  // Find Munsell lightness
 
 		// When the lightness is maximum 10
-		if (Munsell._eq(v, TBL_V[TBL_V.length - 1])) {
+		if (Munsell._eq(v, TBL_V.at(-1) as number)) {
 			const hc = Munsell._interpolateHC(x, y, TBL_V.length - 1);
 			return [hc[0], v, hc[1]];
 		}
 		// When the lightness is 0 or the lightness is larger than the maximum 10, or when it is an achromatic color (standard illuminant C)
-		if (Munsell._eq0(v) || TBL_V[TBL_V.length - 1] < v || (Munsell._eq(x, Munsell.ILLUMINANT_C[0]) && Munsell._eq(y, Munsell.ILLUMINANT_C[1]))) {
+		if (Munsell._eq0(v) || TBL_V.at(-1) as number < v || (Munsell._eq(x, Munsell.ILLUMINANT_C[0]) && Munsell._eq(y, Munsell.ILLUMINANT_C[1]))) {
 			return [0, v, 0];
 		}
 		// Obtain lower side
@@ -234,7 +234,7 @@ export class Munsell {
 			return [Y, ...Munsell.ILLUMINANT_C];
 		}
 		// When the lightness is the maximum value 10 or more
-		const v_max = TBL_V[TBL_V.length - 1];
+		const v_max = TBL_V.at(-1) as number;
 		if (v_max <= v) {
 			const xy = Munsell._interpolateXY(h, c, TBL_V.length - 1);
 			Munsell.isSaturated = (v_max < v);
