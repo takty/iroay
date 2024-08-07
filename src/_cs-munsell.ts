@@ -60,9 +60,9 @@ export class Munsell {
 
 	static isSaturated = false;
 
-	private static _getXy(vi: number, h10: number, c: number): Pair|null {
+	private static _getXy(vi: number, ht: number, c: number): Pair|null {
 		if (c === 0) return Munsell.ILLUMINANT_C;
-		return Munsell.TBL[vi][h10 / 25][c / 2];
+		return Munsell.TBL[vi][ht / 25][c / 2];
 	}
 
 	// Find Y of XYZ (C) from Munsell's V (JIS).
@@ -90,6 +90,7 @@ export class Munsell {
 	// Find the Munsell value from xyY (standard illuminant C).
 	private static _yxy2mun([Y, x, y]: Triplet): Triplet {
 		const v = Munsell._y2v(Y);  // Find Munsell lightness
+		// Munsell.isSaturated = false;
 
 		// When the lightness is maximum 10
 		if (Munsell._eq(v, TBL_V.at(-1) as number)) {
@@ -127,25 +128,25 @@ export class Munsell {
 	// If not included, -1 is returned.
 	private static _interpolateHC(x: number, y: number, vi: number): Pair {
 		const p = [x, y] as Pair;
-		const [h0, h1, c0, c1] = Munsell._getHcRange(p, vi);
+		const [ht0, ht1, c0, c1] = Munsell._getHcRange(p, vi);
 
-		let h10_l, h10_u = -1;
+		let ht_l, ht_u = -1;
 		let c_l = -1, c_u = -1;
-		let h10c = null;
+		let hc_r = null;
 
 		out:
-		for (h10_l = h0; h10_l <= h1; h10_l += 25) {  // h 0-975 step 25;
-			h10_u = h10_l + 25;
-			if (h10_u === 1000) h10_u = 0;
+		for (ht_l = ht0; ht_l <= ht1; ht_l += 25) {  // h 0-975 step 25;
+			ht_u = ht_l + 25;
+			if (ht_u === 1000) ht_u = 0;
 
 			inner:
 			for (c_l = c0; c_l <= c1; c_l += 2) {  // c 0-50 step 2;
 				c_u = c_l + 2;
 
-				const wa = Munsell._getXy(vi, h10_l, c_l);
-				const wb = Munsell._getXy(vi, h10_u, c_l);
-				let wc = Munsell._getXy(vi, h10_u, c_u);
-				let wd = Munsell._getXy(vi, h10_l, c_u);
+				const wa = Munsell._getXy(vi, ht_l, c_l);
+				const wb = Munsell._getXy(vi, ht_u, c_l);
+				let wc = Munsell._getXy(vi, ht_u, c_u);
+				let wd = Munsell._getXy(vi, ht_l, c_u);
 
 				if (wa && wb && wc && !wd) {
 					wd = [wa[0] + (wc[0] - wb[0]), wa[1] + (wc[1] - wb[1])]
@@ -161,29 +162,30 @@ export class Munsell {
 				//  ------> x
 				if (wa[0] === wb[0] && wa[1] === wb[1]) {
 					if (Munsell._inside(p, wa, wc, wd)) {
-						h10c = Munsell._interpolationRatio(p, wa, wd, wb, wc);
+						hc_r = Munsell._interpolationRatio(p, wa, wd, wb, wc);
 					}
 				} else {
 					if (Munsell._inside(p, wa, wc, wd) || Munsell._inside(p, wa, wb, wc)) {
-						h10c = Munsell._interpolationRatio(p, wa, wd, wb, wc);
+						hc_r = Munsell._interpolationRatio(p, wa, wd, wb, wc);
 					}
 				}
-				if (h10c !== null) break out;
+				if (hc_r !== null) break out;
 			}
 		}
-		if (h10c === null) {
+		if (hc_r === null) {
 			const ps = Munsell.TBL_TREES[vi].neighbors(p, 2);
 			if (2 === ps.length) {
-				let [[[h10_0, c0], d0], [[h10_1, c1], d1]] = ps;
+				// Munsell.isSaturated = true;
+				let [[[ht0, c0], d0], [[ht1, c1], d1]] = ps;
 				const r = d0 / (d0 + d1);
-				return Munsell._addHc([h10_0 / 10, c0], [h10_1 / 10, c1], r);
+				return Munsell._addHc([ht0 / 10, c0], [ht1 / 10, c1], r);
 			}
 			return [0, 0];
 		}
-		if (h10_u === 0) h10_u = 1000;
+		if (ht_u === 0) ht_u = 1000;
 		return [
-			((h10_u - h10_l) * h10c[0] + h10_l) / 10,
-			(c_u - c_l) * h10c[1] + c_l
+			((ht_u - ht_l) * hc_r[0] + ht_l) / 10,
+			(c_u - c_l) * hc_r[1] + c_l
 		];
 	}
 
@@ -312,51 +314,51 @@ export class Munsell {
 	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
 	// Return false if it is out of the range of the table.
 	private static _interpolateXY(h: number, c: number, vi: number): [number, number, boolean] {
-		const h10 = h * 10;
-		const p = [h10, c] as Pair;
+		const ht = h * 10;
+		const p = [ht, c] as Pair;
 
 		const c_l = 0 | Math.floor(c / 2) * 2;
 		const c_u = c_l + 2;
 
-		let h10_l = 0 | Math.floor(h10 / 25) * 25;
-		let h10_u = h10_l + 25;
+		let ht_l = 0 | Math.floor(ht / 25) * 25;
+		let ht_u = ht_l + 25;
 
-		if (h10_u === 1000) h10_u = 0;
-		let maxC_hl = Munsell.TBL_MAX_C[vi][h10_l / 25];
-		let maxC_hu = Munsell.TBL_MAX_C[vi][h10_u / 25];
+		if (ht_u === 1000) ht_u = 0;
+		let maxC_hl = Munsell.TBL_MAX_C[vi][ht_l / 25];
+		let maxC_hu = Munsell.TBL_MAX_C[vi][ht_u / 25];
 
 		if (maxC_hl === 0) {
-			h10_l -= 25;
-			if (h10_l < 0) h10_l = 1000 - 25;
-			maxC_hl = Munsell.TBL_MAX_C[vi][h10_l / 25];
+			ht_l -= 25;
+			if (ht_l < 0) ht_l = 1000 - 25;
+			maxC_hl = Munsell.TBL_MAX_C[vi][ht_l / 25];
 		}
 		if (maxC_hu === 0) {
-			h10_u += 25;
-			if (h10_u === 1000) h10_u = 0;
-			maxC_hu = Munsell.TBL_MAX_C[vi][h10_u / 25];
+			ht_u += 25;
+			if (ht_u === 1000) ht_u = 0;
+			maxC_hu = Munsell.TBL_MAX_C[vi][ht_u / 25];
 		}
 
 		if (c < maxC_hl && maxC_hu <= c) {
 			for (let c_l = maxC_hu; c_l <= maxC_hl - 2; c_l += 2) {
-				if (Munsell._inside(p, [h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2])) {
-					const xy = interpolate3(vi, p, [h10_u, maxC_hu], [h10_l, c_l], [h10_l, c_l + 2]);
+				if (Munsell._inside(p, [ht_u, maxC_hu], [ht_l, c_l], [ht_l, c_l + 2])) {
+					const xy = interpolate3(vi, p, [ht_u, maxC_hu], [ht_l, c_l], [ht_l, c_l + 2]);
 					return [...xy, true];
 				}
 			}
 		}
 		if (maxC_hl <= c && c < maxC_hu) {
 			for (let c_c = maxC_hl; c_c <= maxC_hu - 2; c_c += 2) {
-				if (Munsell._inside(p, [h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c])) {
-					const xy = interpolate3(vi, p, [h10_l, maxC_hl], [h10_u, c_c + 2], [h10_u, c_c]);
+				if (Munsell._inside(p, [ht_l, maxC_hl], [ht_u, c_c + 2], [ht_u, c_c])) {
+					const xy = interpolate3(vi, p, [ht_l, maxC_hl], [ht_u, c_c + 2], [ht_u, c_c]);
 					return [...xy, true];
 				}
 			}
 		}
 		if (maxC_hl <= c || maxC_hu <= c) {
-			const xy = interpolate2(vi, p, [h10_l, maxC_hl], [h10_u, maxC_hu]);
+			const xy = interpolate2(vi, p, [ht_l, maxC_hl], [ht_u, maxC_hu]);
 			return [...xy, false];
 		}
-		const xy = interpolate4(vi, p, [h10_l, c_l], [h10_u, c_l], [h10_u, c_u], [h10_l, c_u]);
+		const xy = interpolate4(vi, p, [ht_l, c_l], [ht_u, c_l], [ht_u, c_u], [ht_l, c_u]);
 		return [...xy, true];
 
 		function interpolate2(vi: number, p: Pair, a: Pair, b: Pair): Pair {
