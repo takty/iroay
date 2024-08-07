@@ -6,10 +6,11 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-08-06
+ * @version 2024-08-07
  */
 
 import { TBL_SRC_MIN, TBL_V } from './table/_hc2xy-all-min';
+import { Tree } from './_kdt';
 
 import { Pair, Triplet } from './_type';
 import { XYZ } from './_cs-xyz';
@@ -51,6 +52,7 @@ export class Munsell {
 	private static ILLUMINANT_C: Pair = [0.3101, 0.3162];  // Standard illuminant C, white point
 	private static TBL_MAX_C: number[][];
 	private static TBL: (Pair|null)[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
+	private static TBL_TREES: Tree[] = [];
 
 	static MIN_HUE = 0;
 	static MAX_HUE = 100;  // Same as MIN_HUE
@@ -91,8 +93,8 @@ export class Munsell {
 
 		// When the lightness is maximum 10
 		if (Munsell._eq(v, TBL_V.at(-1) as number)) {
-			const hc = Munsell._interpolateHC(x, y, TBL_V.length - 1);
-			return [hc[0], v, hc[1]];
+			const [h, c] = Munsell._interpolateHC(x, y, TBL_V.length - 1);
+			return [h, v, c];
 		}
 		// When the lightness is 0 or the lightness is larger than the maximum 10, or when it is an achromatic color (standard illuminant C)
 		if (Munsell._eq0(v) || TBL_V.at(-1) as number < v || (Munsell._eq(x, Munsell.ILLUMINANT_C[0]) && Munsell._eq(y, Munsell.ILLUMINANT_C[1]))) {
@@ -101,7 +103,7 @@ export class Munsell {
 		// Obtain lower side
 		let vi_l = -1;
 		while (TBL_V[vi_l + 1] <= v) ++vi_l;
-		let hc_l = [0, 0];  // Hue and chroma of the lower side
+		let hc_l = [0, 0] as Pair;  // Hue and chroma of the lower side
 		if (vi_l !== -1) hc_l = Munsell._interpolateHC(x, y, vi_l);
 
 		// Obtain upper side
@@ -117,15 +119,7 @@ export class Munsell {
 		const v_h = TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 
-		if (Math.abs(hc_u[0] - hc_l[0]) > Munsell.MAX_HUE * 0.5) {
-			if (hc_l[0] < hc_u[0]) hc_l[0] += Munsell.MAX_HUE;
-			else if (hc_l[0] > hc_u[0]) hc_u[0] += Munsell.MAX_HUE;
-		}
-
-		let h = (hc_u[0] - hc_l[0]) * r + hc_l[0];
-		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
-		let c = (hc_u[1] - hc_l[1]) * r + hc_l[1];
-		if (c < Munsell.MONO_LIMIT_C) c = 0;
+		const [h, c] = Munsell._addHc(hc_l, hc_u, r);
 		return [h, v, c];
 	}
 
@@ -133,20 +127,19 @@ export class Munsell {
 	// If not included, -1 is returned.
 	private static _interpolateHC(x: number, y: number, vi: number): Pair {
 		const p = [x, y] as Pair;
+		const [h0, h1, c0, c1] = Munsell._getHcRange(p, vi);
 
-		let h10_l;
-		let h10_u = -1;
-		let c_l = -1;
-		let c_u = -1;
-		let hv = null;
+		let h10_l, h10_u = -1;
+		let c_l = -1, c_u = -1;
+		let h10c = null;
 
 		out:
-		for (h10_l = 0; h10_l <= 975; h10_l += 25) {  // h 0-975 step 25;
+		for (h10_l = h0; h10_l <= h1; h10_l += 25) {  // h 0-975 step 25;
 			h10_u = h10_l + 25;
 			if (h10_u === 1000) h10_u = 0;
 
 			inner:
-			for (c_l = 0; c_l <= 50; c_l += 2) {  // c 0-50 step 2;
+			for (c_l = c0; c_l <= c1; c_l += 2) {  // c 0-50 step 2;
 				c_u = c_l + 2;
 
 				const wa = Munsell._getXy(vi, h10_l, c_l);
@@ -168,23 +161,42 @@ export class Munsell {
 				//  ------> x
 				if (wa[0] === wb[0] && wa[1] === wb[1]) {
 					if (Munsell._inside(p, wa, wc, wd)) {
-						hv = Munsell._interpolationRatio(p, wa, wd, wb, wc);
+						h10c = Munsell._interpolationRatio(p, wa, wd, wb, wc);
 					}
 				} else {
 					if (Munsell._inside(p, wa, wc, wd) || Munsell._inside(p, wa, wb, wc)) {
-						hv = Munsell._interpolationRatio(p, wa, wd, wb, wc);
+						h10c = Munsell._interpolationRatio(p, wa, wd, wb, wc);
 					}
 				}
-				if (hv !== null) break out;
+				if (h10c !== null) break out;
 			}
 		}
-		if (hv === null) {
+		if (h10c === null) {
+			const ps = Munsell.TBL_TREES[vi].neighbors(p, 2);
+			if (2 === ps.length) {
+				let [[[h10_0, c0], d0], [[h10_1, c1], d1]] = ps;
+				const r = d0 / (d0 + d1);
+				return Munsell._addHc([h10_0 / 10, c0], [h10_1 / 10, c1], r);
+			}
 			return [0, 0];
 		}
 		if (h10_u === 0) h10_u = 1000;
 		return [
-			((h10_u - h10_l) * hv[0] + h10_l) / 10,
-			(c_u - c_l) * hv[1] + c_l
+			((h10_u - h10_l) * h10c[0] + h10_l) / 10,
+			(c_u - c_l) * h10c[1] + c_l
+		];
+	}
+
+	private static _getHcRange(p: Pair, vi: number): [number, number, number, number] {
+		const ps = Munsell.TBL_TREES[vi].neighbors(p, 16);
+		const hcs = ps.map(([e,]) => e);
+		const hs = hcs.map(([h,]) => h);
+		const cs = hcs.map(([,c]) => c);
+		return [
+			Math.min(...hs),
+			Math.max(...hs),
+			Math.min(...cs),
+			Math.max(...cs),
 		];
 	}
 
@@ -195,14 +207,14 @@ export class Munsell {
 	 *  | A D
 	 *  ------> x
 	 */
-	private static _interpolationRatio(p: Pair, a: Pair, d: Pair, b: Pair, c: Pair): Pair|null {
+	private static _interpolationRatio(p: Pair, wa: Pair, wd: Pair, wb: Pair, wc: Pair): Pair|null {
 		// Find the ratio in the vertical direction
 		let v = -1;
 
 		// Solve a v^2 + b v + c = 0
-		const ea = (a[0] - d[0]) * (a[1] + c[1] - b[1] - d[1]) - (a[0] + c[0] - b[0] - d[0]) * (a[1] - d[1]);
-		const eb = (p[0] - a[0]) * (a[1] + c[1] - b[1] - d[1]) + (a[0] - d[0]) * (b[1] - a[1]) - (a[0] + c[0] - b[0] - d[0]) * (p[1] - a[1]) - (b[0] - a[0]) * (a[1] - d[1]);
-		const ec = (p[0] - a[0]) * (b[1] - a[1]) - (p[1] - a[1]) * (b[0] - a[0]);
+		const ea = (wa[0] - wd[0]) * (wa[1] + wc[1] - wb[1] - wd[1]) - (wa[0] + wc[0] - wb[0] - wd[0]) * (wa[1] - wd[1]);
+		const eb = (p[0] - wa[0]) * (wa[1] + wc[1] - wb[1] - wd[1]) + (wa[0] - wd[0]) * (wb[1] - wa[1]) - (wa[0] + wc[0] - wb[0] - wd[0]) * (p[1] - wa[1]) - (wb[0] - wa[0]) * (wa[1] - wd[1]);
+		const ec = (p[0] - wa[0]) * (wb[1] - wa[1]) - (p[1] - wa[1]) * (wb[0] - wa[0]);
 
 		if (Munsell._eq0(ea)) {
 			if (!Munsell._eq0(eb)) v = -ec / eb;
@@ -210,7 +222,7 @@ export class Munsell {
 			const rt = Math.sqrt(eb * eb - 4 * ea * ec);
 			const v1 = (-eb + rt) / (2 * ea), v2 = (-eb - rt) / (2 * ea);
 
-			if (a[0] === b[0] && a[1] === b[1]) {  // In this case, v1 is always 0, but this is not a solution.
+			if (wa[0] === wb[0] && wa[1] === wb[1]) {  // In this case, v1 is always 0, but this is not a solution.
 				if (0 <= v2 && v2 <= 1) v = v2;
 			} else {
 				if      (0 <= v1 && v1 <= 1) v = v1;
@@ -221,11 +233,11 @@ export class Munsell {
 
 		// Find the ratio in the horizontal direction
 		let h = -1, h1 = -1, h2 = -1;
-		const deX = (a[0] - d[0] - b[0] + c[0]) * v - a[0] + b[0];
-		const deY = (a[1] - d[1] - b[1] + c[1]) * v - a[1] + b[1];
+		const deX = (wa[0] - wd[0] - wb[0] + wc[0]) * v - wa[0] + wb[0];
+		const deY = (wa[1] - wd[1] - wb[1] + wc[1]) * v - wa[1] + wb[1];
 
-		if (!Munsell._eq0(deX)) h1 = ((a[0] - d[0]) * v + p[0] - a[0]) / deX;
-		if (!Munsell._eq0(deY)) h2 = ((a[1] - d[1]) * v + p[1] - a[1]) / deY;
+		if (!Munsell._eq0(deX)) h1 = ((wa[0] - wd[0]) * v + p[0] - wa[0]) / deX;
+		if (!Munsell._eq0(deY)) h2 = ((wa[1] - wd[1]) * v + p[1] - wa[1]) / deY;
 
 		if      (0 <= h1 && h1 <= 1) h = h1;
 		else if (0 <= h2 && h2 <= 1) h = h2;
@@ -235,7 +247,20 @@ export class Munsell {
 		return [h, v];
 	}
 
-	static _mun2yxy([h, v, c]: Triplet): Triplet {
+	private static _addHc([h0, c0]: Pair, [h1, c1]: Pair, r: number): Pair {
+		if (Math.abs(h1 - h0) > Munsell.MAX_HUE * 0.5) {
+			if (h0 < h1) h0 += Munsell.MAX_HUE;
+			else if (h0 > h1) h1 += Munsell.MAX_HUE;
+		}
+
+		let h = (h1 - h0) * r + h0;
+		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
+		let c = (c1 - c0) * r + c0;
+		if (c < Munsell.MONO_LIMIT_C) c = 0;
+		return [h, c];
+	}
+
+	private static _mun2yxy([h, v, c]: Triplet): Triplet {
 		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
 		const Y = Munsell._v2y(v);
 		Munsell.isSaturated = false;
@@ -476,6 +501,7 @@ export class Munsell {
 	static initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
 		Munsell.TBL_MAX_C = new Array(tbl_v.length);
 		Munsell.TBL = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
+		Munsell.TBL_TREES = new Array(tbl_v.length);
 
 		for (let vi = 0; vi < tbl_v.length; vi += 1) {
 			Munsell.TBL_MAX_C[vi] = new Array(1000 / 25);
@@ -485,6 +511,7 @@ export class Munsell {
 				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
 				Munsell.TBL[vi][i].fill(null);
 			}
+			const data: [Pair, Pair][] = [];
 			for (const cs of tbl_src_min[vi]) {
 				const c0 = cs.shift() as number;
 				_integrate(cs);
@@ -494,12 +521,15 @@ export class Munsell {
 					const c2 = cs[i + 0] / 1000;
 					const c3 = cs[i + 1] / 1000;
 					Munsell.TBL[vi][c0][c1] = [c2, c3];
+					data.push([[c2, c3], [c0 * 25, c1 * 2]]);
 					if (Munsell.TBL_MAX_C[vi][c0] < c1 * 2) {
 						Munsell.TBL_MAX_C[vi][c0] = c1 * 2;
 					}
 				}
 			}
+			Munsell.TBL_TREES[vi] = new Tree(data);
 		}
+		// console.log(Munsell.TBL_TREES);
 		function _integrate(cs: number[]) {
 			let c2_ = 0, c3_ = 0;
 			for (let i = 0; i < cs.length; i += 2) {
