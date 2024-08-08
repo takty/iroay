@@ -531,7 +531,7 @@ export class Munsell {
 			}
 			Munsell.TBL_TREES[vi] = new Tree(data);
 		}
-		// console.log(Munsell.TBL_TREES);
+
 		function _integrate(cs: number[]) {
 			let c2_ = 0, c3_ = 0;
 			for (let i = 0; i < cs.length; i += 2) {
