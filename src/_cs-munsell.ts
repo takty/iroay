@@ -513,45 +513,48 @@ export class Munsell {
 	}
 
 	static initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
+		Munsell.TBL       = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 		Munsell.TBL_MAX_C = new Array(tbl_v.length);
-		Munsell.TBL = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 		Munsell.TBL_TREES = new Array(tbl_v.length);
 
 		for (let vi = 0; vi < tbl_v.length; vi += 1) {
+			Munsell.TBL[vi]       = new Array(1000 / 25);
 			Munsell.TBL_MAX_C[vi] = new Array(1000 / 25);
 			Munsell.TBL_MAX_C[vi].fill(0);
-			Munsell.TBL[vi] = new Array(1000 / 25);
+
 			for (let i = 0, n = 1000 / 25; i < n; i += 1) {
 				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
 				Munsell.TBL[vi][i].fill(null);
 			}
 			const data: [Pair, Pair][] = [];
+
 			for (const cs of tbl_src_min[vi]) {
-				const c0 = cs.shift() as number;
+				const hi = cs.shift() as number;
 				_integrate(cs);
 				_integrate(cs);
+
 				for (let i = 0; i < cs.length; i += 2) {
-					const c1 = i / 2 + 1;
-					const c2 = cs[i + 0] / 1000;
-					const c3 = cs[i + 1] / 1000;
-					Munsell.TBL[vi][c0][c1] = [c2, c3];
-					data.push([[c2, c3], [c0 * 25, c1 * 2]]);
-					if (Munsell.TBL_MAX_C[vi][c0] < c1 * 2) {
-						Munsell.TBL_MAX_C[vi][c0] = c1 * 2;
-					}
+					const ci = i / 2 + 1;
+					const x = cs[i + 0] / 1000;
+					const y = cs[i + 1] / 1000;
+
+					Munsell.TBL[vi][hi][ci] = [x, y];
+					data.push([[x, y], [hi * 25, ci * 2]]);
 				}
+				Munsell.TBL_MAX_C[vi][hi] = cs.length - 2;
 			}
 			Munsell.TBL_TREES[vi] = new Tree(data);
 		}
 
 		function _integrate(cs: number[]) {
-			let c2_ = 0, c3_ = 0;
+			let x_ = 0;
+			let y_ = 0;
+
 			for (let i = 0; i < cs.length; i += 2) {
-				const c2 = cs[i], c3 = cs[i + 1];
-				cs[i]     = c2 + c2_;
-				cs[i + 1] = c3 + c3_;
-				c2_ += c2;
-				c3_ += c3;
+				x_ += cs[i];
+				y_ += cs[i + 1];
+				cs[i]     = x_;
+				cs[i + 1] = y_;
 			}
 		}
 	}
