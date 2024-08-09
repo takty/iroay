@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-09
  */
 
 import { Triplet } from './_type';
@@ -182,6 +182,7 @@ export class Color {
 				break;
 			default:
 				t = Munsell.fromXYZ(this.asXYZ());
+				this.us.set('munsell_saturation', Munsell.isSaturated);
 				break;
 		}
 		this.ts.set(ColorSpace.Munsell, t);
