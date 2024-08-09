@@ -6,7 +6,7 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-08-07
+ * @version 2024-08-09
  */
 
 import { TBL_SRC_MIN, TBL_V } from './table/_hc2xy-all-min';
@@ -62,6 +62,7 @@ export class Munsell {
 
 	private static _getXy(vi: number, ht: number, c: number): Pair|null {
 		if (c === 0) return Munsell.ILLUMINANT_C;
+		if (1000 <= ht) ht -= 1000;
 		return Munsell.TBL[vi][ht / 25][c / 2];
 	}
 
@@ -87,10 +88,14 @@ export class Munsell {
 		return v;
 	}
 
+
+	// -------------------------------------------------------------------------
+
+
 	// Find the Munsell value from xyY (standard illuminant C).
 	private static _yxy2mun([Y, x, y]: Triplet): Triplet {
 		const v = Munsell._y2v(Y);  // Find Munsell lightness
-		// Munsell.isSaturated = false;
+		Munsell.isSaturated = false;
 
 		// When the lightness is maximum 10
 		if (Munsell._eq(v, TBL_V.at(-1) as number)) {
@@ -137,7 +142,6 @@ export class Munsell {
 		out:
 		for (ht_l = ht0; ht_l <= ht1; ht_l += 25) {  // h 0-975 step 25;
 			ht_u = ht_l + 25;
-			if (ht_u === 1000) ht_u = 0;
 
 			inner:
 			for (c_l = c0; c_l <= c1; c_l += 2) {  // c 0-50 step 2;
@@ -175,7 +179,7 @@ export class Munsell {
 		if (hc_r === null) {
 			const ps = Munsell.TBL_TREES[vi].neighbors(p, 2);
 			if (2 === ps.length) {
-				// Munsell.isSaturated = true;
+				Munsell.isSaturated = true;
 				let [[[ht0, c0], d0], [[ht1, c1], d1]] = ps;
 				const r = d0 / (d0 + d1);
 				return Munsell._addHc([ht0 / 10, c0], [ht1 / 10, c1], r);
@@ -261,6 +265,10 @@ export class Munsell {
 		if (c < Munsell.MONO_LIMIT_C) c = 0;
 		return [h, c];
 	}
+
+
+	// -------------------------------------------------------------------------
+
 
 	private static _mun2yxy([h, v, c]: Triplet): Triplet {
 		if (Munsell.MAX_HUE <= h) h -= Munsell.MAX_HUE;
@@ -405,6 +413,10 @@ export class Munsell {
 			return Munsell._div(wab, wdc, ry);
 		}
 	}
+
+
+	// -------------------------------------------------------------------------
+
 
 	/**
 	 * Convert name-based hue expression to hue value.
