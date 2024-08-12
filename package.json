@@ -30,6 +30,7 @@
 		"dev": "vite src/_docs --base ./",
 		"debug": "tsc --noEmit -w"
 	},
+	"packageManager": "yarn@1.22.22",
 	"dependencies": {
 		"esbuild": "^0.23.0",
 		"esbuild-sass-plugin": "^3.3.1",
@@ -37,6 +38,6 @@
 		"klales": "github:takty/klales",
 		"sass": "^1.77.8",
 		"typescript": "^5.5.4",
-		"vite": "^5.3.5"
+		"vite": "^5.4.0"
 	}
 }
