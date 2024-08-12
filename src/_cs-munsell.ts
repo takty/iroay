@@ -66,6 +66,12 @@ export class Munsell {
 		return Munsell.TBL[vi][ht / 25][c / 2];
 	}
 
+	private static _getMaxC(vi: number, ht: number): number {
+		if (1000 <= ht) ht -= 1000;
+		if (ht < 0) ht += 1000;
+		return Munsell.TBL_MAX_C[vi][ht / 25];
+	}
+
 	// Find Y of XYZ (C) from Munsell's V (JIS).
 	private static _v2y(v: number) {
 		if (v <= 1) return v * 0.0121;
@@ -292,7 +298,7 @@ export class Munsell {
 		const vi_u = vi_l + 1;
 
 		// Obtain lower side
-		let xy_l;
+		let xy_l: [number, number, boolean];
 		if (vi_l !== -1) {
 			xy_l = Munsell._interpolateXY(h, c, vi_l);
 		} else {  // When the lightness of the lower side is the minimum 0, use standard illuminant.
@@ -330,26 +336,22 @@ export class Munsell {
 
 		let ht_l = 0 | Math.floor(ht / 25) * 25;
 		let ht_u = ht_l + 25;
+		let maxC_hl = 0;
+		let maxC_hu = 0;
 
-		if (ht_u === 1000) ht_u = 0;
-		let maxC_hl = Munsell.TBL_MAX_C[vi][ht_l / 25];
-		let maxC_hu = Munsell.TBL_MAX_C[vi][ht_u / 25];
-
-		if (maxC_hl === 0) {
-			ht_l -= 25;
-			if (ht_l < 0) ht_l = 1000 - 25;
-			maxC_hl = Munsell.TBL_MAX_C[vi][ht_l / 25];
+		for (; maxC_hl === 0; ht_l -= 25) {
+			maxC_hl = Munsell._getMaxC(vi, ht_l);
+			if (maxC_hl !== 0) break;
 		}
-		if (maxC_hu === 0) {
-			ht_u += 25;
-			if (ht_u === 1000) ht_u = 0;
-			maxC_hu = Munsell.TBL_MAX_C[vi][ht_u / 25];
+		for (; maxC_hu === 0; ht_u += 25) {
+			maxC_hu = Munsell._getMaxC(vi, ht_u);
+			if (maxC_hu !== 0) break;
 		}
 
 		if (c < maxC_hl && maxC_hu <= c) {
-			for (let c_l = maxC_hu; c_l <= maxC_hl - 2; c_l += 2) {
-				if (Munsell._inside(p, [ht_u, maxC_hu], [ht_l, c_l], [ht_l, c_l + 2])) {
-					const xy = interpolate3(vi, p, [ht_u, maxC_hu], [ht_l, c_l], [ht_l, c_l + 2]);
+			for (let c_c = maxC_hu; c_c <= maxC_hl - 2; c_c += 2) {
+				if (Munsell._inside(p, [ht_u, maxC_hu], [ht_l, c_c], [ht_l, c_c + 2])) {
+					const xy = interpolate3(vi, p, [ht_u, maxC_hu], [ht_l, c_c], [ht_l, c_c + 2]);
 					return [...xy, true];
 				}
 			}
