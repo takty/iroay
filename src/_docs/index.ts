@@ -2,11 +2,11 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-07-31
+ * @version 2024-08-11
  */
 
 import 'klales/klales.min.css';
-import { Color, ColorSpace } from '../colorjst.ts';
+import { Color, ColorSpace, Munsell, RGB, LRGB } from '../colorjst.ts';
 
 type Triplet = [number, number, number];
 
@@ -17,132 +17,139 @@ document.addEventListener('DOMContentLoaded', () => {
 	const can = document.querySelector('canvas');
 	if (can) {
 		const ctx = can.getContext('2d') as CanvasRenderingContext2D;
+		const w = can.width;
+		const h = can.height;
 
-		draw(ctx, sel, sli, ss);
+		draw(w, h, ctx, sel, sli, ss);
 		sel?.addEventListener('change', () => {
-			draw(ctx, sel, sli, ss);
+			draw(w, h, ctx, sel, sli, ss);
 		});
 		sli?.addEventListener('input', () => {
-			draw(ctx, sel, sli, ss);
+			draw(w, h, ctx, sel, sli, ss);
 		});
 		ss?.addEventListener('change', () => {
-			draw(ctx, sel, sli, ss);
+			draw(w, h, ctx, sel, sli, ss);
 		});
 	}
 });
 
-function draw(ctx: CanvasRenderingContext2D, sel: HTMLSelectElement, sli: HTMLInputElement, ss: HTMLInputElement): void {
+function draw(w: number, h: number, ctx: CanvasRenderingContext2D, sel: HTMLSelectElement, sli: HTMLInputElement, ss: HTMLInputElement): void {
 	ctx.save();
 	ctx.fillStyle = 'rgb(191, 191, 191)';
 	ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 	ctx.restore();
 
-	const fns = [
-		drawChartRGB,
-		drawChartLRGB,
-		drawChartXYZ,
-		drawChartLab,
-		drawChartYxy,
-		drawChartMunsell,
-		drawChartMunsellPolar,
-		drawChartPCCS,
-		drawChartPCCSPolar,
-		drawChartTone,
-	];
-	const idx = parseInt(sel.value, 10);
+	const fns = new Map([
+		['rgb', drawChartRGB],
+		['lrgb', drawChartLRGB],
+		['xyz', drawChartXYZ],
+		['lab', drawChartLab],
+		['yxy', drawChartYxy],
+		['mun', drawChartMunsell],
+		['mun_p', drawChartMunsellPolar],
+		['mun_i', drawChartMunsellFromXYZ],
+		['pccs', drawChartPCCS],
+		['pccs_p', drawChartPCCSPolar],
+		['tone', drawChartTone],
+	]);
 	ctx.save();
-	fns[idx](ctx, parseInt(sli.value) / 255, ss.checked);
+	const idx = sel.value;
+	const f = fns.get(idx);
+	if  (f) {
+		f(w, h, ctx, parseInt(sli.value) / 255, ss.checked);
+	}
 	ctx.restore();
 };
 
-function drawChartRGB(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
+function drawChartRGB(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
 			const rgb = [x, v * 255, y] as Triplet;
-			setPixel(ctx, x, 255 - y, rgb);
+			setPixel(ctx, x, (h - 1) - y, rgb);
 		}
 	}
 }
 
-function drawChartLRGB(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartLRGB(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			c.set(ColorSpace.LRGB, [x / 255, v, y / 255]);
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.LRGB, [x / (w - 1), v, y / (h - 1)]);
 
 			const rgb = c.asRGB();
-			setPixel(ctx, x, 255 - y, rgb);
+			setPixel(ctx, x, (h - 1) - y, rgb);
 		}
 	}
 }
 
-function drawChartXYZ(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartXYZ(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			c.set(ColorSpace.XYZ, [x / 255, v, y / 255]);
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.XYZ, [x / (w - 1), v, y / (h - 1)]);
 
 			const rgb = c.asRGB();
 			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
-				setPixel(ctx, x, 255 - y, rgb);
+					setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
 	}
 }
 
-function drawChartLab(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartLab(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			c.set(ColorSpace.Lab, [v * 100, x - 128, y - 128]);
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.Lab, [v * 100, (x / w) * 256 - 128, (y / h) * 256 - 128]);
 
 			const rgb = c.asRGB();
 			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
-				setPixel(ctx, x, 255 - y, rgb);
+				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
 	}
 }
 
-function drawChartYxy(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartYxy(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			c.set(ColorSpace.Yxy, [v, x / 255, y / 255]);
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.Yxy, [v, x / (w - 1), y / (h - 1)]);
 
 			const rgb = c.asRGB();
 			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
-				setPixel(ctx, x, 255 - y, rgb);
+				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
 	}
 }
 
-function drawChartMunsell(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartMunsell(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			c.set(ColorSpace.Munsell, [x * 100 / 255, v * 10, y * 38 / 255]);
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.Munsell, [x * 100 / (w - 1), v * 10, y * 38 / (h - 1)]);
 
 			const rgb = c.asRGB();
 			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
-				setPixel(ctx, x, 255 - y, rgb);
+				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
 	}
 }
 
-function drawChartMunsellPolar(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartMunsellPolar(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			const xx = x - 128, yy = y - 128;
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			const xx = (x / w) * 256 - 128;
+			const yy = (y / h) * 256 - 128;
 			const rad = (yy > 0) ? Math.atan2(yy, xx) : (Math.atan2(-yy, -xx) + Math.PI);
 
 			let tb0 = rad / (Math.PI * 2) * 100 + 30;
@@ -159,27 +166,46 @@ function drawChartMunsellPolar(ctx: CanvasRenderingContext2D, v: number, ss: boo
 	}
 }
 
-function drawChartPCCS(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartMunsellFromXYZ(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
+	const c2 = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			c.set(ColorSpace.PCCS, [x * 24 / 255, v * 10, y * 10 / 255]);
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.XYZ, [x / (w - 1), v, y / (h - 1)]);
+			c2.set(ColorSpace.Munsell, c.asMunsell());
 
-			const rgb = c.asRGB();
-			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
-				setPixel(ctx, x, 255 - y, rgb);
+			// const rgb = RGB.fromLRGB(LRGB.fromXYZ(Munsell.toXYZ(c.asMunsell())));
+			const rgb = c2.asRGB();
+			if (ss || !c2.isMunsellSaturated() || 0 === (x + y) % 7) {
+					setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
 	}
 }
 
-function drawChartPCCSPolar(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartPCCS(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			const xx = x - 128, yy = y - 128;
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.PCCS, [x * 24 / (w - 1), v * 10, y * 10 / (h - 1)]);
+
+			const rgb = c.asRGB();
+			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
+				setPixel(ctx, x, (h - 1) - y, rgb);
+			}
+		}
+	}
+}
+
+function drawChartPCCSPolar(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+	const c = new Color();
+
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			const xx = (x / w) * 256 - 128;
+			const yy = (y / h) * 256 - 128;
 			const rad = ((yy > 0) ? Math.atan2(yy, xx) : (Math.atan2(-yy, -xx) + Math.PI)) / (Math.PI * 2);
 
 			let tb0 = rad * 24 - 8;
@@ -197,16 +223,16 @@ function drawChartPCCSPolar(ctx: CanvasRenderingContext2D, v: number, ss: boolea
 	}
 }
 
-function drawChartTone(ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartTone(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
-	for (let y = 0; y < 256; y += 1) {
-		for (let x = 0; x < 256; x += 1) {
-			c.set(ColorSpace.Tone, [v * 24, y * 10 / 256, x * 10 / 256]);
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.Tone, [v * 24, y * 10 / (h - 1), x * 10 / (w - 1)]);
 
 			const rgb = c.asRGB();
 			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
-				setPixel(ctx, x, 255 - y, rgb);
+				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
 	}
