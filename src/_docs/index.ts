@@ -2,7 +2,7 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-08-11
+ * @version 2024-08-13
  */
 
 import 'klales/klales.min.css';
@@ -121,7 +121,7 @@ function drawChartYxy(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 			c.set(ColorSpace.Yxy, [v, x / (w - 1), y / (h - 1)]);
 
 			const rgb = c.asRGB();
-			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
+			if (ss || (!c.isRGBSaturated() && !c.isYxySaturated()) || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
@@ -136,7 +136,8 @@ function drawChartMunsell(w: number, h: number, ctx: CanvasRenderingContext2D, v
 			c.set(ColorSpace.Munsell, [x * 100 / (w - 1), v * 10, y * 38 / (h - 1)]);
 
 			const rgb = c.asRGB();
-			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
+			const s = c.isRGBSaturated() || c.isMunsellSaturated();
+			if (ss || !s || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
@@ -159,7 +160,8 @@ function drawChartMunsellPolar(w: number, h: number, ctx: CanvasRenderingContext
 			c.set(ColorSpace.Munsell, [tb0, v * 10, tb2]);
 
 			const rgb = c.asRGB();
-			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
+			const s = c.isRGBSaturated() || c.isMunsellSaturated();
+			if (ss || !s || 0 === (x + y) % 7) {
 				setPixel(ctx, x, y, rgb);
 			}
 		}
@@ -174,11 +176,11 @@ function drawChartMunsellFromXYZ(w: number, h: number, ctx: CanvasRenderingConte
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.XYZ, [x / (w - 1), v, y / (h - 1)]);
 			c2.set(ColorSpace.Munsell, c.asMunsell());
+			const s = Munsell.isSaturated;
 
-			// const rgb = RGB.fromLRGB(LRGB.fromXYZ(Munsell.toXYZ(c.asMunsell())));
 			const rgb = c2.asRGB();
-			if (ss || !c2.isMunsellSaturated() || 0 === (x + y) % 7) {
-					setPixel(ctx, x, (h - 1) - y, rgb);
+			if (ss || !s || 0 === (x + y) % 7) {
+				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
 	}
