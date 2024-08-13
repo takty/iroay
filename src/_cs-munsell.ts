@@ -6,7 +6,7 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-08-09
+ * @version 2024-08-14
  */
 
 import { TBL_SRC_MIN, TBL_V } from './table/_hc2xy-all-min';
@@ -300,17 +300,17 @@ export class Munsell {
 
 		const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]);
 		const v_u = TBL_V[vi_u];
+		const r = (v - v_l) / (v_u - v_l);
 
 		if (!xy_l[2] && !xy_u[2]) {
 			Munsell.isSaturated = true;
 		} else if (!xy_l[2] || !xy_u[2]) {
-			if (v < 0.5 * (v_l + v_u)) {
+			if (r < 0.5) {
 				if (!xy_l[2]) Munsell.isSaturated = true;
 			} else {
 				if (!xy_u[2]) Munsell.isSaturated = true;
 			}
 		}
-		const r = (v - v_l) / (v_u - v_l);
 		const xy = Munsell._div(xy_l as unknown as Pair, xy_u as unknown as Pair, r);
 		return [Y, ...xy];
 	}
