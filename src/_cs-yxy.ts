@@ -2,7 +2,7 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-13
  */
 
 import { Triplet } from './_type';
@@ -19,7 +19,7 @@ export class Yxy {
 	 */
 	static fromXYZ([x, y, z]: Triplet): Triplet {
 		const sum = x + y + z;
-		if (sum === 0) return [y, 0.31273, 0.32902];  // White point D65
+		if (sum === 0) return [y, Lab.D65_xyz[0], Lab.D65_xyz[1]];
 		return [y, x / sum, y / sum];
 	}
 
