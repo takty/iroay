@@ -1,4 +1,4 @@
-:root{font-size:16px;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}main{display:flex;flex-direction:column;align-items:flex-start;gap:1rem;padding-block-end:2rem}main>div{display:flex;align-items:flex-start;gap:1rem}main #value{width:320px}main canvas{width:256px;height:256px}/*!
+:root{font-size:16px;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}main{display:flex;flex-direction:column;align-items:flex-start;gap:1rem;padding-block-end:2rem}main>div{display:flex;align-items:flex-start;gap:1rem}main #value{width:320px}main canvas{width:var(--w);height:var(--h)}/*!
 * Klales
 *
 * @author Takuto Yanagida

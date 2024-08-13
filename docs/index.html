@@ -6,8 +6,8 @@
 <meta name="description" content="Samples of the Colorjst">
 <meta name="author" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script type="module" crossorigin src="./assets/index-DAmoDF3H.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-Dn43p_y5.css">
+  <script type="module" crossorigin src="./assets/index-CbdebEgX.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CinTQoMv.css">
 </head>
 <body>
 	<header>
@@ -19,19 +19,20 @@
 
 		<div>
 			<select>
-				<option value="0" selected>RGB</option>
-				<option value="1">LRGB</option>
-				<option value="2">XYZ</option>
-				<option value="3">Lab</option>
-				<option value="4">Yxy</option>
-				<option value="5">Munsell</option>
-				<option value="6">Munsell (Polar)</option>
-				<option value="7">PCCS</option>
-				<option value="8">PCCS (Polar)</option>
-				<option value="9">Tone</option>
+				<option value="rgb" selected>RGB</option>
+				<option value="lrgb">LRGB</option>
+				<option value="xyz">XYZ</option>
+				<option value="lab">Lab</option>
+				<option value="yxy">Yxy</option>
+				<option value="mun">Munsell</option>
+				<option value="mun_p">Munsell (Polar)</option>
+				<option value="mun_i">Munsell (From XYZ)</option>
+				<option value="pccs">PCCS</option>
+				<option value="pccs_p">PCCS (Polar)</option>
+				<option value="tone">Tone</option>
 			</select>
 
-			<input id="value" type="range" min="0" max="255">
+			<input id="value" type="range" min="0" max="255" value="127">
 
 			<label>
 				<input id="show-saturation" type="checkbox">
@@ -39,7 +40,7 @@
 			</label>
 		</div>
 
-		<canvas width="256" height="256"></canvas>
+		<canvas width="512" height="512" style="--w:512px;--h:512px;"></canvas>
 	</main>
 </body>
 </html>
