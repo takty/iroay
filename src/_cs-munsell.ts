@@ -53,7 +53,6 @@ export class Munsell {
 	private static TBL_MAX_C: number[][];
 	private static TBL: (Pair|null)[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
 	private static TBL_TREES: Tree[] = [];
-	// private static TBL_TREES2: Tree[] = [];
 
 	static MIN_HUE = 0;
 	static MAX_HUE = 100;  // Same as MIN_HUE
@@ -106,7 +105,7 @@ export class Munsell {
 
 		// When the lightness is maximum 10
 		if (Munsell._eq(v, TBL_V.at(-1) as number)) {
-			const [h, c] = Munsell._interpolateHC(x, y, TBL_V.length - 1);
+			const [h, c] = Munsell._scanHC(x, y, TBL_V.length - 1);
 			return [h, v, c];
 		}
 		// When the lightness is 0 or the lightness is larger than the maximum 10, or when it is an achromatic color (standard illuminant C)
@@ -117,11 +116,11 @@ export class Munsell {
 		let vi_l = -1;
 		while (TBL_V[vi_l + 1] <= v) ++vi_l;
 		let hc_l = [0, 0] as Pair;  // Hue and chroma of the lower side
-		if (vi_l !== -1) hc_l = Munsell._interpolateHC(x, y, vi_l);
+		if (vi_l !== -1) hc_l = Munsell._scanHC(x, y, vi_l);
 
 		// Obtain upper side
 		const vi_u = vi_l + 1;
-		const hc_u = Munsell._interpolateHC(x, y, vi_u);
+		const hc_u = Munsell._scanHC(x, y, vi_u);
 
 		// When the lightness on the lower side is the minimum 0, the hue is matched with the upper side, and the chroma is set to 0
 		if (vi_l === -1) {
@@ -132,170 +131,125 @@ export class Munsell {
 		const v_h = TBL_V[vi_u];
 		const r = (v - v_l) / (v_h - v_l);
 
-		const [h, c] = Munsell._addHc(hc_l, hc_u, r);
+		const [h, c] = Munsell._calcIdpHc(hc_l, hc_u, r);
 		return [h, v, c];
 	}
 
 	// Acquires the hue and chroma for the chromaticity coordinates (x, y) on the surface of the given lightness index.
 	// If not included, -1 is returned.
-	private static _interpolateHC(x: number, y: number, vi: number): Pair {
+	private static _scanHC(x: number, y: number, vi: number): Pair {
 		const p = [x, y] as Pair;
-		const [ht0, ht1, c0, c1] = Munsell._getHcRange(p, vi);
+		const [[q, ],] = Munsell.TBL_TREES[vi].neighbors(p, 1);
+		let ht0 = q[0] - 125;
+		let ht1 = q[0] + 125;
 
-		let ht_l, ht_u = -1;
-		let c_l = -1, c_u = -1;
-		let hc_r = null;
+		if (ht0 < 0 && ht1 < ht0 + 1000) {
+			ht0 += 1000;
+			ht1 += 1000;
+		}
 
-		out:
-		for (ht_l = ht0; ht_l <= ht1; ht_l += 25) {  // h 0-975 step 25;
-			ht_u = ht_l + 25;
-
+		for (let ht_l = ht0; ht_l <= ht1; ht_l += 25) {  // h 0-975 step 25;
 			inner:
-			for (c_l = c0; c_l <= c1; c_l += 2) {  // c 0-50 step 2;
-				c_u = c_l + 2;
-
-				const wa = Munsell._getXy(vi, ht_l, c_l);
-				const wb = Munsell._getXy(vi, ht_u, c_l);
-				let wc = Munsell._getXy(vi, ht_u, c_u);
-				let wd = Munsell._getXy(vi, ht_l, c_u);
-
-				if (wa && wb && wc && !wd) {
-					wd = [wa[0] + (wc[0] - wb[0]), wa[1] + (wc[1] - wb[1])]
-				} else if (wa && wb && !wc && wd) {
-					wc = [wb[0] + (wd[0] - wa[0]), wb[1] + (wd[1] - wa[1])]
+			for (let c_l = 0; c_l <= 50; c_l += 2) {  // c 0-50 step 2;
+				const [hc_r, state] = Munsell._scanOneHC(p, vi, ht_l, c_l);
+				if (state === 'h') break inner;
+				if (hc_r) {
+					return [
+						(25 * hc_r[0] + ht_l) / 10,
+						2 * hc_r[1] + c_l
+					];
 				}
-
-				if (wa === null && wb === null) break inner;
-				if (wa === null || wb === null || wc === null || wd === null) continue;
-				//  ^
-				// y| B C      ↖H (Direction of rotation) ↗C (Radial direction)
-				//  | A D
-				//  ------> x
-				if (wa[0] === wb[0] && wa[1] === wb[1]) {
-					if (Munsell._inside(p, wa, wc, wd)) {
-						hc_r = Munsell._interpolationRatio(p, wa, wd, wb, wc);
-					}
-				} else {
-					if (Munsell._inside(p, wa, wc, wd) || Munsell._inside(p, wa, wb, wc)) {
-						hc_r = Munsell._interpolationRatio(p, wa, wd, wb, wc);
-					}
-				}
-				if (hc_r !== null) break out;
 			}
 		}
-		if (hc_r === null) {
-			const ps = Munsell.TBL_TREES[vi].neighbors(p, 2);
-			if (2 === ps.length) {
-				Munsell.isSaturated = true;
-				let [[[ht0, c0], d0], [[ht1, c1], d1]] = ps;
-				const r = d0 / (d0 + d1);
-				return Munsell._addHc([ht0 / 10, c0], [ht1 / 10, c1], r);
+		const ps = Munsell.TBL_TREES[vi].neighbors(p, 2);
+		if (2 === ps.length) {
+			Munsell.isSaturated = true;
+			let [[[ht0, c0], d0], [[ht1, c1], d1]] = ps;
+			const r = d0 / (d0 + d1);
+			return Munsell._calcIdpHc([ht0 / 10, c0], [ht1 / 10, c1], r);
+		}
+		return [0, 0];
+	}
+
+	private static _scanOneHC(p: Pair, vi: number, ht_l: number, c_l: number): [Pair | null, string] {
+		let hc_r: Pair | null = null;
+
+		const wa = Munsell._getXy(vi, ht_l, c_l);
+		const wb = Munsell._getXy(vi, ht_l + 25, c_l);
+		let wc = Munsell._getXy(vi, ht_l + 25, c_l + 2);
+		let wd = Munsell._getXy(vi, ht_l, c_l + 2);
+
+		if (wa === null && wb === null) return [null, 'h'];
+
+		if (c_l !== 0) {
+			if (wa && wb && wc && !wd) {
+				wd = [wa[0] + (wc[0] - wb[0]), wa[1] + (wc[1] - wb[1])]
+			} else if (wa && wb && !wc && wd) {
+				wc = [wb[0] + (wd[0] - wa[0]), wb[1] + (wd[1] - wa[1])]
 			}
-			return [0, 0];
 		}
-		if (ht_u === 0) ht_u = 1000;
-		return [
-			((ht_u - ht_l) * hc_r[0] + ht_l) / 10,
-			(c_u - c_l) * hc_r[1] + c_l
-		];
-	}
+		if (wa === null || wb === null || wc === null || wd === null) return [null, ''];
 
-	private static _getHcRange(p: Pair, vi: number): [number, number, number, number] {
-		const ps = Munsell.TBL_TREES[vi].neighbors(p, 4);
-		const hcs = ps.map(([e,]) => e);
-		const hs = hcs.map(([h,]) => h);
-		const cs = hcs.map(([,c]) => c);
-
-		let h0 = Math.min(...hs) - 25;
-		let h1 = Math.max(...hs) + 25;
-		let c0 = Math.min(...cs) - 4;
-		let c1 = Math.max(...cs) + 4;
-
-		// let h0 = q[0] - 100;
-		// let h1 = q[0] + 100;
-		if (h0 < 0) {
-			h0 += 1000;
-			h1 += 1000;
-		}
-		// let c0 = q[1] - 10;
-		// let c1 = q[1] + 10;
-		if (c0 < 0) {
-			c0 = 0;
-		}
-		if (50 < c0 ) {
-			c0 = 50;
-		}
-		return [h0, h1, c0, c1];
-	}
-
-	// private static _getHcRange2(p: Pair, vi: number): [number, number, number, number] {
-	// 	const [[q,],] = Munsell.TBL_TREES2[vi].neighbors(p, 1);
-	// 	let h0 = q[0] - 25;
-	// 	let h1 = q[0] + 25;
-	// 	if (h0 < 0) {
-	// 		h0 += 1000;
-	// 		h1 += 1000;
-	// 	}
-	// 	let c0 = q[1] - 2;
-	// 	let c1 = q[1] + 2;
-	// 	if (c0 < 0) {
-	// 		c0 = 0;
-	// 	}
-	// 	if (50 < c1 ) {
-	// 		c1 = 50;
-	// 	}
-	// 	return [h0, h1, c0, c1];
-	// 	// return [0, 1000, 0, 50];
-	// }
-
-	/*
-	 * Calculate the proportion [h, v] of each point in the area surrounded by the points of the following placement (null if it is invalid).
-	 *  ^
-	 * y| B C      ↖H (Direction of rotation) ↗C (Radial direction)
-	 *  | A D
-	 *  ------> x
-	 */
-	private static _interpolationRatio(p: Pair, wa: Pair, wd: Pair, wb: Pair, wc: Pair): Pair|null {
-		// Find the ratio in the vertical direction
-		let v = -1;
-
-		// Solve a v^2 + b v + c = 0
-		const ea = (wa[0] - wd[0]) * (wa[1] + wc[1] - wb[1] - wd[1]) - (wa[0] + wc[0] - wb[0] - wd[0]) * (wa[1] - wd[1]);
-		const eb = (p[0] - wa[0]) * (wa[1] + wc[1] - wb[1] - wd[1]) + (wa[0] - wd[0]) * (wb[1] - wa[1]) - (wa[0] + wc[0] - wb[0] - wd[0]) * (p[1] - wa[1]) - (wb[0] - wa[0]) * (wa[1] - wd[1]);
-		const ec = (p[0] - wa[0]) * (wb[1] - wa[1]) - (p[1] - wa[1]) * (wb[0] - wa[0]);
-
-		if (Munsell._eq0(ea)) {
-			if (!Munsell._eq0(eb)) v = -ec / eb;
+		if (c_l === 0) {
+			if (Munsell._inside(p, wa, wc, wd)) {
+				hc_r = interpolationR(p, wa, wd, wb, wc);
+			}
 		} else {
-			const rt = Math.sqrt(eb * eb - 4 * ea * ec);
-			const v1 = (-eb + rt) / (2 * ea), v2 = (-eb - rt) / (2 * ea);
-
-			if (wa[0] === wb[0] && wa[1] === wb[1]) {  // In this case, v1 is always 0, but this is not a solution.
-				if (0 <= v2 && v2 <= 1) v = v2;
-			} else {
-				if      (0 <= v1 && v1 <= 1) v = v1;
-				else if (0 <= v2 && v2 <= 1) v = v2;
+			if (Munsell._inside(p, wa, wc, wd) || Munsell._inside(p, wa, wb, wc)) {
+				hc_r = interpolationR(p, wa, wd, wb, wc);
 			}
 		}
-		if (v < 0) return null;
+		return [hc_r, ''];
 
-		// Find the ratio in the horizontal direction
-		let h = -1, h1 = -1, h2 = -1;
-		const deX = (wa[0] - wd[0] - wb[0] + wc[0]) * v - wa[0] + wb[0];
-		const deY = (wa[1] - wd[1] - wb[1] + wc[1]) * v - wa[1] + wb[1];
+		/*
+		 * Calculate the proportion [h, v] of each point in the area surrounded by the points of the following placement (null if it is invalid).
+		 *  ^
+		 * y| B C      ↖H (Direction of rotation) ↗C (Radial direction)
+		 *  | A D
+		 *  ------> x
+		 */
+		function interpolationR(p: Pair, wa: Pair, wd: Pair, wb: Pair, wc: Pair): Pair|null {
+			// Find the ratio in the vertical direction
+			let v = -1;
 
-		if (!Munsell._eq0(deX)) h1 = ((wa[0] - wd[0]) * v + p[0] - wa[0]) / deX;
-		if (!Munsell._eq0(deY)) h2 = ((wa[1] - wd[1]) * v + p[1] - wa[1]) / deY;
+			// Solve a v^2 + b v + c = 0
+			const ea = (wa[0] - wd[0]) * (wa[1] + wc[1] - wb[1] - wd[1]) - (wa[0] + wc[0] - wb[0] - wd[0]) * (wa[1] - wd[1]);
+			const eb = (p[0] - wa[0]) * (wa[1] + wc[1] - wb[1] - wd[1]) + (wa[0] - wd[0]) * (wb[1] - wa[1]) - (wa[0] + wc[0] - wb[0] - wd[0]) * (p[1] - wa[1]) - (wb[0] - wa[0]) * (wa[1] - wd[1]);
+			const ec = (p[0] - wa[0]) * (wb[1] - wa[1]) - (p[1] - wa[1]) * (wb[0] - wa[0]);
 
-		if      (0 <= h1 && h1 <= 1) h = h1;
-		else if (0 <= h2 && h2 <= 1) h = h2;
+			if (Munsell._eq0(ea)) {
+				if (!Munsell._eq0(eb)) v = -ec / eb;
+			} else {
+				const rt = Math.sqrt(eb * eb - 4 * ea * ec);
+				const v1 = (-eb + rt) / (2 * ea), v2 = (-eb - rt) / (2 * ea);
 
-		if (h < 0) return null;
+				if (wa[0] === wb[0] && wa[1] === wb[1]) {  // In this case, v1 is always 0, but this is not a solution.
+					if (0 <= v2 && v2 <= 1) v = v2;
+				} else {
+					if      (0 <= v1 && v1 <= 1) v = v1;
+					else if (0 <= v2 && v2 <= 1) v = v2;
+				}
+			}
+			if (v < 0) return null;
 
-		return [h, v];
+			// Find the ratio in the horizontal direction
+			let h = -1, h1 = -1, h2 = -1;
+			const deX = (wa[0] - wd[0] - wb[0] + wc[0]) * v - wa[0] + wb[0];
+			const deY = (wa[1] - wd[1] - wb[1] + wc[1]) * v - wa[1] + wb[1];
+
+			if (!Munsell._eq0(deX)) h1 = ((wa[0] - wd[0]) * v + p[0] - wa[0]) / deX;
+			if (!Munsell._eq0(deY)) h2 = ((wa[1] - wd[1]) * v + p[1] - wa[1]) / deY;
+
+			if      (0 <= h1 && h1 <= 1) h = h1;
+			else if (0 <= h2 && h2 <= 1) h = h2;
+
+			if (h < 0) return null;
+
+			return [h, v];
+		}
 	}
 
-	private static _addHc([h0, c0]: Pair, [h1, c1]: Pair, r: number): Pair {
+	private static _calcIdpHc([h0, c0]: Pair, [h1, c1]: Pair, r: number): Pair {
 		if (Math.abs(h1 - h0) > Munsell.MAX_HUE * 0.5) {
 			if (h0 < h1) h0 += Munsell.MAX_HUE;
 			else if (h0 > h1) h1 += Munsell.MAX_HUE;
@@ -325,7 +279,7 @@ export class Munsell {
 		// When the lightness is the maximum value 10 or more
 		const v_max = TBL_V.at(-1) as number;
 		if (v_max <= v) {
-			const xy = Munsell._interpolateXY(h, c, TBL_V.length - 1);
+			const xy = Munsell._scanXY(h, c, TBL_V.length - 1);
 			Munsell.isSaturated = (v_max < v);
 			return [Y, xy[0], xy[1]];
 		}
@@ -336,13 +290,13 @@ export class Munsell {
 		// Obtain lower side
 		let xy_l: [number, number, boolean];
 		if (vi_l !== -1) {
-			xy_l = Munsell._interpolateXY(h, c, vi_l);
+			xy_l = Munsell._scanXY(h, c, vi_l);
 		} else {  // When the lightness of the lower side is the minimum 0, use standard illuminant.
 			xy_l = [...Munsell.ILLUMINANT_C, false];
 			Munsell.isSaturated = true;
 		}
 		// Obtain upper side
-		const xy_u = Munsell._interpolateXY(h, c, vi_u);
+		const xy_u = Munsell._scanXY(h, c, vi_u);
 
 		const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]);
 		const v_u = TBL_V[vi_u];
@@ -363,7 +317,7 @@ export class Munsell {
 
 	// Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
 	// Return false if it is out of the range of the table.
-	private static _interpolateXY(h: number, c: number, vi: number): [number, number, boolean] {
+	private static _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
 		const ht = h * 10;
 		const p = [ht, c] as Pair;
 
@@ -554,7 +508,6 @@ export class Munsell {
 		Munsell.TBL       = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 		Munsell.TBL_MAX_C = new Array(tbl_v.length);
 		Munsell.TBL_TREES = new Array(tbl_v.length);
-		// Munsell.TBL_TREES2 = new Array(tbl_v.length);
 
 		for (let vi = 0; vi < tbl_v.length; vi += 1) {
 			Munsell.TBL[vi]       = new Array(1000 / 25);
@@ -562,7 +515,7 @@ export class Munsell {
 			Munsell.TBL_MAX_C[vi].fill(0);
 
 			for (let i = 0, n = 1000 / 25; i < n; i += 1) {
-				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 51
+				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 52
 				Munsell.TBL[vi][i].fill(null);
 			}
 			const data: [Pair, Pair][] = [];
@@ -598,61 +551,4 @@ export class Munsell {
 			}
 		}
 	}
-
-	// private static createTree() {
-	// 	for (let vi = 0; vi < TBL_V.length; vi += 1) {
-	// 		const data: [Pair, Pair][] = [];
-
-	// 		out:
-	// 		for (let ht_l = 0; ht_l <= 975; ht_l += 25) {  // h 0-975 step 25;
-	// 			let ht_u = ht_l + 25;
-	// 			if (1000 === ht_u) ht_u = 0;
-
-	// 			inner:
-	// 			for (let c_l = 0; c_l <= 50; c_l += 2) {  // c 0-50 step 2;
-	// 				const c_u = c_l + 2;
-
-	// 				const wa = (c_l === 0) ? Munsell.ILLUMINANT_C : Munsell.TBL[vi][ht_l / 25][c_l / 2];
-	// 				const wb = (c_l === 0) ? Munsell.ILLUMINANT_C : Munsell.TBL[vi][ht_u / 25][c_l / 2];
-	// 				let wc = Munsell.TBL[vi][ht_u / 25][c_u / 2];
-	// 				let wd = Munsell.TBL[vi][ht_l / 25][c_u / 2];
-
-	// 				let w = null;;
-	// 				if (c_l === 0) {
-	// 					if (wc && wd) {
-	// 						w = [
-	// 							(wa[0] + wc[0] + wd[0]) / 3,
-	// 							(wa[1] + wc[1] + wd[1]) / 3,
-	// 						];
-	// 					}
-	// 				} else {
-	// 					if (wa && wb && wc && !wd) {
-	// 						w = [
-	// 							(wa[0] + wb[0] + wc[0]) / 3,
-	// 							(wa[1] + wb[1] + wc[1]) / 3,
-	// 							// (wa[0] + wb[0]) / 2,
-	// 							// (wa[1] + wb[1]) / 2,
-	// 						];
-	// 					} else if (wa && wb && !wc && wd) {
-	// 						w = [
-	// 							(wa[0] + wb[0] + wd[0]) / 3,
-	// 							(wa[1] + wb[1] + wd[1]) / 3,
-	// 							// (wb[0] + wd[0]) / 2,
-	// 							// (wb[1] + wd[1]) / 2,
-	// 						];
-	// 					} else if (wa && wb && wc && wd) {
-	// 						w = [
-	// 							(wa[0] + wb[0] + wc[0] + wd[0]) / 4,
-	// 							(wa[1] + wb[1] + wc[1] + wd[1]) / 4,
-	// 						];
-	// 					}
-	// 				}
-	// 				if (w) {
-	// 					data.push([w, [ht_l, c_l]]);
-	// 				}
-	// 			}
-	// 		}
-	// 		Munsell.TBL_TREES2[vi] = new Tree(data);
-	// 	}
-	// }
 }
