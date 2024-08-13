@@ -53,6 +53,7 @@ export class Munsell {
 	private static TBL_MAX_C: number[][];
 	private static TBL: (Pair|null)[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
 	private static TBL_TREES: Tree[] = [];
+	// private static TBL_TREES2: Tree[] = [];
 
 	static MIN_HUE = 0;
 	static MAX_HUE = 100;  // Same as MIN_HUE
@@ -200,17 +201,52 @@ export class Munsell {
 	}
 
 	private static _getHcRange(p: Pair, vi: number): [number, number, number, number] {
-		const ps = Munsell.TBL_TREES[vi].neighbors(p, 16);
+		const ps = Munsell.TBL_TREES[vi].neighbors(p, 4);
 		const hcs = ps.map(([e,]) => e);
 		const hs = hcs.map(([h,]) => h);
 		const cs = hcs.map(([,c]) => c);
-		return [
-			Math.min(...hs),
-			Math.max(...hs),
-			Math.min(...cs),
-			Math.max(...cs),
-		];
+
+		let h0 = Math.min(...hs) - 25;
+		let h1 = Math.max(...hs) + 25;
+		let c0 = Math.min(...cs) - 4;
+		let c1 = Math.max(...cs) + 4;
+
+		// let h0 = q[0] - 100;
+		// let h1 = q[0] + 100;
+		if (h0 < 0) {
+			h0 += 1000;
+			h1 += 1000;
+		}
+		// let c0 = q[1] - 10;
+		// let c1 = q[1] + 10;
+		if (c0 < 0) {
+			c0 = 0;
+		}
+		if (50 < c0 ) {
+			c0 = 50;
+		}
+		return [h0, h1, c0, c1];
 	}
+
+	// private static _getHcRange2(p: Pair, vi: number): [number, number, number, number] {
+	// 	const [[q,],] = Munsell.TBL_TREES2[vi].neighbors(p, 1);
+	// 	let h0 = q[0] - 25;
+	// 	let h1 = q[0] + 25;
+	// 	if (h0 < 0) {
+	// 		h0 += 1000;
+	// 		h1 += 1000;
+	// 	}
+	// 	let c0 = q[1] - 2;
+	// 	let c1 = q[1] + 2;
+	// 	if (c0 < 0) {
+	// 		c0 = 0;
+	// 	}
+	// 	if (50 < c1 ) {
+	// 		c1 = 50;
+	// 	}
+	// 	return [h0, h1, c0, c1];
+	// 	// return [0, 1000, 0, 50];
+	// }
 
 	/*
 	 * Calculate the proportion [h, v] of each point in the area surrounded by the points of the following placement (null if it is invalid).
@@ -518,6 +554,7 @@ export class Munsell {
 		Munsell.TBL       = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
 		Munsell.TBL_MAX_C = new Array(tbl_v.length);
 		Munsell.TBL_TREES = new Array(tbl_v.length);
+		// Munsell.TBL_TREES2 = new Array(tbl_v.length);
 
 		for (let vi = 0; vi < tbl_v.length; vi += 1) {
 			Munsell.TBL[vi]       = new Array(1000 / 25);
@@ -547,6 +584,7 @@ export class Munsell {
 			}
 			Munsell.TBL_TREES[vi] = new Tree(data);
 		}
+		// Munsell.createTree();
 
 		function _integrate(cs: number[]) {
 			let x_ = 0;
@@ -560,4 +598,61 @@ export class Munsell {
 			}
 		}
 	}
+
+	// private static createTree() {
+	// 	for (let vi = 0; vi < TBL_V.length; vi += 1) {
+	// 		const data: [Pair, Pair][] = [];
+
+	// 		out:
+	// 		for (let ht_l = 0; ht_l <= 975; ht_l += 25) {  // h 0-975 step 25;
+	// 			let ht_u = ht_l + 25;
+	// 			if (1000 === ht_u) ht_u = 0;
+
+	// 			inner:
+	// 			for (let c_l = 0; c_l <= 50; c_l += 2) {  // c 0-50 step 2;
+	// 				const c_u = c_l + 2;
+
+	// 				const wa = (c_l === 0) ? Munsell.ILLUMINANT_C : Munsell.TBL[vi][ht_l / 25][c_l / 2];
+	// 				const wb = (c_l === 0) ? Munsell.ILLUMINANT_C : Munsell.TBL[vi][ht_u / 25][c_l / 2];
+	// 				let wc = Munsell.TBL[vi][ht_u / 25][c_u / 2];
+	// 				let wd = Munsell.TBL[vi][ht_l / 25][c_u / 2];
+
+	// 				let w = null;;
+	// 				if (c_l === 0) {
+	// 					if (wc && wd) {
+	// 						w = [
+	// 							(wa[0] + wc[0] + wd[0]) / 3,
+	// 							(wa[1] + wc[1] + wd[1]) / 3,
+	// 						];
+	// 					}
+	// 				} else {
+	// 					if (wa && wb && wc && !wd) {
+	// 						w = [
+	// 							(wa[0] + wb[0] + wc[0]) / 3,
+	// 							(wa[1] + wb[1] + wc[1]) / 3,
+	// 							// (wa[0] + wb[0]) / 2,
+	// 							// (wa[1] + wb[1]) / 2,
+	// 						];
+	// 					} else if (wa && wb && !wc && wd) {
+	// 						w = [
+	// 							(wa[0] + wb[0] + wd[0]) / 3,
+	// 							(wa[1] + wb[1] + wd[1]) / 3,
+	// 							// (wb[0] + wd[0]) / 2,
+	// 							// (wb[1] + wd[1]) / 2,
+	// 						];
+	// 					} else if (wa && wb && wc && wd) {
+	// 						w = [
+	// 							(wa[0] + wb[0] + wc[0] + wd[0]) / 4,
+	// 							(wa[1] + wb[1] + wc[1] + wd[1]) / 4,
+	// 						];
+	// 					}
+	// 				}
+	// 				if (w) {
+	// 					data.push([w, [ht_l, c_l]]);
+	// 				}
+	// 			}
+	// 		}
+	// 		Munsell.TBL_TREES2[vi] = new Tree(data);
+	// 	}
+	// }
 }
