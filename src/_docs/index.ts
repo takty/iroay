@@ -44,6 +44,7 @@ function draw(w: number, h: number, ctx: CanvasRenderingContext2D, sel: HTMLSele
 		['lrgb', drawChartLRGB],
 		['xyz', drawChartXYZ],
 		['lab', drawChartLab],
+		['lch', drawChartLCh],
 		['yxy', drawChartYxy],
 		['mun', drawChartMunsell],
 		['mun_p', drawChartMunsellPolar],
@@ -104,6 +105,22 @@ function drawChartLab(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 	for (let y = 0; y < h; y += 1) {
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.Lab, [v * 100, (x / w) * 256 - 128, (y / h) * 256 - 128]);
+
+			const rgb = c.asRGB();
+			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
+				setPixel(ctx, x, (h - 1) - y, rgb);
+			}
+		}
+	}
+}
+
+function drawChartLCh(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+	const c = new Color();
+	const c2 = new Color();
+
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.LCh, [v * 100, (y / (h - 1)) * 128, (x / (w - 1)) * 360]);
 
 			const rgb = c.asRGB();
 			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
