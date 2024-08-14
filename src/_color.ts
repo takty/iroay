@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-08-09
+ * @version 2024-08-14
  */
 
 import { Triplet } from './_type';
@@ -142,7 +142,7 @@ export class Color {
 		let t: Triplet = [0, 0, 0];
 		switch (this.cs) {
 			case ColorSpace.LCh:
-				t = Lab.toOrthogonalCoordinate(this.asLCh());
+				t = Lab.fromLCh(this.asLCh());
 				break;
 			default:
 				t = Lab.fromXYZ(this.asXYZ());
@@ -156,7 +156,7 @@ export class Color {
 		if (this.ts.has(ColorSpace.LCh)) {
 			return this.ts.get(ColorSpace.LCh) as Triplet;
 		}
-		const t: Triplet = Lab.toPolarCoordinate(this.asLab());
+		const t: Triplet = Lab.toLCh(this.asLab());
 		this.ts.set(ColorSpace.LCh, t);
 		return t;
 	}

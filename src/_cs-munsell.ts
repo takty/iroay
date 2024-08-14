@@ -60,6 +60,57 @@ export class Munsell {
 
 	static isSaturated = false;
 
+	static {
+		Munsell.initTable(TBL_V, TBL_SRC_MIN);
+	}
+
+	static initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
+		Munsell.TBL       = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
+		Munsell.TBL_MAX_C = new Array(tbl_v.length);
+		Munsell.TBL_TREES = new Array(tbl_v.length);
+
+		for (let vi = 0; vi < tbl_v.length; vi += 1) {
+			Munsell.TBL[vi]       = new Array(1000 / 25);
+			Munsell.TBL_MAX_C[vi] = new Array(1000 / 25);
+			Munsell.TBL_MAX_C[vi].fill(0);
+
+			for (let i = 0, n = 1000 / 25; i < n; i += 1) {
+				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 52
+				Munsell.TBL[vi][i].fill(null);
+			}
+			const data: [Pair, Pair][] = [];
+
+			for (const cs of tbl_src_min[vi]) {
+				const hi = cs.shift() as number;
+				_integrate(cs);
+				_integrate(cs);
+
+				for (let i = 0; i < cs.length; i += 2) {
+					const ci = i / 2 + 1;
+					const x = cs[i + 0] / 1000;
+					const y = cs[i + 1] / 1000;
+
+					Munsell.TBL[vi][hi][ci] = [x, y];
+					data.push([[x, y], [hi * 25, ci * 2]]);
+				}
+				Munsell.TBL_MAX_C[vi][hi] = cs.length - 2;
+			}
+			Munsell.TBL_TREES[vi] = new Tree(data);
+		}
+
+		function _integrate(cs: number[]) {
+			let x_ = 0;
+			let y_ = 0;
+
+			for (let i = 0; i < cs.length; i += 2) {
+				x_ += cs[i];
+				y_ += cs[i + 1];
+				cs[i]     = x_;
+				cs[i + 1] = y_;
+			}
+		}
+	}
+
 	private static _getXy(vi: number, ht: number, c: number): Pair|null {
 		if (c === 0) return Munsell.ILLUMINANT_C;
 		if (1000 <= ht) ht -= 1000;
@@ -407,6 +458,58 @@ export class Munsell {
 	}
 
 
+	// XYZ ---------------------------------------------------------------------
+
+
+	/**
+	 * Convert CIE 1931 XYZ to Munsell (HVC).
+	 * @param {Triplet} xyz XYZ color (standard illuminant D65).
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} Munsell color.
+	 */
+	static fromXYZ(xyz: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		const r = Munsell._yxy2mun(Yxy.fromXYZ(XYZ.toIlluminantC(xyz, dest), dest));
+		dest[0] = r[0];
+		dest[1] = r[1];
+		dest[2] = r[2];
+		return dest;
+	}
+
+	/**
+	 * Convert Munsell (HVC) to CIE 1931 XYZ.
+	 * @param {Triplet} hvc Hue, value, chroma of Munsell color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} XYZ color.
+	 */
+	static toXYZ([h, v, c]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		return XYZ.fromIlluminantC(Yxy.toXYZ(Munsell._mun2yxy([h, v, c]), dest), dest);
+	}
+
+
+	// PCCS --------------------------------------------------------------------
+
+
+	/**
+	 * Convert PCCS (hls) to Munsell (HVC).
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} Munsell color.
+	 */
+	static fromPCCS(hls: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		return PCCS.toMunsell(hls, dest);
+	}
+
+	/**
+	 * Convert Munsell (HVC) to PCCS (hls).
+	 * @param {Triplet} hvc Hue, value, chroma of Munsell color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} PCCS color.
+	 */
+	static toPCCS(hvc: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		return PCCS.fromMunsell(hvc, dest);
+	}
+
+
 	// -------------------------------------------------------------------------
 
 
@@ -449,42 +552,6 @@ export class Munsell {
 	}
 
 	/**
-	 * Convert CIE 1931 XYZ to Munsell (HVC).
-	 * @param {Triplet} xyz XYZ color (standard illuminant D65)
-	 * @return {Triplet} Munsell color
-	 */
-	static fromXYZ(xyz: Triplet): Triplet {
-		return Munsell._yxy2mun(Yxy.fromXYZ(XYZ.toIlluminantC(xyz)));
-	}
-
-	/**
-	 * Convert Munsell (HVC) to CIE 1931 XYZ.
-	 * @param {Triplet} hvc Hue, value, chroma of Munsell color
-	 * @return {Triplet} XYZ color
-	 */
-	static toXYZ([h, v, c]: Triplet): Triplet {
-		return XYZ.fromIlluminantC(Yxy.toXYZ(Munsell._mun2yxy([h, v, c])));
-	}
-
-	/**
-	 * Convert Munsell (HVC) to PCCS (hls).
-	 * @param {Triplet} hvc Hue, value, chroma of Munsell color
-	 * @return {Triplet} PCCS color
-	 */
-	static toPCCS(hvc: Triplet): Triplet {
-		return PCCS.fromMunsell(hvc);
-	}
-
-	/**
-	 * Convert PCCS (hls) to Munsell (HVC).
-	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
-	 * @return {Triplet} Munsell color
-	 */
-	static fromPCCS(hls: Triplet): Triplet {
-		return PCCS.toMunsell(hls);
-	}
-
-	/**
 	 * Returns the string representation of Munsell numerical representation.
 	 * @param {Triplet} hvc Hue, value, chroma of Munsell color
 	 * @return {string} String representation
@@ -500,55 +567,4 @@ export class Munsell {
 		}
 	}
 
-	static {
-		Munsell.initTable(TBL_V, TBL_SRC_MIN);
-	}
-
-	static initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
-		Munsell.TBL       = new Array(tbl_v.length);  // [vi][10 * h / 25][c / 2] -> [x, y]
-		Munsell.TBL_MAX_C = new Array(tbl_v.length);
-		Munsell.TBL_TREES = new Array(tbl_v.length);
-
-		for (let vi = 0; vi < tbl_v.length; vi += 1) {
-			Munsell.TBL[vi]       = new Array(1000 / 25);
-			Munsell.TBL_MAX_C[vi] = new Array(1000 / 25);
-			Munsell.TBL_MAX_C[vi].fill(0);
-
-			for (let i = 0, n = 1000 / 25; i < n; i += 1) {
-				Munsell.TBL[vi][i] = new Array(50 / 2 + 2);  // 2 <= C <= 52
-				Munsell.TBL[vi][i].fill(null);
-			}
-			const data: [Pair, Pair][] = [];
-
-			for (const cs of tbl_src_min[vi]) {
-				const hi = cs.shift() as number;
-				_integrate(cs);
-				_integrate(cs);
-
-				for (let i = 0; i < cs.length; i += 2) {
-					const ci = i / 2 + 1;
-					const x = cs[i + 0] / 1000;
-					const y = cs[i + 1] / 1000;
-
-					Munsell.TBL[vi][hi][ci] = [x, y];
-					data.push([[x, y], [hi * 25, ci * 2]]);
-				}
-				Munsell.TBL_MAX_C[vi][hi] = cs.length - 2;
-			}
-			Munsell.TBL_TREES[vi] = new Tree(data);
-		}
-		// Munsell.createTree();
-
-		function _integrate(cs: number[]) {
-			let x_ = 0;
-			let y_ = 0;
-
-			for (let i = 0; i < cs.length; i += 2) {
-				x_ += cs[i];
-				y_ += cs[i + 1];
-				cs[i]     = x_;
-				cs[i + 1] = y_;
-			}
-		}
-	}
 }

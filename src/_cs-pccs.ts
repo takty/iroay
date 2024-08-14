@@ -6,7 +6,7 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-14
  */
 
 import { Triplet, Quartet } from './_type';
@@ -119,10 +119,11 @@ export class PCCS {
 
 	/**
 	 * Convert Munsell (HVC) to PCCS (hls).
-	 * @param {Triplet} hvc Hue, value, chroma of Munsell color
-	 * @return {Triplet} PCCS color
+	 * @param {Triplet} hvc Hue, value, chroma of Munsell color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} PCCS color.
 	 */
-	static fromMunsell([H, V, C]: Triplet): Triplet {
+	static fromMunsell([H, V, C]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 		let h = 0, l = V, s = 0;
 
@@ -131,15 +132,19 @@ export class PCCS {
 			s = PCCS.conversionMethod._calcPccsS(V, C, h);
 		}
 		if (PCCS.MAX_HUE <= h) h -= PCCS.MAX_HUE;
-		return [h, l, s];
+		dest[0] = h;
+		dest[1] = l;
+		dest[2] = s;
+		return dest;
 	}
 
 	/**
 	 * Convert PCCS (hls) to Munsell (HVC).
-	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
-	 * @return {Triplet} Munsell color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} Munsell color.
 	 */
-	static toMunsell([h, l, s]: Triplet): Triplet {
+	static toMunsell([h, l, s]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		let H = 0, V = l, C = 0;
 
 		H = PCCS.conversionMethod._calcMunsellH(h);
@@ -148,7 +153,10 @@ export class PCCS {
 		}
 		if (H < 0) H += Munsell.MAX_HUE;
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
-		return [H, V, C];
+		dest[0] = H;
+		dest[1] = V;
+		dest[2] = C;
+		return dest;
 	}
 
 	/**
@@ -204,20 +212,28 @@ export class PCCS {
 
 	/**
 	 * Convert PCCS color to tone coordinate color.
-	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color
-	 * @return {Triplet} Tone coordinate color
+	 * @param {Triplet} hls Hue, lightness, saturation of PCCS color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} Tone coordinate color.
 	 */
-	static toToneCoordinate(hls: Triplet): Triplet {
-		return [hls[0], PCCS.relativeLightness(hls), hls[2]];
+	static toToneCoordinate(hls: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		dest[0] = hls[0];
+		dest[1] = PCCS.relativeLightness(hls);
+		dest[2] = hls[2];
+		return dest;
 	}
 
 	/**
 	 * Convert tone coordinate color to PCCS color.
-	 * @param {Triplet} hLs Tone coordinate color
-	 * @return {Triplet} PCCS color
+	 * @param {Triplet} hLs Tone coordinate color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} PCCS color.
 	 */
-	static toNormalCoordinate(hLs: Triplet): Triplet {
-		return [hLs[0], PCCS.absoluteLightness(hLs), hLs[2]];
+	static toNormalCoordinate(hLs: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		dest[0] = hLs[0];
+		dest[1] = PCCS.absoluteLightness(hLs);
+		dest[2] = hLs[2];
+		return dest;
 	}
 
 	/**

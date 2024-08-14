@@ -2,54 +2,61 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-13
+ * @version 2024-08-14
  */
 
 import { Triplet } from './_type';
-import { Lab } from './_cs-lab';
-import { Evaluation } from './_eval';
+import { D65_xyz, D65_XYZ } from './_constant';
 
 export class Yxy {
+
 	static isSaturated = false;
+
+
+	// XYZ ---------------------------------------------------------------------
+
 
 	/**
 	 * Convert CIE 1931 XYZ to Yxy.
-	 * @param {Triplet} xyz XYZ color
-	 * @return {Triplet} Yxy color
+	 * @param {Triplet} xyz XYZ color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} Yxy color.
 	 */
-	static fromXYZ([x, y, z]: Triplet): Triplet {
+	static fromXYZ([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		dest[0] = y;
 		const sum = x + y + z;
-		if (sum === 0) return [y, Lab.D65_xyz[0], Lab.D65_xyz[1]];
-		return [y, x / sum, y / sum];
+		if (sum === 0) {
+			dest[1] = D65_xyz[0];
+			dest[2] = D65_xyz[1];
+		} else {
+			dest[1] = x / sum;
+			dest[2] = y / sum;
+		}
+		return dest;
 	}
 
 	/**
 	 * Convert Yxy to CIE 1931 XYZ.
-	 * @param {Triplet} yxy Yxy color
-	 * @return {Triplet} XYZ color
+	 * @param {Triplet} yxy Yxy color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} XYZ color.
 	 */
-	static toXYZ([y, sx, sy]: Triplet): Triplet {
+	static toXYZ([y, sx, sy]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		const d0 = sx * y / sy;
 		if (!Number.isFinite(d0)) {
 			Yxy.isSaturated = false;
-			return [0, 0, 0];
+			dest[0] = 0;
+			dest[1] = 0;
+			dest[2] = 0;
+		} else {
+			const d1 = y;
+			const d2 = (1 - sx - sy) * y / sy;
+			Yxy.isSaturated = (D65_XYZ[0] < d0 || D65_XYZ[1] < d1 || D65_XYZ[2] < d2);
+			dest[0] = d0;
+			dest[1] = d1;
+			dest[2] = d2;
 		}
-		const d1 = y;
-		const d2 = (1 - sx - sy) * y / sy;
-		Yxy.isSaturated = (Lab.D65_XYZ[0] < d0 || Lab.D65_XYZ[1] < d1 || Lab.D65_XYZ[2] < d2);
-		return [d0, d1, d2];
+		return dest;
 	}
 
-
-	// Evaluation Function -----------------------------------------------------
-
-
-	/**
-	 * Calculate the basic categorical color of the specified color.
-	 * @param {Triplet} yxy Yxy color
-	 * @return {string} Basic categorical color
-	 */
-	static categoryOf(yxy: Triplet): string {
-		return Evaluation.categoryOfYxy(yxy);
-	}
 }

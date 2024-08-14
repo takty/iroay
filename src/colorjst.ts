@@ -1,6 +1,7 @@
 export { Color, ColorSpace } from './_color';
 
 export { Lab } from './_cs-lab';
+export { LCh } from './_cs-lch';
 export { LMS } from './_cs-lms';
 export { LRGB } from './_cs-lrgb';
 export { RGB } from './_cs-rgb';
