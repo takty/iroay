@@ -8,7 +8,7 @@
  */
 
 import { Triplet } from './_type';
-import { D65_XYZ } from './_constant';
+import { D65_XYZ } from './_const';
 import { LCh } from './_cs-lch';
 
 export class Lab {

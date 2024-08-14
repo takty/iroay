@@ -82,7 +82,7 @@ export class Color {
 		if (this.ts.has(ColorSpace.LRGB)) {
 			return this.ts.get(ColorSpace.LRGB) as Triplet;
 		}
-		let t: Triplet = [0, 0, 0];
+		let t: Triplet;
 		switch (this.cs) {
 			case ColorSpace.RGB:
 				t = RGB.toLRGB(this.asRGB());
@@ -140,7 +140,7 @@ export class Color {
 		if (this.ts.has(ColorSpace.Lab)) {
 			return this.ts.get(ColorSpace.Lab) as Triplet;
 		}
-		let t: Triplet = [0, 0, 0];
+		let t: Triplet;
 		switch (this.cs) {
 			case ColorSpace.LCh:
 				t = LCh.toLab(this.asLCh());
@@ -175,7 +175,7 @@ export class Color {
 		if (this.ts.has(ColorSpace.Munsell)) {
 			return this.ts.get(ColorSpace.Munsell) as Triplet;
 		}
-		let t: Triplet = [0, 0, 0];
+		let t: Triplet;
 		switch (this.cs) {
 			case ColorSpace.PCCS:
 			case ColorSpace.Tone:
@@ -194,7 +194,7 @@ export class Color {
 		if (this.ts.has(ColorSpace.PCCS)) {
 			return this.ts.get(ColorSpace.PCCS) as Triplet;
 		}
-		let t: Triplet = [0, 0, 0];
+		let t: Triplet;
 		switch (this.cs) {
 			case ColorSpace.Tone:
 				t = PCCS.toNormalCoordinate(this.asTone());
@@ -296,25 +296,27 @@ export class Color {
 
 
 	public toProtanopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+		ColorVisionSimulation.doCorrection = doCorrection;
 		switch (method) {
 			case 'lms':
-				const lms0 = ColorVisionSimulation.lmsToProtanopia(this.asLMS(), doCorrection);
+				const lms0 = ColorVisionSimulation.lmsToProtanopia(this.asLMS());
 				return new Color(ColorSpace.LMS, lms0);
 			case 'lrgb':
 			default:
-				const lms1 = ColorVisionSimulation.lrgbToProtanopia(this.asLRGB(), doCorrection);
+				const lms1 = ColorVisionSimulation.lrgbToProtanopia(this.asLRGB());
 				return new Color(ColorSpace.LMS, lms1);
 		}
 	}
 
 	public toDeuteranopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+		ColorVisionSimulation.doCorrection = doCorrection;
 		switch (method) {
 			case 'lms':
-				const lms0 = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS(), doCorrection);
+				const lms0 = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS());
 				return new Color(ColorSpace.LMS, lms0);
 			case 'lrgb':
 			default:
-				const lms1 = ColorVisionSimulation.lrgbToDeuteranopia(this.asLRGB(), doCorrection);
+				const lms1 = ColorVisionSimulation.lrgbToDeuteranopia(this.asLRGB());
 				return new Color(ColorSpace.LMS, lms1);
 		}
 	}

@@ -6,7 +6,7 @@
  */
 
 import { Triplet } from './_type';
-import { D65_xyz, D65_XYZ } from './_constant';
+import { D65_xyz, D65_XYZ } from './_const';
 
 export class Yxy {
 

@@ -2,7 +2,7 @@
  * This class simulates color vision characteristics.
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-14
  */
 
 import { Triplet } from './_type';
@@ -10,6 +10,15 @@ import { LMS } from './_cs-lms';
 import { XYZ } from './_cs-xyz';
 
 export class ColorVisionSimulation {
+
+	private static readonly LMS_BASE: Triplet  = LMS.fromXYZ([1, 1, 1]);
+	private static readonly LMS_BASE2: Triplet = LMS.fromXYZ(XYZ.fromLRGB([1, 1, 1]));
+
+	static ALPHA: number = 1;
+	static BETA: number  = 1;
+
+	static doCorrection: boolean = false;
+
 	/*
 	 * Reference: Brettel, H.; Viénot, F. & Mollon, J. D.,
 	 * Computerized simulation of color appearance for dichromats,
@@ -18,28 +27,28 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Simulate protanopia
-	 * @param {Triplet} lms LMS color
-	 * @return {Triplet} LMS color in protanopia
+	 * @param {Triplet} lms LMS color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} LMS color in protanopia.
 	 */
-	static brettelP([l, m, s]: Triplet): Triplet {
-		return [
-			0.0 * l + 2.02344 * m + -2.52581 * s,
-			0.0 * l + 1.0     * m +  0.0     * s,
-			0.0 * l + 0.0     * m +  1.0     * s,
-		];
+	static brettelP([l, m, s]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		dest[0] = 0.0 * l + 2.02344 * m + -2.52581 * s;
+		dest[1] = 0.0 * l + 1.0     * m +  0.0     * s;
+		dest[2] = 0.0 * l + 0.0     * m +  1.0     * s;
+		return dest;
 	}
 
 	/**
 	 * Simulate deuteranopia
-	 * @param {Triplet} lms LMS color
-	 * @return {Triplet} LMS color in deuteranopia
+	 * @param {Triplet} lms LMS color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} LMS color in deuteranopia.
 	 */
-	static brettelD([l, m, s]: Triplet): Triplet {
-		return [
-			1.0      * l + 0.0 * m + 0.0     * s,
-			0.494207 * l + 0.0 * m + 1.24827 * s,
-			0.0      * l + 0.0 * m + 1.0     * s,
-		];
+	static brettelD([l, m, s]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		dest[0] = 1.0      * l + 0.0 * m + 0.0     * s;
+		dest[1] = 0.494207 * l + 0.0 * m + 1.24827 * s;
+		dest[2] = 0.0      * l + 0.0 * m + 1.0     * s;
+		return dest;
 	}
 
 	/*
@@ -50,42 +59,42 @@ export class ColorVisionSimulation {
 
 	/**
 	 * Correct simulation of protanopia
-	 * @param {number} m Original M of LMS color
-	 * @param {Triplet} lms LMS color of protanopia simulation
-	 * @param {Triplet} base Base LMS color
-	 * @return {Triplet} LMS color in protanopia
+	 * @param {number} m Original M of LMS color.
+	 * @param {Triplet} lms LMS color of protanopia simulation.
+	 * @param {Triplet} base Base LMS color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} LMS color in protanopia.
 	 */
-	static okajimaCorrectionP(m: number, [l2, m2, s2]: Triplet, base: Triplet): Triplet {
+	static okajimaCorrectionP(m: number, [l2, m2, s2]: Triplet, base: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		const sp1 = m / base[1];
 		const dp0 = l2 / base[0];
 		const dp1 = m2 / base[1];
 		const dp2 = s2 / base[2];
 		const k = ColorVisionSimulation.BETA * sp1 / (ColorVisionSimulation.ALPHA * dp0 + ColorVisionSimulation.BETA * dp1);
-		return [
-			(k * dp0) * base[0],
-			(k * dp1) * base[1],
-			(k * dp2) * base[2]
-		];
+		dest[0] = (k * dp0) * base[0];
+		dest[1] = (k * dp1) * base[1];
+		dest[2] = (k * dp2) * base[2];
+		return dest;
 	}
 
 	/**
 	 * Correct simulation of deuteranopia
-	 * @param {number} l Original L of LMS color
-	 * @param {Triplet} lms LMS color of deuteranopia simulation
-	 * @param {Triplet} base Base LMS color
-	 * @return {Triplet} LMS color in deuteranopia
+	 * @param {number} l Original L of LMS color.
+	 * @param {Triplet} lms LMS color of deuteranopia simulation.
+	 * @param {Triplet} base Base LMS color.
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} LMS color in deuteranopia.
 	 */
-	static okajimaCorrectionD(l: number, [l2, m2, s2]: Triplet, base: Triplet): Triplet {
+	static okajimaCorrectionD(l: number, [l2, m2, s2]: Triplet, base: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		const sp0 = l / base[0];
 		const dp0 = l2 / base[0];
 		const dp1 = m2 / base[1];
 		const dp2 = s2 / base[2];
 		const k = ColorVisionSimulation.ALPHA * sp0 / (ColorVisionSimulation.ALPHA * dp0 + ColorVisionSimulation.BETA * dp1);
-		return [
-			(k * dp0) * base[0],
-			(k * dp1) * base[1],
-			(k * dp2) * base[2]
-		];
+		dest[0] = (k * dp0) * base[0];
+		dest[1] = (k * dp1) * base[1];
+		dest[2] = (k * dp2) * base[2];
+		return dest;
 	}
 
 
@@ -95,29 +104,29 @@ export class ColorVisionSimulation {
 	/**
 	 * Convert LMS to LMS in protanopia (Method 1).
 	 * @param {Triplet} lms LMS color
-	 * @param {boolean} doCorrection
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
 	 * @return {Triplet} LMS color in protanopia
 	 */
-	static lmsToProtanopia(lms: Triplet, doCorrection: boolean = false): Triplet {
-		const ds = ColorVisionSimulation.brettelP(lms);
-		if (doCorrection) {
-			return ColorVisionSimulation.okajimaCorrectionP(lms[1], ds, ColorVisionSimulation.LMS_BASE);
+	static lmsToProtanopia(lms: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		ColorVisionSimulation.brettelP(lms, dest);
+		if (ColorVisionSimulation.doCorrection) {
+			ColorVisionSimulation.okajimaCorrectionP(lms[1], dest, ColorVisionSimulation.LMS_BASE, dest);
 		}
-		return ds;
+		return dest;
 	}
 
 	/**
 	 * Convert LMS to LMS in deuteranopia (Method 1).
 	 * @param {Triplet} lms LMS color
-	 * @param {boolean} doCorrection
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
 	 * @return {Triplet} LMS color in deuteranopia
 	 */
-	static lmsToDeuteranopia(lms: Triplet, doCorrection: boolean = false): Triplet {
-		const ds = ColorVisionSimulation.brettelD(lms);
-		if (doCorrection) {
-			return ColorVisionSimulation.okajimaCorrectionD(lms[0], ds, ColorVisionSimulation.LMS_BASE);
+	static lmsToDeuteranopia(lms: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+		ColorVisionSimulation.brettelD(lms, dest);
+		if (ColorVisionSimulation.doCorrection) {
+			ColorVisionSimulation.okajimaCorrectionD(lms[0], dest, ColorVisionSimulation.LMS_BASE, dest);
 		}
-		return ds;
+		return dest;
 	}
 
 
@@ -127,48 +136,43 @@ export class ColorVisionSimulation {
 	/**
 	 * Convert Linear RGB to LMS in protanopia (Method 2).
 	 * @param {Triplet} lrgb Linear RGB color
-	 * @param {boolean} doCorrection
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
 	 * @return {Triplet} LMS color in protanopia
 	 */
-	static lrgbToProtanopia([lr, lg, lb]: Triplet, doCorrection: boolean = false): Triplet {
+	static lrgbToProtanopia([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		const lrgb2: Triplet = [
 			0.992052 * lr + 0.003974,
 			0.992052 * lg + 0.003974,
 			0.992052 * lb + 0.003974,
 		];
 		const lms = LMS.fromXYZ(XYZ.fromLRGB(lrgb2));
-		const ds = ColorVisionSimulation.brettelP(lms);
+		ColorVisionSimulation.brettelP(lms, dest);
 
-		if (doCorrection) {
-			return ColorVisionSimulation.okajimaCorrectionP(lms[1], ds, ColorVisionSimulation.LMS_BASE2);
+		if (ColorVisionSimulation.doCorrection) {
+			ColorVisionSimulation.okajimaCorrectionP(lms[1], dest, ColorVisionSimulation.LMS_BASE2, dest);
 		}
-		return ds;
+		return dest;
 	}
 
 	/**
 	 * Convert Linear RGB to LMS in deuteranopia (Method 2).
 	 * @param {Triplet} lrgb Linear RGB color
-	 * @param {boolean} doCorrection
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
 	 * @return {Triplet} LMS color in deuteranopia
 	 */
-	static lrgbToDeuteranopia([lr, lg, lb]: Triplet, doCorrection: boolean = false): Triplet {
+	static lrgbToDeuteranopia([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		const lrgb2: Triplet = [
 			0.957237 * lr + 0.0213814,
 			0.957237 * lg + 0.0213814,
 			0.957237 * lb + 0.0213814,
 		];
 		const lms = LMS.fromXYZ(XYZ.fromLRGB(lrgb2));
-		const ds = ColorVisionSimulation.brettelD(lms);
+		ColorVisionSimulation.brettelD(lms, dest);
 
-		if (doCorrection) {
-			return ColorVisionSimulation.okajimaCorrectionD(lms[0], ds, ColorVisionSimulation.LMS_BASE2);
+		if (ColorVisionSimulation.doCorrection) {
+			ColorVisionSimulation.okajimaCorrectionD(lms[0], dest, ColorVisionSimulation.LMS_BASE2, dest);
 		}
-		return ds;
+		return dest;
 	}
 
-	static LMS_BASE  = LMS.fromXYZ([1, 1, 1]);
-	static LMS_BASE2 = LMS.fromXYZ(XYZ.fromLRGB([1, 1, 1]));
-
-	static ALPHA = 1;
-	static BETA  = 1;
 }

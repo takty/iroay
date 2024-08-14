@@ -6,7 +6,7 @@
  */
 
 import { Triplet } from './_type';
-import { PI2 } from './_constant';
+import { PI2 } from './_const';
 
 export class AgeSimulation {
 
@@ -32,32 +32,32 @@ export class AgeSimulation {
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of elderly people (70 years old) (conversion other than lightness).
-	 * @param {Triplet} lab L*, a*, b* of CIELAB color (young person)
-	 * @return {Triplet} CIELAB color in color vision of elderly people
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color (young person).
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} CIELAB color in color vision of elderly people.
 	 */
-	static labToElderlyAB([ls, as, bs]: Triplet): Triplet {
+	static labToElderlyAB([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		const rad = AgeSimulation._atan2rad(as, bs) + AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) * AgeSimulation._chromaRatio(as, bs);
-		return [
-			ls,
-			c * Math.cos(rad),
-			c * Math.sin(rad),
-		];
+		dest[0] = ls;
+		dest[1] = c * Math.cos(rad);
+		dest[2] = c * Math.sin(rad);
+		return dest;
 	}
 
 	/**
 	 * Convert CIELAB (L*a*b*) to CIELAB in the color vision of young people (20 years old) (conversion other than lightness).
-	 * @param {Triplet} lab L*, a*, b* of CIELAB color (elderly person)
-	 * @return {Triplet} CIELAB color in color vision of young people
+	 * @param {Triplet} lab L*, a*, b* of CIELAB color (elderly person).
+	 * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
+	 * @return {Triplet} CIELAB color in color vision of young people.
 	 */
-	static labToYoungAB([ls, as, bs]: Triplet): Triplet {
+	static labToYoungAB([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 		const rad = AgeSimulation._atan2rad(as, bs) - AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) / AgeSimulation._chromaRatio(as, bs);
-		return [
-			ls,
-			c * Math.cos(rad),
-			c * Math.sin(rad),
-		];
+		dest[0] = ls;
+		dest[1] = c * Math.cos(rad);
+		dest[2] = c * Math.sin(rad);
+		return dest;
 	}
 
 }

@@ -15,4 +15,5 @@ export { Evaluation } from './_eval';
 export { AgeSimulation } from './_sim-age';
 export { ColorVisionSimulation } from './_sim-color-vision';
 
-export { convert, getConverter, isRGBSaturated, isYxySaturated, isMunsellSaturated } from './_util';
+export { convert, getConverter } from './_conv';
+export { isRGBSaturated, isYxySaturated, isMunsellSaturated } from './_util';

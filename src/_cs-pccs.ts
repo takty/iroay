@@ -11,7 +11,7 @@
 
 import { Triplet, Quartet } from './_type';
 import { Munsell } from './_cs-munsell';
-import { PI2 } from './_constant';
+import { PI2 } from './_const';
 
 export class PCCS {
 
