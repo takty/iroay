@@ -8,6 +8,7 @@
 import { Triplet } from './_type';
 import { RGB } from './_cs-rgb';
 import { Lab } from './_cs-lab';
+import { LCh } from './_cs-lch';
 import { Yxy } from './_cs-yxy';
 import { LMS } from './_cs-lms';
 import { LRGB } from './_cs-lrgb';
@@ -142,7 +143,7 @@ export class Color {
 		let t: Triplet = [0, 0, 0];
 		switch (this.cs) {
 			case ColorSpace.LCh:
-				t = Lab.fromLCh(this.asLCh());
+				t = LCh.toLab(this.asLCh());
 				break;
 			default:
 				t = Lab.fromXYZ(this.asXYZ());
@@ -156,7 +157,7 @@ export class Color {
 		if (this.ts.has(ColorSpace.LCh)) {
 			return this.ts.get(ColorSpace.LCh) as Triplet;
 		}
-		const t: Triplet = Lab.toLCh(this.asLab());
+		const t: Triplet = LCh.fromLab(this.asLab());
 		this.ts.set(ColorSpace.LCh, t);
 		return t;
 	}
