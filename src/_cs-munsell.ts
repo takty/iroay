@@ -47,16 +47,17 @@ export class Munsell {
 		return true;
 	}
 
-	private static HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
-	private static EP = 0.0000000000001;
-	private static ILLUMINANT_C: Pair = [0.3101, 0.3162];  // Standard illuminant C, white point
+	private static readonly HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
+	private static readonly EP = 0.0000000000001;
+	private static readonly ILLUMINANT_C: Pair = [0.3101, 0.3162];  // Standard illuminant C, white point
+
 	private static TBL_MAX_C: number[][];
 	private static TBL: (Pair|null)[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
 	private static TBL_TREES: Tree[] = [];
 
-	static MIN_HUE = 0;
-	static MAX_HUE = 100;  // Same as MIN_HUE
-	static MONO_LIMIT_C = 0.05;
+	static readonly MIN_HUE = 0;
+	static readonly MAX_HUE = 100;  // Same as MIN_HUE
+	static readonly MONO_LIMIT_C = 0.05;
 
 	static isSaturated = false;
 

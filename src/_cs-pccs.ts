@@ -15,6 +15,86 @@ import { PI2 } from './_constant';
 
 export class PCCS {
 
+	// Hue [0, 24), 24 is also acceptable
+	static readonly MIN_HUE: number = 0;
+	static readonly MAX_HUE: number = 24;
+	static readonly MONO_LIMIT_S: number = 0.01;
+
+	private static readonly _HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
+	private static readonly _TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
+	private static readonly _MUNSELL_H = [
+		96,  // Dummy
+		0,  4,  7, 10, 14, 18, 22, 25, 28, 33, 38, 43,
+		49, 55, 60, 65, 70, 73, 76, 79, 83, 87, 91, 96, 100
+	];
+	private static readonly _COEFFICIENTS: Triplet[] = [
+		[0.853642,  0.084379, -0.002798],  // 0 === 24
+		[1.042805,  0.046437,  0.001607],  // 2
+		[1.079160,  0.025470,  0.003052],  // 4
+		[1.039472,  0.054749, -0.000511],  // 6
+		[0.925185,  0.050245,  0.000953],  // 8
+		[0.968557,  0.012537,  0.003375],  // 10
+		[1.070433, -0.047359,  0.007385],  // 12
+		[1.087030, -0.051075,  0.006526],  // 14
+		[1.089652, -0.050206,  0.006056],  // 16
+		[0.880861,  0.060300, -0.001280],  // 18
+		[0.897326,  0.053912, -0.000860],  // 20
+		[0.887834,  0.055086, -0.000847],  // 22
+		[0.853642,  0.084379, -0.002798],  // 24
+	];
+
+	/**
+	 * Enum type for conversion methods.
+	 */
+	static readonly ConversionMethod = Object.freeze({
+		/**
+		 * Concise conversion
+		 */
+		CONCISE: {
+			_calcMunsellH: PCCS._simplyCalcMunsellH,
+			_calcMunsellS: PCCS._simplyCalcMunsellC,
+			_calcPccsH: PCCS._simplyCalcPccsH,
+			_calcPccsS: PCCS._simplyCalcPccsS,
+		},
+
+		/**
+		 * Accurate conversion
+		 */
+		ACCURATE: {
+			_calcMunsellH: PCCS._calcMunsellH,
+			_calcMunsellC: PCCS._calcMunsellC,
+			_calcPccsH: PCCS._calcPccsH,
+			_calcPccsS: PCCS._calcPccsS,
+		}
+	});
+
+	/**
+	 * Indicates the currently selected color vision characteristic conversion method.
+	 */
+	static conversionMethod = PCCS.ConversionMethod.ACCURATE;
+
+	/**
+	 * Enum type for Tone.
+	 */
+	static readonly Tone = Object.freeze({
+		p   : 0,
+		p_p : 1,
+		ltg : 2,
+		g   : 3,
+		dkg : 4,
+		lt  : 5,
+		lt_p: 6,
+		sf  : 7,
+		d   : 8,
+		dk  : 9,
+		b   : 10,
+		s   : 11,
+		dp  : 12,
+		v   : 13,
+		none: 14
+	});
+
+
 	// Calculation of PCCS value (accurate) ------------------------------------
 
 
@@ -117,6 +197,10 @@ export class PCCS {
 		return Ct * (0.077 * s + 0.0040 * s * s) * (1 - Math.exp(-gt * l));
 	}
 
+
+	// Munsell -----------------------------------------------------------------
+
+
 	/**
 	 * Convert Munsell (HVC) to PCCS (hls).
 	 * @param {Triplet} hvc Hue, value, chroma of Munsell color.
@@ -124,16 +208,18 @@ export class PCCS {
 	 * @return {Triplet} PCCS color.
 	 */
 	static fromMunsell([H, V, C]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
-		let h = 0, l = V, s = 0;
+		let h = 0;
+		let s = 0;
 
+		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 		h = PCCS.conversionMethod._calcPccsH(H);
 		if (Munsell.MONO_LIMIT_C <= C) {
 			s = PCCS.conversionMethod._calcPccsS(V, C, h);
 		}
 		if (PCCS.MAX_HUE <= h) h -= PCCS.MAX_HUE;
+
 		dest[0] = h;
-		dest[1] = l;
+		dest[1] = V;
 		dest[2] = s;
 		return dest;
 	}
@@ -145,7 +231,8 @@ export class PCCS {
 	 * @return {Triplet} Munsell color.
 	 */
 	static toMunsell([h, l, s]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-		let H = 0, V = l, C = 0;
+		let H = 0;
+		let C = 0;
 
 		H = PCCS.conversionMethod._calcMunsellH(h);
 		if (PCCS.MONO_LIMIT_S <= s) {
@@ -153,11 +240,16 @@ export class PCCS {
 		}
 		if (H < 0) H += Munsell.MAX_HUE;
 		if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
+
 		dest[0] = H;
-		dest[1] = V;
+		dest[1] = l;
 		dest[2] = C;
 		return dest;
 	}
+
+
+	// -------------------------------------------------------------------------
+
 
 	/**
 	 * Calculate tone.
@@ -167,7 +259,8 @@ export class PCCS {
 	static tone(hls: Triplet): number {
 		const s = hls[2];
 		const t = PCCS.relativeLightness(hls);
-		const tu = s * -3 / 10 + 8.5, td = s * 3 / 10 + 2.5;
+		const tu = s * -3 / 10 + 8.5;
+		const td = s * 3 / 10 + 2.5;
 
 		if (s < 1) {
 			return PCCS.Tone.none;
@@ -292,84 +385,5 @@ export class PCCS {
 			return PCCS._TONE_NAMES[PCCS.tone(hls)];
 		}
 	}
-
-	// Hue [0, 24), 24 is also acceptable
-	static MIN_HUE = 0;
-	static MAX_HUE = 24;
-	static MONO_LIMIT_S = 0.01;
-
-	private static _HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
-	private static _TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
-	private static _MUNSELL_H = [
-		96,  // Dummy
-		0,  4,  7, 10, 14, 18, 22, 25, 28, 33, 38, 43,
-		49, 55, 60, 65, 70, 73, 76, 79, 83, 87, 91, 96, 100
-	];
-	private static _COEFFICIENTS: Triplet[] = [
-		[0.853642,  0.084379, -0.002798],  // 0 === 24
-		[1.042805,  0.046437,  0.001607],  // 2
-		[1.079160,  0.025470,  0.003052],  // 4
-		[1.039472,  0.054749, -0.000511],  // 6
-		[0.925185,  0.050245,  0.000953],  // 8
-		[0.968557,  0.012537,  0.003375],  // 10
-		[1.070433, -0.047359,  0.007385],  // 12
-		[1.087030, -0.051075,  0.006526],  // 14
-		[1.089652, -0.050206,  0.006056],  // 16
-		[0.880861,  0.060300, -0.001280],  // 18
-		[0.897326,  0.053912, -0.000860],  // 20
-		[0.887834,  0.055086, -0.000847],  // 22
-		[0.853642,  0.084379, -0.002798],  // 24
-	];
-
-	/**
-	 * Enum type for conversion methods.
-	 */
-	static ConversionMethod = Object.freeze({
-		/**
-		 * Concise conversion
-		 */
-		CONCISE: {
-			_calcMunsellH: PCCS._simplyCalcMunsellH,
-			_calcMunsellS: PCCS._simplyCalcMunsellC,
-			_calcPccsH: PCCS._simplyCalcPccsH,
-			_calcPccsS: PCCS._simplyCalcPccsS,
-		},
-
-		/**
-		 * Accurate conversion
-		 */
-		ACCURATE: {
-			_calcMunsellH: PCCS._calcMunsellH,
-			_calcMunsellC: PCCS._calcMunsellC,
-			_calcPccsH: PCCS._calcPccsH,
-			_calcPccsS: PCCS._calcPccsS,
-		}
-	});
-
-	/**
-	 * Indicates the currently selected color vision characteristic conversion method.
-	 */
-	static conversionMethod = PCCS.ConversionMethod.ACCURATE;
-
-	/**
-	 * Enum type for Tone.
-	 */
-	static Tone = Object.freeze({
-		p   : 0,
-		p_p : 1,
-		ltg : 2,
-		g   : 3,
-		dkg : 4,
-		lt  : 5,
-		lt_p: 6,
-		sf  : 7,
-		d   : 8,
-		dk  : 9,
-		b   : 10,
-		s   : 11,
-		dp  : 12,
-		v   : 13,
-		none: 14
-	});
 
 }
