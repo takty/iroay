@@ -2,12 +2,18 @@
  * This class performs various simulations of color space.
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-14
  */
 
 import { Triplet } from './_type';
+import { PI2 } from './_constant';
 
 export class AgeSimulation {
+
+	private static _atan2rad(as: number, bs: number): number {
+		return Math.atan2(bs, as) + (bs < 0 ? PI2 : 0);
+	}
+
 	/*
 	 * Color vision age-related change simulation (conversion other than lightness)
 	 * Reference: Katsunori Okajima, Human Color Vision Mechanism and its Age-Related Change,
@@ -15,8 +21,8 @@ export class AgeSimulation {
 	 */
 
 	private static _hueDiff(a: number, b: number): number {
-		const p = (b > 0) ? Math.atan2(b, a) : (Math.atan2(-b, -a) + Math.PI);
-		return 4.5 * Math.cos(2 * Math.PI * (p - 28.8) / 50.9) + 4.4;
+		const p = AgeSimulation._atan2rad(a, b);
+		return 4.5 * Math.cos(PI2 * (p - 28.8) / 50.9) + 4.4;
 	}
 
 	private static _chromaRatio(a: number, b: number): number {
@@ -30,12 +36,12 @@ export class AgeSimulation {
 	 * @return {Triplet} CIELAB color in color vision of elderly people
 	 */
 	static labToElderlyAB([ls, as, bs]: Triplet): Triplet {
-		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) + AgeSimulation._hueDiff(as, bs);
+		const rad = AgeSimulation._atan2rad(as, bs) + AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) * AgeSimulation._chromaRatio(as, bs);
 		return [
 			ls,
-			Math.cos(h) * c,
-			Math.sin(h) * c,
+			c * Math.cos(rad),
+			c * Math.sin(rad),
 		];
 	}
 
@@ -45,12 +51,13 @@ export class AgeSimulation {
 	 * @return {Triplet} CIELAB color in color vision of young people
 	 */
 	static labToYoungAB([ls, as, bs]: Triplet): Triplet {
-		const h = ((bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI)) - AgeSimulation._hueDiff(as, bs);
+		const rad = AgeSimulation._atan2rad(as, bs) - AgeSimulation._hueDiff(as, bs);
 		const c = Math.sqrt(as * as + bs * bs) / AgeSimulation._chromaRatio(as, bs);
 		return [
 			ls,
-			Math.cos(h) * c,
-			Math.sin(h) * c,
+			c * Math.cos(rad),
+			c * Math.sin(rad),
 		];
 	}
+
 }

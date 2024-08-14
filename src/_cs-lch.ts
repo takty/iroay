@@ -6,6 +6,7 @@
  */
 
 import { Triplet } from './_type';
+import { DEG_RAD, RAD_DEG, PI2 } from './_constant';
 
 export class LCh {
 
@@ -19,10 +20,10 @@ export class LCh {
 	 * @return {Triplet} LCh color.
 	 */
 	static fromLab([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
+		const rad = Math.atan2(bs, as) + (bs < 0 ? PI2 : 0);
 		dest[0] = ls;
 		dest[1] = Math.sqrt(as * as + bs * bs);
-		dest[2] = rad * 360 / (Math.PI * 2);
+		dest[2] = rad * RAD_DEG;
 		return dest;
 	}
 
@@ -33,7 +34,7 @@ export class LCh {
 	 * @return {Triplet} L*, a*, b* of CIELAB color.
 	 */
 	static toLab([ls, cs, h]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-		const rad = h * (Math.PI * 2) / 360;
+		const rad = h * DEG_RAD;
 		dest[0] = ls;
 		dest[1] = Math.cos(rad) * cs;
 		dest[2] = Math.sin(rad) * cs;

@@ -11,9 +11,9 @@
 
 import { Triplet, Quartet } from './_type';
 import { Munsell } from './_cs-munsell';
+import { PI2 } from './_constant';
 
 export class PCCS {
-
 
 	// Calculation of PCCS value (accurate) ------------------------------------
 
@@ -88,7 +88,7 @@ export class PCCS {
 
 	private static _simplyCalcPccsH(H: number): number {
 		const y = H * Math.PI / 50;
-		return 24 * y / (2 * Math.PI) + 1.24
+		return 24 * y / PI2 + 1.24
 				+ 0.02 * Math.cos(y) - 0.1 * Math.cos(2 * y) - 0.11  * Math.cos(3 * y)
 				+ 0.68 * Math.sin(y) - 0.3 * Math.sin(2 * y) + 0.013 * Math.sin(3 * y);
 	}
@@ -106,7 +106,7 @@ export class PCCS {
 
 	private static _simplyCalcMunsellH(h: number): number {
 		const x = (h - 1) * Math.PI / 12;
-		return 100 * x / (2 * Math.PI) - 1
+		return 100 * x / PI2 - 1
 				+ 0.12 * Math.cos(x) + 0.34 * Math.cos(2 * x) + 0.4 * Math.cos(3 * x)
 				- 2.7  * Math.sin(x) + 1.5  * Math.sin(2 * x) - 0.4 * Math.sin(3 * x);
 	}
@@ -371,4 +371,5 @@ export class PCCS {
 		v   : 13,
 		none: 14
 	});
+
 }

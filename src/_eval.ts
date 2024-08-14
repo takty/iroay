@@ -2,14 +2,14 @@
  * Evaluation Methods
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-14
  */
 
 import { CC_TABLE } from './table/_cc-min';
 import { Triplet } from './_type';
+import { DEG_RAD, RAD_DEG, PI2 } from './_constant';
 
 export class Evaluation {
-
 
 	// Calculation of the conspicuity degree -----------------------------------
 
@@ -23,11 +23,11 @@ export class Evaluation {
 	 * TODO Consider chroma (ab radius of LAB)
 	 */
 	static conspicuityOfLab([, as, bs]: Triplet): number {
-		const rad = (bs > 0) ? Math.atan2(bs, as) : (Math.atan2(-bs, -as) + Math.PI);
-		const H = rad / (Math.PI * 2) * 360;
+		const rad = Math.atan2(bs, as) + (bs < 0 ? PI2 : 0);
+		const h = rad * RAD_DEG;
 		const a = 35;  // Constant
-		if (H < a) return Math.abs(180 - (360 + H - a));
-		else return Math.abs(180 - (H - a));
+		if (h < a) return Math.abs(180 - (360 + h - a));
+		else return Math.abs(180 - (h - a));
 	}
 
 
@@ -109,9 +109,9 @@ export class Evaluation {
 		return DE;
 
 		function sq(v: number) { return v * v; }
-		function atan(y: number, x: number) { const v = Math.atan2(y, x) * 180 / Math.PI; return (v < 0) ? (v + 360) : v; }
-		function sin(deg: number) { return Math.sin(deg * Math.PI / 180); }
-		function cos(deg: number) { return Math.cos(deg * Math.PI / 180); }
+		function atan(y: number, x: number) { const v = Math.atan2(y, x) * RAD_DEG; return (v < 0) ? (v + 360) : v; }
+		function sin(deg: number) { return Math.sin(deg * DEG_RAD); }
+		function cos(deg: number) { return Math.cos(deg * DEG_RAD); }
 	}
 
 	/**
@@ -197,4 +197,5 @@ export class Evaluation {
 	private static _LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
 	private static _CC_TABLE = CC_TABLE;
+
 }
