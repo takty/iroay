@@ -2,7 +2,7 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-15
  */
 
 import { Triplet } from './_type';
@@ -10,20 +10,6 @@ import { Lab } from './_cs-lab';
 import { LRGB } from './_cs-lrgb';
 import { RGB } from './_cs-rgb';
 import { XYZ } from './_cs-xyz';
-import { Yxy } from './_cs-yxy';
-import { Munsell } from './_cs-munsell';
-
-export function isRGBSaturated(): boolean {
-	return RGB.isSaturated;
-}
-
-export function isYxySaturated(): boolean {
-	return Yxy.isSaturated;
-}
-
-export function isMunsellSaturated(): boolean {
-	return Munsell.isSaturated;
-}
 
 /**
  * Convert sRGB to Lightness-only sRGB.
