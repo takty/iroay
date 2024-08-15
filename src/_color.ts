@@ -38,7 +38,7 @@ export class Color {
 	private cs: ColorSpace | null = null;
 
 	public constructor(cs: ColorSpace|null = null, t: Triplet|null = null) {
-		if (cs && t) {
+		if (cs !== null && t !== null) {  // Must check for null.
 			this.ts.set(cs, t);
 			this.cs = cs;
 		}
