@@ -39,7 +39,8 @@ export class Color {
 
 	public constructor(cs: ColorSpace|null = null, t: Triplet|null = null) {
 		if (cs && t) {
-			this.set(cs, t);
+			this.ts.set(cs, t);
+			this.cs = cs;
 		}
 	}
 
