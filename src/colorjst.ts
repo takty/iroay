@@ -16,4 +16,4 @@ export { AgeSimulation } from './_sim-age';
 export { ColorVisionSimulation } from './_sim-color-vision';
 
 export { convert, getConverter } from './_conv';
-export { isRGBSaturated, isYxySaturated, isMunsellSaturated } from './_util';
+export { toMonochromeRGB } from './_util';
