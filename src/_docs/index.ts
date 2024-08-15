@@ -2,7 +2,7 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-08-13
+ * @version 2024-08-15
  */
 
 import 'klales/klales.min.css';
@@ -41,6 +41,7 @@ function draw(w: number, h: number, ctx: CanvasRenderingContext2D, sel: HTMLSele
 
 	const fns = new Map([
 		['rgb', drawChartRGB],
+		['yiq', drawChartYIQ],
 		['lrgb', drawChartLRGB],
 		['xyz', drawChartXYZ],
 		['lab', drawChartLab],
@@ -65,7 +66,20 @@ function draw(w: number, h: number, ctx: CanvasRenderingContext2D, sel: HTMLSele
 function drawChartRGB(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	for (let y = 0; y < h; y += 1) {
 		for (let x = 0; x < w; x += 1) {
-			const rgb = [x, v * 255, y] as Triplet;
+			const rgb = [255 * x / (w - 1), v * 255, 255 * y / (h - 1)] as Triplet;
+			setPixel(ctx, x, (h - 1) - y, rgb);
+		}
+	}
+}
+
+function drawChartYIQ(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+	const c = new Color();
+
+	for (let y = 0; y < h; y += 1) {
+		for (let x = 0; x < w; x += 1) {
+			c.set(ColorSpace.YIQ, [v, 0.5959 * (x / (w - 1) - 0.5), 0.5229 * (y / (h - 1) - 0.5)]);
+
+			const rgb = c.asRGB();
 			setPixel(ctx, x, (h - 1) - y, rgb);
 		}
 	}
