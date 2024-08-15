@@ -2,16 +2,17 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-15
  */
 
 import { Triplet } from './_type';
 import { RGB } from './_cs-rgb';
+import { YIQ } from './_cs-yiq';
+import { LRGB } from './_cs-lrgb';
+import { Yxy } from './_cs-yxy';
 import { Lab } from './_cs-lab';
 import { LCh } from './_cs-lch';
-import { Yxy } from './_cs-yxy';
 import { LMS } from './_cs-lms';
-import { LRGB } from './_cs-lrgb';
 import { Munsell } from './_cs-munsell';
 import { PCCS } from './_cs-pccs';
 import { Evaluation } from './_eval';
@@ -19,6 +20,7 @@ import { ColorVisionSimulation } from './_sim-color-vision';
 
 export enum ColorSpace {
 	RGB,
+	YIQ,
 	LRGB,
 	XYZ,
 	Yxy,
@@ -52,6 +54,7 @@ export class Color {
 	public as(cs: ColorSpace): Triplet {
 		switch (cs) {
 			case ColorSpace.RGB    : return this.asRGB();
+			case ColorSpace.YIQ    : return this.asYIQ();
 			case ColorSpace.LRGB   : return this.asLRGB();
 			case ColorSpace.XYZ    : return this.asXYZ();
 			case ColorSpace.Yxy    : return this.asYxy();
@@ -78,6 +81,15 @@ export class Color {
 		return t;
 	}
 
+	public asYIQ(): Triplet {
+		if (this.ts.has(ColorSpace.YIQ)) {
+			return this.ts.get(ColorSpace.YIQ) as Triplet;
+		}
+		const t: Triplet = YIQ.fromLRGB(this.asLRGB());
+		this.ts.set(ColorSpace.YIQ, t);
+		return t;
+	}
+
 	public asLRGB(): Triplet {
 		if (this.ts.has(ColorSpace.LRGB)) {
 			return this.ts.get(ColorSpace.LRGB) as Triplet;
@@ -86,6 +98,9 @@ export class Color {
 		switch (this.cs) {
 			case ColorSpace.RGB:
 				t = RGB.toLRGB(this.asRGB());
+				break;
+			case ColorSpace.YIQ:
+				t = YIQ.toLRGB(this.asYIQ());
 				break;
 			default:
 				t = LRGB.fromXYZ(this.asXYZ());
@@ -102,6 +117,7 @@ export class Color {
 		let t: Triplet = [0, 0, 0];
 		switch (this.cs) {
 			case ColorSpace.RGB:
+			case ColorSpace.YIQ:
 			case ColorSpace.LRGB:
 				t = LRGB.toXYZ(this.asLRGB());
 				break;
