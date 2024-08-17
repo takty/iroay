@@ -6,8 +6,10 @@
  */
 
 import { Triplet } from './type';
-import { Evaluation } from './eval';
-import { ColorVisionSimulation } from './sim-color-vision';
+import { Category } from './eval/category';
+import { Conspicuity } from './eval/conspicuity';
+import { Difference } from './eval/difference';
+import { ColorVisionSimulation } from './sim/color-vision';
 
 import { RGB } from './cs/rgb';
 import { YIQ } from './cs/yiq';
@@ -283,7 +285,7 @@ export class Color {
 		if (this.us.has('conspicuity')) {
 			return this.us.get('conspicuity') as number;
 		}
-		const s = Evaluation.conspicuityOfLab(this.asLab());
+		const s = Conspicuity.conspicuityOfLab(this.asLab());
 		this.us.set('conspicuity', s);
 		return s;
 	}
@@ -292,7 +294,7 @@ export class Color {
 		if (this.us.has('category')) {
 			return this.us.get('category') as string;
 		}
-		const n = Evaluation.categoryOfYxy(this.asYxy());
+		const n = Category.categoryOfYxy(this.asYxy());
 		this.us.set('category', n);
 		return n;
 	}
@@ -300,12 +302,12 @@ export class Color {
 	public distanceTo(c: Color, method: 'sqrt'|'cie76'|'ciede2000' = 'ciede2000'): number {
 		switch (method) {
 			case 'sqrt':
-				return Evaluation.distance(this.asLab(), c.asLab());
+				return Difference.distance(this.asLab(), c.asLab());
 			case 'cie76':
-				return Evaluation.CIE76(this.asLab(), c.asLab());
+				return Difference.CIE76(this.asLab(), c.asLab());
 			case 'ciede2000':
 			default:
-				return Evaluation.CIEDE2000(this.asLab(), c.asLab());
+				return Difference.CIEDE2000(this.asLab(), c.asLab());
 		}
 	}
 

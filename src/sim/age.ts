@@ -2,11 +2,11 @@
  * This class performs various simulations of color space.
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './type';
-import { PI2 } from './const';
+import { Triplet } from '../type';
+import { PI2 } from '../const';
 
 export class AgeSimulation {
 

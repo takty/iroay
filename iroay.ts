@@ -1,7 +1,9 @@
 export { Color, ColorSpace } from './src/color';
-export { Evaluation } from './src/eval';
-export { AgeSimulation } from './src/sim-age';
-export { ColorVisionSimulation } from './src/sim-color-vision';
+export { Category } from './src/eval/category';
+export { Conspicuity } from './src/eval/conspicuity';
+export { Difference } from './src/eval/difference';
+export { AgeSimulation } from './src/sim/age';
+export { ColorVisionSimulation } from './src/sim/color-vision';
 
 export { Lab } from './src/cs/lab';
 export { LCh } from './src/cs/lch';

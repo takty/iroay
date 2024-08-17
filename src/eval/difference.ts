@@ -1,34 +1,14 @@
 /**
- * Evaluation Methods
+ * Evaluation Methods (Difference)
  *
  * @author Takuto Yanagida
  * @version 2024-08-17
  */
 
-import { Triplet } from './type';
-import { DEG_RAD, RAD_DEG, PI2 } from './const';
-import { CC_TABLE } from './table/cc-min';
+import { Triplet } from '../type';
+import { DEG_RAD, RAD_DEG } from '../const';
 
-export class Evaluation {
-
-	// Calculation of the conspicuity degree -----------------------------------
-
-
-	/**
-	 * Calculate the conspicuity degree.
-	 * Reference: Effective use of color conspicuity for Re-Coloring system,
-	 * Correspondences on Human interface Vol. 12, No. 1, SIG-DE-01, 2010.
-	 * @param {Triplet} lab L*, a*, b* of CIELAB color
-	 * @return {number} Conspicuity degree [0, 180]
-	 * TODO Consider chroma (ab radius of LAB)
-	 */
-	static conspicuityOfLab([, as, bs]: Triplet): number {
-		const rad = Math.atan2(bs, as) + (bs < 0 ? PI2 : 0);
-		const h = rad * RAD_DEG;
-		const a = 35;  // Constant
-		if (h < a) return Math.abs(180 - (360 + h - a));
-		else return Math.abs(180 - (h - a));
-	}
+export class Difference {
 
 
 	// Calculation of the color difference -------------------------------------
@@ -123,50 +103,10 @@ export class Evaluation {
 	 */
 	static differenceBetweenLab(lab1: Triplet, lab2: Triplet, method: string = 'cie76'): number {
 		if (method === 'cie76') {
-			return Evaluation.CIE76(lab1, lab2);
+			return Difference.CIE76(lab1, lab2);
 		} else {
-			return Evaluation.CIEDE2000(lab1, lab2);
+			return Difference.CIEDE2000(lab1, lab2);
 		}
-	}
-
-
-	// Determination of the basic categorical color ----------------------------
-
-
-	/**
-	 * Find the basic categorical color of the specified color.
-	 * @param {Triplet} yxy Yxy color
-	 * @return {string} Basic categorical color
-	 */
-	static categoryOfYxy([y, sx, sy]: Triplet): string {
-		const lum = Math.pow(y * Evaluation._Y_TO_LUM, 0.9);  // magic number
-
-		let diff = Number.MAX_VALUE;
-		let clu = 0;
-		for (let l of Evaluation._LUM_TABLE) {
-			const d = Math.abs(lum - l);
-			if (d < diff) {
-				diff = d;
-				clu = l;
-			}
-		}
-		const t: string = Evaluation._CC_TABLE[clu as 2|5|10|20|30|40] as string;
-		sx *= 1000;
-		sy *= 1000;
-		let dis = Number.MAX_VALUE;
-		let cc: number|string = 1;
-		for (let i = 0; i < 18 * 21; i += 1) {
-			if (t[i] === '.') continue;
-			const x = (i % 18) * 25 + 150;
-			const y = ((i / 18) | 0) * 25 + 75;
-			const d = Math.sqrt((sx - x) * (sx - x) + (sy - y) * (sy - y));
-			if (d < dis) {
-				dis = d;
-				cc = t[i];
-			}
-		}
-		const ci = (cc === 'a') ? 10 : parseInt(cc as string);
-		return Evaluation.CATEGORICAL_COLORS[ci];
 	}
 
 	/**
@@ -184,18 +124,5 @@ export class Evaluation {
 	 * Dental Materials J. 27(1), 139-144 (2008)
 	 */
 	static DE_TO_NBS = 0.92;
-
-	/**
-	 * Basic Categorical Colors
-	 */
-	static CATEGORICAL_COLORS = [
-		'white', 'black', 'red', 'green',
-		'yellow', 'blue', 'brown', 'purple',
-		'pink', 'orange', 'gray',
-	];
-	private static _Y_TO_LUM = 60;
-	private static _LUM_TABLE = [2, 5, 10, 20, 30, 40];
-
-	private static _CC_TABLE = CC_TABLE;
 
 }

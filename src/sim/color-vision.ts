@@ -5,10 +5,10 @@
  * @version 2024-08-17
  */
 
-import { Triplet } from './type';
+import { Triplet } from '../type';
 
-import { LMS } from './cs/lms';
-import { XYZ } from './cs/xyz';
+import { LMS } from '../cs/lms';
+import { XYZ } from '../cs/xyz';
 
 export class ColorVisionSimulation {
 
