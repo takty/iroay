@@ -2,12 +2,13 @@
  * This class simulates color vision characteristics.
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
-import { LMS } from './_cs-lms';
-import { XYZ } from './_cs-xyz';
+import { Triplet } from './type';
+
+import { LMS } from './cs/lms';
+import { XYZ } from './cs/xyz';
 
 export class ColorVisionSimulation {
 

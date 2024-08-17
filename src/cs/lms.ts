@@ -2,10 +2,10 @@
  * This class converts the LMS color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
+import { Triplet } from '../type';
 
 export class LMS {
 

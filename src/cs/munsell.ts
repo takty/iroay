@@ -6,16 +6,16 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { TBL_SRC_MIN, TBL_V } from './table/_hc2xy-all-min';
-import { Tree } from './_kdt';
+import { TBL_SRC_MIN, TBL_V } from '../table/hc2xy-all-min';
+import { Tree } from '../lib/kdt';
+import { Pair, Triplet } from '../type';
 
-import { Pair, Triplet } from './_type';
-import { XYZ } from './_cs-xyz';
-import { Yxy } from './_cs-yxy';
-import { PCCS } from './_cs-pccs';
+import { XYZ } from './xyz';
+import { Yxy } from './yxy';
+import { PCCS } from './pccs';
 
 export class Munsell {
 

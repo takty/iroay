@@ -4,12 +4,13 @@
  * Reference: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
-import { RGB } from './_cs-rgb';
-import { YIQ } from './_cs-yiq';
+import { Triplet } from '../type';
+
+import { RGB } from './rgb';
+import { YIQ } from './yiq';
 
 export class LRGB {
 

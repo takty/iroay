@@ -24,6 +24,6 @@
 		"removeComments": true,
 	},
 	"files": [
-		"src/iroay.ts"
+		"iroay.ts"
 	]
 }

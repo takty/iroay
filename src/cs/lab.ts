@@ -4,12 +4,13 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
-import { D65_XYZ } from './_const';
-import { LCh } from './_cs-lch';
+import { Triplet } from '../type';
+import { D65_XYZ } from '../const';
+
+import { LCh } from './lch';
 
 export class Lab {
 

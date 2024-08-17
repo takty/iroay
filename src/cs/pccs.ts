@@ -6,12 +6,13 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet, Quartet } from './_type';
-import { Munsell } from './_cs-munsell';
-import { PI2 } from './_const';
+import { Triplet, Quartet } from '../type';
+import { PI2 } from '../const';
+
+import { Munsell } from './munsell';
 
 export class PCCS {
 

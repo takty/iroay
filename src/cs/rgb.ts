@@ -3,10 +3,10 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
+import { Triplet } from '../type';
 
 export class RGB {
 

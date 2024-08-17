@@ -2,14 +2,15 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-08-15
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
-import { Lab } from './_cs-lab';
-import { LRGB } from './_cs-lrgb';
-import { RGB } from './_cs-rgb';
-import { XYZ } from './_cs-xyz';
+import { Triplet } from './type';
+
+import { Lab } from './cs/lab';
+import { LRGB } from './cs/lrgb';
+import { RGB } from './cs/rgb';
+import { XYZ } from './cs/xyz';
 
 /**
  * Convert sRGB to Lightness-only sRGB.

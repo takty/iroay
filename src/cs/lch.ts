@@ -2,11 +2,11 @@
  * This class converts the LCh color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
-import { DEG_RAD, RAD_DEG, PI2 } from './_const';
+import { Triplet } from '../type';
+import { DEG_RAD, RAD_DEG, PI2 } from '../const';
 
 export class LCh {
 

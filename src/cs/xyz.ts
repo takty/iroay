@@ -2,15 +2,16 @@
  * This class converts the CIE 1931 XYZ color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
-import { LRGB } from './_cs-lrgb';
-import { Yxy } from './_cs-yxy';
-import { Lab } from './_cs-lab';
-import { LMS } from './_cs-lms';
-import { Munsell } from './_cs-munsell';
+import { Triplet } from '../type';
+
+import { LRGB } from './lrgb';
+import { Yxy } from './yxy';
+import { Lab } from './lab';
+import { LMS } from './lms';
+import { Munsell } from './munsell';
 
 export class XYZ {
 

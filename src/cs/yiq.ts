@@ -3,10 +3,10 @@
  * Reference: http://en.wikipedia.org/wiki/YIQ
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
+import { Triplet } from '../type';
 
 export class YIQ {
 

@@ -32,8 +32,7 @@
 	},
 	"packageManager": "yarn@1.22.22",
 	"dependencies": {
-		"esbuild": "^0.23.0",
-		"esbuild-sass-plugin": "^3.3.1",
+		"esbuild": "^0.23.1",
 		"glob": "^11.0.0",
 		"klales": "github:takty/klales",
 		"sass": "^1.77.8",

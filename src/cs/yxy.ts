@@ -2,11 +2,11 @@
  * This class converts the Yxy color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-14
+ * @version 2024-08-17
  */
 
-import { Triplet } from './_type';
-import { D65_xyz, D65_XYZ } from './_const';
+import { Triplet } from '../type';
+import { D65_xyz, D65_XYZ } from '../const';
 
 export class Yxy {
 

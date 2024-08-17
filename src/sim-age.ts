@@ -5,8 +5,8 @@
  * @version 2024-08-14
  */
 
-import { Triplet } from './_type';
-import { PI2 } from './_const';
+import { Triplet } from './type';
+import { PI2 } from './const';
 
 export class AgeSimulation {
 

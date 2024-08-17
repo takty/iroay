@@ -5,7 +5,7 @@
  * @version 2024-08-14
  */
 
-import { Triplet } from './_type';
+import { Triplet } from './type';
 
 /**
  * D50 tristimulus value

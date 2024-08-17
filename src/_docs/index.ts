@@ -2,11 +2,11 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-08-15
+ * @version 2024-08-17
  */
 
 import 'klales/klales.min.css';
-import { Color, ColorSpace, Munsell, RGB, LRGB } from '../iroay.ts';
+import { Color, ColorSpace, Munsell } from './../../iroay.ts';
 
 type Triplet = [number, number, number];
 
