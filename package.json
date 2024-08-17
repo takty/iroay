@@ -1,11 +1,11 @@
 {
-	"name": "colorjst",
+	"name": "iroay",
 	"version": "1.0.0",
 	"description": "Color Library",
 	"license": "MIT",
 	"author": "Takuto Yanagida",
 	"type": "module",
-	"homepage": "https://github.com/takty/colorjst#readme",
+	"homepage": "https://github.com/takty/iroay#readme",
 	"keywords": [
 		"js",
 		"css",
@@ -14,10 +14,10 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/takty/colorjst.git"
+		"url": "git+https://github.com/takty/iroay.git"
 	},
 	"bugs": {
-		"url": "https://github.com/takty/colorjst/issues"
+		"url": "https://github.com/takty/iroay/issues"
 	},
 	"browserslist": [
 		"> 1%",

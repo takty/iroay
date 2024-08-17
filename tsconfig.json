@@ -24,6 +24,6 @@
 		"removeComments": true,
 	},
 	"files": [
-		"src/colorjst.ts"
+		"src/iroay.ts"
 	]
 }

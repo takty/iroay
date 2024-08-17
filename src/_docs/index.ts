@@ -6,7 +6,7 @@
  */
 
 import 'klales/klales.min.css';
-import { Color, ColorSpace, Munsell, RGB, LRGB } from '../colorjst.ts';
+import { Color, ColorSpace, Munsell, RGB, LRGB } from '../iroay.ts';
 
 type Triplet = [number, number, number];
 
