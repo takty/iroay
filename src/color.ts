@@ -2,24 +2,24 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-08-17
+ * @version 2024-08-18
  */
 
 import { Triplet } from './type';
-import { Category } from './eval/category';
-import { Conspicuity } from './eval/conspicuity';
-import { Difference } from './eval/difference';
-import { ColorVisionSimulation } from './sim/color-vision';
+import * as Category from './eval/category';
+import * as Conspicuity from './eval/conspicuity';
+import * as Difference from './eval/difference';
+import * as ColorVisionSimulation from './sim/color-vision';
 
-import { RGB } from './cs/rgb';
-import { YIQ } from './cs/yiq';
-import { LRGB } from './cs/lrgb';
-import { Yxy } from './cs/yxy';
-import { Lab } from './cs/lab';
-import { LCh } from './cs/lch';
-import { LMS } from './cs/lms';
-import { Munsell } from './cs/munsell';
-import { PCCS } from './cs/pccs';
+import * as RGB from './cs/rgb';
+import * as YIQ from './cs/yiq';
+import * as LRGB from './cs/lrgb';
+import * as Yxy from './cs/yxy';
+import * as Lab from './cs/lab';
+import * as LCh from './cs/lch';
+import * as LMS from './cs/lms';
+import * as Munsell from './cs/munsell';
+import * as PCCS from './cs/pccs';
 
 export enum ColorSpace {
 	RGB,
@@ -316,7 +316,7 @@ export class Color {
 
 
 	public toProtanopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
-		ColorVisionSimulation.doCorrection = doCorrection;
+		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
 				const lms0 = ColorVisionSimulation.lmsToProtanopia(this.asLMS());
@@ -329,7 +329,7 @@ export class Color {
 	}
 
 	public toDeuteranopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
-		ColorVisionSimulation.doCorrection = doCorrection;
+		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
 				const lms0 = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS());

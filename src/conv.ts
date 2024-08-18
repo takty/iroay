@@ -2,21 +2,21 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-08-17
+ * @version 2024-08-18
  */
 
 import { Triplet } from './type';
 
-import { Lab } from './cs/lab';
-import { LCh } from './cs/lch';
-import { LMS } from './cs/lms';
-import { LRGB } from './cs/lrgb';
-import { RGB } from './cs/rgb';
-import { XYZ } from './cs/xyz';
-import { YIQ } from './cs/yiq';
-import { Yxy } from './cs/yxy';
-import { Munsell } from './cs/munsell';
-import { PCCS } from './cs/pccs';
+import * as RGB from './cs/rgb';
+import * as YIQ from './cs/yiq';
+import * as LRGB from './cs/lrgb';
+import * as XYZ from './cs/xyz';
+import * as Yxy from './cs/yxy';
+import * as Lab from './cs/lab';
+import * as LCh from './cs/lch';
+import * as LMS from './cs/lms';
+import * as Munsell from './cs/munsell';
+import * as PCCS from './cs/pccs';
 
 /**
  * Convert a color from one color space to another.
