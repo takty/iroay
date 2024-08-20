@@ -4,23 +4,19 @@
  * IEICE technical report 109(249), 43-48, 2009-10-15.
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-08-19
  */
 
 import { Triplet } from '../type';
-import { PI2 } from '../const';
+import { PI2, atan2rad, mag } from '../math';
 
-function _atan2rad(as: number, bs: number): number {
-	return Math.atan2(bs, as) + (bs < 0 ? PI2 : 0);
-}
-
-function _hueDiff(a: number, b: number): number {
-	const p = _atan2rad(a, b);
+function hueDiff(a: number, b: number): number {
+	const p = atan2rad(b, a);
 	return 4.5 * Math.cos(PI2 * (p - 28.8) / 50.9) + 4.4;
 }
 
-function _chromaRatio(a: number, b: number): number {
-	const c = Math.sqrt(a * a + b * b);
+function chromaRatio(a: number, b: number): number {
+	const c = mag(a, b);
 	return 0.83 * Math.exp(-c / 13.3) - (1 / 8) * Math.exp(-(c - 50) * (c - 50) / (3000 * 3000)) + 1;
 }
 
@@ -35,8 +31,8 @@ function _chromaRatio(a: number, b: number): number {
  * @return {Triplet} CIELAB color in color vision of elderly people.
  */
 export function labToElderlyAB([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const rad = _atan2rad(as, bs) + _hueDiff(as, bs);
-	const c = Math.sqrt(as * as + bs * bs) * _chromaRatio(as, bs);
+	const rad = atan2rad(bs, as) + hueDiff(as, bs);
+	const c = mag(as, bs) * chromaRatio(as, bs);
 	dest[0] = ls;
 	dest[1] = c * Math.cos(rad);
 	dest[2] = c * Math.sin(rad);
@@ -50,8 +46,8 @@ export function labToElderlyAB([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0])
  * @return {Triplet} CIELAB color in color vision of young people.
  */
 export function labToYoungAB([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const rad = _atan2rad(as, bs) - _hueDiff(as, bs);
-	const c = Math.sqrt(as * as + bs * bs) / _chromaRatio(as, bs);
+	const rad = atan2rad(bs, as) - hueDiff(as, bs);
+	const c = mag(as, bs) / chromaRatio(as, bs);
 	dest[0] = ls;
 	dest[1] = c * Math.cos(rad);
 	dest[2] = c * Math.sin(rad);

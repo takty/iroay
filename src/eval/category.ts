@@ -2,11 +2,12 @@
  * Determination of the basic categorical color.
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-08-19
  */
 
 import { Triplet } from './../type';
 import { CC_TABLE } from './../table/cc-min';
+import { mag } from '../math';
 
 /**
  * Basic Categorical Colors
@@ -47,7 +48,7 @@ export function categoryOfYxy([y, sx, sy]: Triplet): string {
 		if (t[i] === '.') continue;
 		const x = (i % 18) * 25 + 150;
 		const y = ((i / 18) | 0) * 25 + 75;
-		const d = Math.sqrt((sx - x) * (sx - x) + (sy - y) * (sy - y));
+		const d = mag(sx - x, sy - y);
 		if (d < dis) {
 			dis = d;
 			cc = t[i];

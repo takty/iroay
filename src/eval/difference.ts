@@ -2,22 +2,24 @@
  * Calculation of the color difference.
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-08-19
  */
 
 import { Triplet } from '../type';
-import { DEG_RAD, RAD_DEG } from '../const';
+import { DEG_RAD, RAD_DEG, atan2rad, mag } from '../math';
 
 /**
  * They are sensual expressions of color difference by NBS unit.
  * The values represent the lower limit of each range.
  */
-export const NBS_TRACE       = 0.0;
-export const NBS_SLIGHT      = 0.5;
-export const NBS_NOTICEABLE  = 1.5;
-export const NBS_APPRECIABLE = 3.0;
-export const NBS_MUCH        = 6.0;
-export const NBS_VERY_MUCH   = 12.0;
+export enum NBS {
+	TRACE       = 0.0,
+	SLIGHT      = 0.5,
+	NOTICEABLE  = 1.5,
+	APPRECIABLE = 3.0,
+	MUCH        = 6.0,
+	VERY_MUCH   = 12.0,
+};
 
 /**
  * Dental Materials J. 27(1), 139-144 (2008)
@@ -45,19 +47,19 @@ export function CIE76([ls1, as1, bs1]: Triplet, [ls2, as2, bs2]: Triplet): numbe
 }
 
 /**
-* Color difference calculation method by CIEDE2000
-* Reference: http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
-* http://d.hatena.ne.jp/yoneh/20071227/1198758604
-	* @param {Triplet} lab1 L*, a*, b* of CIELAB color 1
-	* @param {Triplet} lab2 L*, a*, b* of CIELAB color 2
-	* @return {number} Color difference
-*/
+ * Color difference calculation method by CIEDE2000
+ * Reference: http://www.ece.rochester.edu/~gsharma/ciede2000/ciede2000noteCRNA.pdf
+ * http://d.hatena.ne.jp/yoneh/20071227/1198758604
+ * @param {Triplet} lab1 L*, a*, b* of CIELAB color 1
+ * @param {Triplet} lab2 L*, a*, b* of CIELAB color 2
+ * @return {number} Color difference
+ */
 export function CIEDE2000([ls1, as1, bs1]: Triplet, [ls2, as2, bs2]: Triplet): number {
-	const C1 = Math.sqrt(as1 * as1 + bs1 * bs1), C2 = Math.sqrt(as2 * as2 + bs2 * bs2);
+	const C1 = mag(as1, bs1), C2 = mag(as2, bs2);
 	const Cb = (C1 + C2) / 2;
 	const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + Math.pow(25, 7))));
 	const ap1 = (1 + G) * as1, ap2 = (1 + G) * as2;
-	const Cp1 = Math.sqrt(ap1 * ap1 + bs1 * bs1), Cp2 = Math.sqrt(ap2 * ap2 + bs2 * bs2);
+	const Cp1 = mag(ap1, bs1), Cp2 = mag(ap2, bs2);
 	const hp1 = (bs1 === 0 && ap1 === 0) ? 0 : atan(bs1, ap1), hp2 = (bs2 === 0 && ap2 === 0) ? 0 : atan(bs2, ap2);
 
 	const DLp = ls2 - ls1;
@@ -100,6 +102,6 @@ export function CIEDE2000([ls1, as1, bs1]: Triplet, [ls2, as2, bs2]: Triplet): n
 }
 
 function sq(v: number) { return v * v; }
-function atan(y: number, x: number) { const v = Math.atan2(y, x) * RAD_DEG; return (v < 0) ? (v + 360) : v; }
+function atan(y: number, x: number) { return atan2rad(y, x) * RAD_DEG; }
 function sin(deg: number) { return Math.sin(deg * DEG_RAD); }
 function cos(deg: number) { return Math.cos(deg * DEG_RAD); }

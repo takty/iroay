@@ -6,42 +6,43 @@
  * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-08-19
  */
 
 import { TBL_SRC_MIN, TBL_V } from '../table/hc2xy-all-min';
 import { Tree } from '../lib/kdt';
 import { Pair, Triplet } from '../type';
 
-import * as XYZ from './xyz';
-import * as Yxy from './yxy';
+import { toIlluminantC as xyz2c,  fromIlluminantC as c2xyz } from './xyz';
+import { fromXYZ as xyz2yxy, toXYZ as yxy2xyz }  from './yxy';
+
 export { toMunsell as fromPCCS, fromMunsell as toPCCS } from './pccs';
 
-function _eq0(x: number): boolean {
+function eq0(x: number): boolean {
 	return Math.abs(x) < EP;
 }
 
-function _eq(x0: number, x1: number): boolean {
+function eq(x0: number, x1: number): boolean {
 	return Math.abs(x0 - x1) < EP;
 }
 
-function _div(a: Pair, b: Pair, r: number): Pair {
+function div(a: Pair, b: Pair, r: number): Pair {
 	return [(b[0] - a[0]) * r + a[0], (b[1] - a[1]) * r + a[1]];
 }
 
-function _cross(ax: number, ay: number, bx: number, by: number): number {
+function cross(ax: number, ay: number, bx: number, by: number): number {
 	return ax * by - ay * bx;
 }
 
 // Whether a point (x, y) exists within the interior (including the boundary) of the clockwise triangle abc
 // in the mathematical coordinate system (positive on the y axis is upward)
-function _inside(p: Pair, a: Pair, b: Pair, c: Pair) {
+function inside(p: Pair, a: Pair, b: Pair, c: Pair) {
 	// If x, y are on the right side of ab, the point is outside the triangle
-	if (_cross(p[0] - a[0], p[1] - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
+	if (cross(p[0] - a[0], p[1] - a[1], b[0] - a[0], b[1] - a[1]) < 0) return false;
 	// If x, y are on the right side of bc, the point is outside the triangle
-	if (_cross(p[0] - b[0], p[1] - b[1], c[0] - b[0], c[1] - b[1]) < 0) return false;
+	if (cross(p[0] - b[0], p[1] - b[1], c[0] - b[0], c[1] - b[1]) < 0) return false;
 	// If x, y are on the right side of ca, the point is outside the triangle
-	if (_cross(p[0] - c[0], p[1] - c[1], a[0] - c[0], a[1] - c[1]) < 0) return false;
+	if (cross(p[0] - c[0], p[1] - c[1], a[0] - c[0], a[1] - c[1]) < 0) return false;
 	return true;
 }
 
@@ -79,8 +80,8 @@ function initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
 
 		for (const cs of tbl_src_min[vi]) {
 			const hi = cs.shift() as number;
-			_integrate(cs);
-			_integrate(cs);
+			integrate(cs);
+			integrate(cs);
 
 			for (let i = 0; i < cs.length; i += 2) {
 				const ci = i / 2 + 1;
@@ -95,7 +96,7 @@ function initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
 		TBL_TREES[vi] = new Tree(data);
 	}
 
-	function _integrate(cs: number[]) {
+	function integrate(cs: number[]) {
 		let x_ = 0;
 		let y_ = 0;
 
@@ -108,20 +109,20 @@ function initTable(tbl_v: number[], tbl_src_min: number[][][]): void {
 	}
 }
 
-function _getXy(vi: number, ht: number, c: number): Pair|null {
+function getXy(vi: number, ht: number, c: number): Pair|null {
 	if (c === 0) return ILLUMINANT_C;
 	if (1000 <= ht) ht -= 1000;
 	return TBL[vi][ht / 25][c / 2];
 }
 
-function _getMaxC(vi: number, ht: number): number {
+function getMaxC(vi: number, ht: number): number {
 	if (1000 <= ht) ht -= 1000;
 	if (ht < 0) ht += 1000;
 	return TBL_MAX_C[vi][ht / 25];
 }
 
 // Find Y of XYZ (C) from Munsell's V (JIS).
-function _v2y(v: number) {
+function v2y(v: number) {
 	if (v <= 1) return v * 0.0121;
 	const v2 = v * v;
 	const v3 = v2 * v;
@@ -130,11 +131,11 @@ function _v2y(v: number) {
 }
 
 // Munsell's V is obtained from Y of XYZ (C) (JIS, Newton's method).
-function _y2v(y: number) {
+function y2v(y: number) {
 	if (y <= 0.0121) return y / 0.0121;
 	let v = 10;
 	for (let i = 0; i < 1000; ++i) {  // Max iteration is 1000.
-		const f = _v2y(v) - y;
+		const f = v2y(v) - y;
 		const fp =  (v <= 1) ? 0.0121 : ((3 * 0.0467 * (v * v) + 2 * 0.5602 * v - 0.1753) / 100);
 		if (Math.abs(f) < 0.0001) break;
 		v = v - f / fp;
@@ -147,28 +148,28 @@ function _y2v(y: number) {
 
 
 // Find the Munsell value from xyY (standard illuminant C).
-function _yxy2mun([Y, x, y]: Triplet): Triplet {
-	const v = _y2v(Y);  // Find Munsell lightness
+function yxy2mun([Y, x, y]: Triplet): Triplet {
+	const v = y2v(Y);  // Find Munsell lightness
 	isSaturated = false;
 
 	// When the lightness is maximum 10
-	if (_eq(v, TBL_V.at(-1) as number)) {
-		const [h, c] = _scanHC(x, y, TBL_V.length - 1);
+	if (eq(v, TBL_V.at(-1) as number)) {
+		const [h, c] = scanHC(x, y, TBL_V.length - 1);
 		return [h, v, c];
 	}
 	// When the lightness is 0 or the lightness is larger than the maximum 10, or when it is an achromatic color (standard illuminant C)
-	if (_eq0(v) || TBL_V.at(-1) as number < v || (_eq(x, ILLUMINANT_C[0]) && _eq(y, ILLUMINANT_C[1]))) {
+	if (eq0(v) || TBL_V.at(-1) as number < v || (eq(x, ILLUMINANT_C[0]) && eq(y, ILLUMINANT_C[1]))) {
 		return [0, v, 0];
 	}
 	// Obtain lower side
 	let vi_l = -1;
 	while (TBL_V[vi_l + 1] <= v) ++vi_l;
 	let hc_l = [0, 0] as Pair;  // Hue and chroma of the lower side
-	if (vi_l !== -1) hc_l = _scanHC(x, y, vi_l);
+	if (vi_l !== -1) hc_l = scanHC(x, y, vi_l);
 
 	// Obtain upper side
 	const vi_u = vi_l + 1;
-	const hc_u = _scanHC(x, y, vi_u);
+	const hc_u = scanHC(x, y, vi_u);
 
 	// When the lightness on the lower side is the minimum 0, the hue is matched with the upper side, and the chroma is set to 0
 	if (vi_l === -1) {
@@ -179,13 +180,13 @@ function _yxy2mun([Y, x, y]: Triplet): Triplet {
 	const v_h = TBL_V[vi_u];
 	const r = (v - v_l) / (v_h - v_l);
 
-	const [h, c] = _calcIdpHc(hc_l, hc_u, r);
+	const [h, c] = calcIdpHc(hc_l, hc_u, r);
 	return [h, v, c];
 }
 
 // Acquires the hue and chroma for the chromaticity coordinates (x, y) on the surface of the given lightness index.
 // If not included, -1 is returned.
-function _scanHC(x: number, y: number, vi: number): Pair {
+function scanHC(x: number, y: number, vi: number): Pair {
 	const p = [x, y] as Pair;
 	const [[q, ],] = TBL_TREES[vi].neighbors(p, 1);
 	let ht0 = q[0] - 125;
@@ -199,7 +200,7 @@ function _scanHC(x: number, y: number, vi: number): Pair {
 	for (let ht_l = ht0; ht_l <= ht1; ht_l += 25) {  // h 0-975 step 25;
 		inner:
 		for (let c_l = 0; c_l <= 50; c_l += 2) {  // c 0-50 step 2;
-			const [hc_r, state] = _scanOneHC(p, vi, ht_l, c_l);
+			const [hc_r, state] = scanOneHC(p, vi, ht_l, c_l);
 			if (state === 'h') break inner;
 			if (hc_r) {
 				return [
@@ -214,18 +215,18 @@ function _scanHC(x: number, y: number, vi: number): Pair {
 		isSaturated = true;
 		let [[[ht0, c0], d0], [[ht1, c1], d1]] = ps;
 		const r = d0 / (d0 + d1);
-		return _calcIdpHc([ht0 / 10, c0], [ht1 / 10, c1], r);
+		return calcIdpHc([ht0 / 10, c0], [ht1 / 10, c1], r);
 	}
 	return [0, 0];
 }
 
-function _scanOneHC(p: Pair, vi: number, ht_l: number, c_l: number): [Pair | null, string] {
+function scanOneHC(p: Pair, vi: number, ht_l: number, c_l: number): [Pair | null, string] {
 	let hc_r: Pair | null = null;
 
-	const wa = _getXy(vi, ht_l, c_l);
-	const wb = _getXy(vi, ht_l + 25, c_l);
-	let wc = _getXy(vi, ht_l + 25, c_l + 2);
-	let wd = _getXy(vi, ht_l, c_l + 2);
+	const wa = getXy(vi, ht_l, c_l);
+	const wb = getXy(vi, ht_l + 25, c_l);
+	let wc = getXy(vi, ht_l + 25, c_l + 2);
+	let wd = getXy(vi, ht_l, c_l + 2);
 
 	if (wa === null && wb === null) return [null, 'h'];
 
@@ -239,11 +240,11 @@ function _scanOneHC(p: Pair, vi: number, ht_l: number, c_l: number): [Pair | nul
 	if (wa === null || wb === null || wc === null || wd === null) return [null, ''];
 
 	if (c_l === 0) {
-		if (_inside(p, wa, wc, wd)) {
+		if (inside(p, wa, wc, wd)) {
 			hc_r = interpolationR(p, wa, wd, wb, wc);
 		}
 	} else {
-		if (_inside(p, wa, wc, wd) || _inside(p, wa, wb, wc)) {
+		if (inside(p, wa, wc, wd) || inside(p, wa, wb, wc)) {
 			hc_r = interpolationR(p, wa, wd, wb, wc);
 		}
 	}
@@ -265,8 +266,8 @@ function _scanOneHC(p: Pair, vi: number, ht_l: number, c_l: number): [Pair | nul
 		const eb = (p[0] - wa[0]) * (wa[1] + wc[1] - wb[1] - wd[1]) + (wa[0] - wd[0]) * (wb[1] - wa[1]) - (wa[0] + wc[0] - wb[0] - wd[0]) * (p[1] - wa[1]) - (wb[0] - wa[0]) * (wa[1] - wd[1]);
 		const ec = (p[0] - wa[0]) * (wb[1] - wa[1]) - (p[1] - wa[1]) * (wb[0] - wa[0]);
 
-		if (_eq0(ea)) {
-			if (!_eq0(eb)) v = -ec / eb;
+		if (eq0(ea)) {
+			if (!eq0(eb)) v = -ec / eb;
 		} else {
 			const rt = Math.sqrt(eb * eb - 4 * ea * ec);
 			const v1 = (-eb + rt) / (2 * ea), v2 = (-eb - rt) / (2 * ea);
@@ -285,8 +286,8 @@ function _scanOneHC(p: Pair, vi: number, ht_l: number, c_l: number): [Pair | nul
 		const deX = (wa[0] - wd[0] - wb[0] + wc[0]) * v - wa[0] + wb[0];
 		const deY = (wa[1] - wd[1] - wb[1] + wc[1]) * v - wa[1] + wb[1];
 
-		if (!_eq0(deX)) h1 = ((wa[0] - wd[0]) * v + p[0] - wa[0]) / deX;
-		if (!_eq0(deY)) h2 = ((wa[1] - wd[1]) * v + p[1] - wa[1]) / deY;
+		if (!eq0(deX)) h1 = ((wa[0] - wd[0]) * v + p[0] - wa[0]) / deX;
+		if (!eq0(deY)) h2 = ((wa[1] - wd[1]) * v + p[1] - wa[1]) / deY;
 
 		if      (0 <= h1 && h1 <= 1) h = h1;
 		else if (0 <= h2 && h2 <= 1) h = h2;
@@ -297,7 +298,7 @@ function _scanOneHC(p: Pair, vi: number, ht_l: number, c_l: number): [Pair | nul
 	}
 }
 
-function _calcIdpHc([h0, c0]: Pair, [h1, c1]: Pair, r: number): Pair {
+function calcIdpHc([h0, c0]: Pair, [h1, c1]: Pair, r: number): Pair {
 	if (Math.abs(h1 - h0) > MAX_HUE * 0.5) {
 		if (h0 < h1) h0 += MAX_HUE;
 		else if (h0 > h1) h1 += MAX_HUE;
@@ -314,20 +315,20 @@ function _calcIdpHc([h0, c0]: Pair, [h1, c1]: Pair, r: number): Pair {
 // -------------------------------------------------------------------------
 
 
-function _mun2yxy([h, v, c]: Triplet): Triplet {
+function mun2yxy([h, v, c]: Triplet): Triplet {
 	if (MAX_HUE <= h) h -= MAX_HUE;
-	const Y = _v2y(v);
+	const Y = v2y(v);
 	isSaturated = false;
 
 	// When the lightness is 0 or achromatic (check this first)
-	if (_eq0(v) || h < 0 || c < MONO_LIMIT_C) {
-		isSaturated = _eq0(v) && 0 < c;
+	if (eq0(v) || h < 0 || c < MONO_LIMIT_C) {
+		isSaturated = eq0(v) && 0 < c;
 		return [Y, ...ILLUMINANT_C];
 	}
 	// When the lightness is the maximum value 10 or more
 	const v_max = TBL_V.at(-1) as number;
 	if (v_max <= v) {
-		const xy = _scanXY(h, c, TBL_V.length - 1);
+		const xy = scanXY(h, c, TBL_V.length - 1);
 		isSaturated = (v_max < v);
 		return [Y, xy[0], xy[1]];
 	}
@@ -338,13 +339,13 @@ function _mun2yxy([h, v, c]: Triplet): Triplet {
 	// Obtain lower side
 	let xy_l: [number, number, boolean];
 	if (vi_l !== -1) {
-		xy_l = _scanXY(h, c, vi_l);
+		xy_l = scanXY(h, c, vi_l);
 	} else {  // When the lightness of the lower side is the minimum 0, use standard illuminant.
 		xy_l = [...ILLUMINANT_C, false];
 		isSaturated = true;
 	}
 	// Obtain upper side
-	const xy_u = _scanXY(h, c, vi_u);
+	const xy_u = scanXY(h, c, vi_u);
 
 	const v_l = ((vi_l === -1) ? 0 : TBL_V[vi_l]);
 	const v_u = TBL_V[vi_u];
@@ -359,13 +360,13 @@ function _mun2yxy([h, v, c]: Triplet): Triplet {
 			if (!xy_u[2]) isSaturated = true;
 		}
 	}
-	const xy = _div(xy_l as unknown as Pair, xy_u as unknown as Pair, r);
+	const xy = div(xy_l as unknown as Pair, xy_u as unknown as Pair, r);
 	return [Y, ...xy];
 }
 
 // Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
 // Return false if it is out of the range of the table.
-function _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
+function scanXY(h: number, c: number, vi: number): [number, number, boolean] {
 	const ht = h * 10;
 	const p = [ht, c] as Pair;
 
@@ -378,17 +379,17 @@ function _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
 	let maxC_hu = 0;
 
 	for (; maxC_hl === 0; ht_l -= 25) {
-		maxC_hl = _getMaxC(vi, ht_l);
+		maxC_hl = getMaxC(vi, ht_l);
 		if (maxC_hl !== 0) break;
 	}
 	for (; maxC_hu === 0; ht_u += 25) {
-		maxC_hu = _getMaxC(vi, ht_u);
+		maxC_hu = getMaxC(vi, ht_u);
 		if (maxC_hu !== 0) break;
 	}
 
 	if (c < maxC_hl && maxC_hu <= c) {
 		for (let c_c = maxC_hu; c_c <= maxC_hl - 2; c_c += 2) {
-			if (_inside(p, [ht_u, maxC_hu], [ht_l, c_c], [ht_l, c_c + 2])) {
+			if (inside(p, [ht_u, maxC_hu], [ht_l, c_c], [ht_l, c_c + 2])) {
 				const xy = interpolate3(vi, p, [ht_u, maxC_hu], [ht_l, c_c], [ht_l, c_c + 2]);
 				return [...xy, true];
 			}
@@ -396,7 +397,7 @@ function _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
 	}
 	if (maxC_hl <= c && c < maxC_hu) {
 		for (let c_c = maxC_hl; c_c <= maxC_hu - 2; c_c += 2) {
-			if (_inside(p, [ht_l, maxC_hl], [ht_u, c_c + 2], [ht_u, c_c])) {
+			if (inside(p, [ht_l, maxC_hl], [ht_u, c_c + 2], [ht_u, c_c])) {
 				const xy = interpolate3(vi, p, [ht_l, maxC_hl], [ht_u, c_c + 2], [ht_u, c_c]);
 				return [...xy, true];
 			}
@@ -412,10 +413,10 @@ function _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
 	function interpolate2(vi: number, p: Pair, a: Pair, b: Pair): Pair {
 		const rx = (p[0] - a[0]) / (b[0] - a[0]);
 
-		const wa = _getXy(vi, ...a) as Pair;
-		const wb = _getXy(vi, ...b) as Pair;
+		const wa = getXy(vi, ...a) as Pair;
+		const wb = getXy(vi, ...b) as Pair;
 
-		return _div(wa, wb, rx);
+		return div(wa, wb, rx);
 	}
 
 	function interpolate3(vi: number, p: Pair, a: Pair, b: Pair, c: Pair): Pair {
@@ -425,9 +426,9 @@ function _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
 		const w2 = ((c[1] - a[1]) * (p[0] - c[0]) + (a[0] - c[0]) * (p[1] - c[1])) / f;
 		const w3 = 1 - w1 - w2;
 
-		const wa = _getXy(vi, ...a) as Pair;
-		const wb = _getXy(vi, ...b) as Pair;
-		const wc = _getXy(vi, ...c) as Pair;
+		const wa = getXy(vi, ...a) as Pair;
+		const wb = getXy(vi, ...b) as Pair;
+		const wc = getXy(vi, ...c) as Pair;
 
 		return [
 			wa[0] * w1 + wb[0] * w2 + wc[0] * w3,
@@ -441,16 +442,16 @@ function _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
 		const rx = (p[0] - a[0]) / (b[0] - a[0]);
 		const ry = (p[1] - a[1]) / (d[1] - a[1]);
 
-		const wa = _getXy(vi, ...a) as Pair;
-		const wb = _getXy(vi, ...b) as Pair;
-		const wc = _getXy(vi, ...c) as Pair;
-		const wd = _getXy(vi, ...d) as Pair;
+		const wa = getXy(vi, ...a) as Pair;
+		const wb = getXy(vi, ...b) as Pair;
+		const wc = getXy(vi, ...c) as Pair;
+		const wd = getXy(vi, ...d) as Pair;
 
 		// Checking (wa === wb) in case both are ILLUMINANT_C.
-		const wab = (wa === wb) ? wa : _div(wa, wb, rx);
-		const wdc = _div(wd, wc, rx);
+		const wab = (wa === wb) ? wa : div(wa, wb, rx);
+		const wdc = div(wd, wc, rx);
 
-		return _div(wab, wdc, ry);
+		return div(wab, wdc, ry);
 	}
 }
 
@@ -465,7 +466,7 @@ function _scanXY(h: number, c: number, vi: number): [number, number, boolean] {
  * @return {Triplet} Munsell color.
  */
 export function fromXYZ(xyz: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const r = _yxy2mun(Yxy.fromXYZ(XYZ.toIlluminantC(xyz, dest), dest));
+	const r = yxy2mun(xyz2yxy(xyz2c(xyz, dest), dest));
 	dest[0] = r[0];
 	dest[1] = r[1];
 	dest[2] = r[2];
@@ -479,7 +480,7 @@ export function fromXYZ(xyz: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
  * @return {Triplet} XYZ color.
  */
 export function toXYZ([h, v, c]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	return XYZ.fromIlluminantC(Yxy.toXYZ(_mun2yxy([h, v, c]), dest), dest);
+	return c2xyz(yxy2xyz(mun2yxy([h, v, c]), dest), dest);
 }
 
 
@@ -513,7 +514,7 @@ export function hueNameToHueValue(hueName: string): number {
  * @return {string} Name-based hue expression
  */
 export function hueValueToHueName(hue: number, chroma: number): string {
-	if (hue === -1 || _eq0(chroma)) return 'N';
+	if (hue === -1 || eq0(chroma)) return 'N';
 	if (hue <= 0) hue += MAX_HUE;
 	let h10 = (0 | hue * 10) % 100;
 	let c = 0 | (hue / 10);

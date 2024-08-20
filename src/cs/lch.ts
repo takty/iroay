@@ -2,11 +2,11 @@
  * This class converts the LCh color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-08-19
  */
 
 import { Triplet } from '../type';
-import { DEG_RAD, RAD_DEG, PI2 } from '../const';
+import { DEG_RAD, RAD_DEG, atan2rad, mag } from '../math';
 
 
 // Lab ---------------------------------------------------------------------
@@ -19,9 +19,9 @@ import { DEG_RAD, RAD_DEG, PI2 } from '../const';
  * @return {Triplet} LCh color.
  */
 export function fromLab([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const rad = Math.atan2(bs, as) + (bs < 0 ? PI2 : 0);
+	const rad = atan2rad(bs, as);
 	dest[0] = ls;
-	dest[1] = Math.sqrt(as * as + bs * bs);
+	dest[1] = mag(as, bs);
 	dest[2] = rad * RAD_DEG;
 	return dest;
 }

@@ -2,18 +2,18 @@
  * Converter of original hc2xy data for minimizing
  *
  * @author Takuto Yanagida
- * @version 2024-08-01
+ * @version 2024-08-19
  */
 
-const _HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
-const _MAX_HUE = 100.0;
+const HUE_NAMES = ['R', 'YR', 'Y', 'GY', 'G', 'BG', 'B', 'PB', 'P', 'RP'];  // 1R = 1, 9RP = 99, 10RP = 0
+const MAX_HUE = 100.0;
 
-const _TBL_V_REAL = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
-const _TBL_V_ALL  = [0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+const TBL_V_REAL = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+const TBL_V_ALL  = [0.2, 0.4, 0.6, 0.8, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
 
 Munsell = {};
-Munsell._TBL_V = _TBL_V_REAL;
-Munsell._TBL_SRC = new Array(Munsell._TBL_V.length);
+TBL_V = TBL_V_REAL;
+TBL_SRC = new Array(TBL_V.length);
 
 // require('./orig/_hc2xy-all.js');
 require('./orig/_hc2xy-real.js');
@@ -25,9 +25,9 @@ convert();
 
 function convert() {
 	const vs_v = [];
-	for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
+	for (let vi = 0; vi < TBL_V.length; vi += 1) {
 		const vs = {};
-		for (const cs of Munsell._TBL_SRC[vi]) {
+		for (const cs of TBL_SRC[vi]) {
 			const c0 = 0 | (hueNameToHueValue(cs[0]) * 10) / 25;
 			const c1 = cs[1] / 2;
 			const c2 = 0 | Math.round(cs[2] * 1000);
@@ -47,17 +47,17 @@ function convert() {
 		}
 		vs_v.push('\t[\n' + vs_c.join(',\n') + '\n\t]');
 	}
-	console.log('Munsell._TBL_SRC_MIN = [\n' + vs_v.join(',\n') + '\n];');
+	console.log('TBL_SRC_MIN = [\n' + vs_v.join(',\n') + '\n];');
 }
 
 function invert() {
-	for (let vi = 0; vi < Munsell._TBL_V.length; vi += 1) {
+	for (let vi = 0; vi < TBL_V.length; vi += 1) {
 		const ls = [];
-		for (const vs of Munsell._TBL_SRC_MIN[vi]) {
+		for (const vs of TBL_SRC_MIN[vi]) {
 			const v0 = vs.shift();
 			const h = hueValueToHueName(v0 * 25 / 10);
-			_integrate(vs);
-			_integrate(vs);
+			integrate(vs);
+			integrate(vs);
 			for (let i = 0; i < vs.length; i += 2) {
 				const c = (i / 2 + 1) * 2;
 				const x = vs[i + 0] / 1000;
@@ -66,7 +66,7 @@ function invert() {
 				ls.push(`\t['${h}',${c},${x},${y}]`);
 			}
 		}
-		console.log(`Munsell._TBL_SRC[${vi}] = [\n` + ls.join(',\n') + '\n];');
+		console.log(`TBL_SRC[${vi}] = [\n` + ls.join(',\n') + '\n];');
 	}
 }
 
@@ -78,21 +78,21 @@ function hueNameToHueValue(hueName) {
 	const n = hueName.substring(hueName.length - len);
 
 	let hv = parseFloat(hueName.substring(0, hueName.length - len));
-	hv += _HUE_NAMES.indexOf(n) * 10;
-	if (_MAX_HUE <= hv) hv -= _MAX_HUE;
+	hv += HUE_NAMES.indexOf(n) * 10;
+	if (MAX_HUE <= hv) hv -= MAX_HUE;
 	return hv;
 }
 
 function hueValueToHueName(hue) {
 	if (hue === -1) return 'N';
-	if (hue <= 0) hue += _MAX_HUE;
+	if (hue <= 0) hue += MAX_HUE;
 	let h10 = (0 | hue * 10) % 100;
 	let c = 0 | (hue / 10);
 	if (h10 === 0) {
 		h10 = 100;
 		c -= 1;
 	}
-	return (Math.round(h10 * 10) / 100) + _HUE_NAMES[c];
+	return (Math.round(h10 * 10) / 100) + HUE_NAMES[c];
 }
 
 function differentiate(cs) {
@@ -106,7 +106,7 @@ function differentiate(cs) {
 	}
 }
 
-function _integrate(cs) {
+function integrate(cs) {
 	let c2_ = 0, c3_ = 0;
 	for (let i = 0; i < cs.length; i += 2) {
 		const c2 = cs[i], c3 = cs[i + 1];

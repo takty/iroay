@@ -6,11 +6,11 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-08-19
  */
 
 import { Triplet, Quartet } from '../type';
-import { PI2 } from '../const';
+import { PI2 } from '../math';
 
 import * as Munsell from './munsell';
 
@@ -19,14 +19,14 @@ export const MIN_HUE: number = 0;
 export const MAX_HUE: number = 24;
 export const MONO_LIMIT_S: number = 0.01;
 
-const _HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
-const _TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
-const _MUNSELL_H = [
+const HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
+const TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
+const MUNSELL_H = [
 	96,  // Dummy
 	0,  4,  7, 10, 14, 18, 22, 25, 28, 33, 38, 43,
 	49, 55, 60, 65, 70, 73, 76, 79, 83, 87, 91, 96, 100
 ];
-const _COEFFICIENTS: Triplet[] = [
+const COEFFICIENTS: Triplet[] = [
 	[0.853642,  0.084379, -0.002798],  // 0 === 24
 	[1.042805,  0.046437,  0.001607],  // 2
 	[1.079160,  0.025470,  0.003052],  // 4
@@ -50,20 +50,20 @@ export const ConversionMethod = Object.freeze({
 	 * Concise conversion
 	 */
 	CONCISE: {
-		calcMunsellH: _simplyCalcMunsellH,
-		calcMunsellS: _simplyCalcMunsellC,
-		calcPccsH: _simplyCalcPccsH,
-		calcPccsS: _simplyCalcPccsS,
+		calcMunsellH: simplyCalcMunsellH,
+		calcMunsellS: simplyCalcMunsellC,
+		calcPccsH: simplyCalcPccsH,
+		calcPccsS: simplyCalcPccsS,
 	},
 
 	/**
 	 * Accurate conversion
 	 */
 	ACCURATE: {
-		calcMunsellH: _calcMunsellH,
-		calcMunsellC: _calcMunsellC,
-		calcPccsH: _calcPccsH,
-		calcPccsS: _calcPccsS,
+		calcMunsellH: calcMunsellH,
+		calcMunsellC: calcMunsellC,
+		calcPccsH: calcPccsH,
+		calcPccsS: calcPccsS,
 	}
 });
 
@@ -98,45 +98,45 @@ export enum Tone {
 };
 
 
-// Calculation of PCCS value (accurate) ------------------------------------
+// Calculation of PCCS value (accurate) ----------------------------------------
 
 
-function _calcPccsH(H: number): number {
+function calcPccsH(H: number): number {
 	let h1 = -1, h2 = -1;
-	for (let i = 1; i < _MUNSELL_H.length; ++i) {
-		if (_MUNSELL_H[i] <= H) h1 = i;
-		if (H < _MUNSELL_H[i]) {
+	for (let i = 1; i < MUNSELL_H.length; ++i) {
+		if (MUNSELL_H[i] <= H) h1 = i;
+		if (H < MUNSELL_H[i]) {
 			h2 = i;
 			break;
 		}
 	}
 	if (h1 === -1) console.error("h1 is -1, H = " + H);
 	if (h2 === -1) console.error("h2 is -1, H = " + H);
-	return h1 + (h2 - h1) * (H - _MUNSELL_H[h1]) / (_MUNSELL_H[h2] - _MUNSELL_H[h1]);
+	return h1 + (h2 - h1) * (H - MUNSELL_H[h1]) / (MUNSELL_H[h2] - MUNSELL_H[h1]);
 }
 
-function _calcPccsS(V: number, C: number, h: number): number {
-	const a = _calcInterpolatedCoefficients(h);
+function calcPccsS(V: number, C: number, h: number): number {
+	const a = calcInterpolatedCoefficients(h);
 	const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
 	const a0 = -C / (1 - Math.exp(-g * V));
-	return _solveEquation(_simplyCalcPccsS(V, C, h), a[3], a[2], a[1], a0);
+	return solveEquation(simplyCalcPccsS(V, C, h), a[3], a[2], a[1], a0);
 }
 
-function _calcInterpolatedCoefficients(h: number): Quartet {
+function calcInterpolatedCoefficients(h: number): Quartet {
 	if (MAX_HUE < h) h -= MAX_HUE;
 	let hf = 0 | Math.floor(h);
 	if (hf % 2 !== 0) --hf;
 	let hc = hf + 2;
 	if (MAX_HUE < hc) hc -= MAX_HUE;
 
-	const af: Triplet = _COEFFICIENTS[hf / 2], ac: Triplet = _COEFFICIENTS[hc / 2], a: Quartet = [0, 0, 0, 0];
+	const af: Triplet = COEFFICIENTS[hf / 2], ac: Triplet = COEFFICIENTS[hc / 2], a: Quartet = [0, 0, 0, 0];
 	for (let i = 0; i < 3; ++i) {
 		a[i + 1] = (h - hf) / (hc - hf) * (ac[i]- af[i]) + af[i];
 	}
 	return a;
 }
 
-function _solveEquation(x0: number, a3: number, a2: number, a1: number, a0: number): number {
+function solveEquation(x0: number, a3: number, a2: number, a1: number, a0: number): number {
 	let x = x0;
 	while (true) {
 		const y = a3 * x * x * x + a2 * x * x + a1 * x + a0;
@@ -149,34 +149,34 @@ function _solveEquation(x0: number, a3: number, a2: number, a1: number, a0: numb
 }
 
 
-// Calculation of Munsell value (accurate) ---------------------------------
+// Calculation of Munsell value (accurate) -------------------------------------
 
 
-function _calcMunsellH(h: number): number {
+function calcMunsellH(h: number): number {
 	const h1 = 0 | Math.floor(h), h2 = h1 + 1;
-	let H1 = _MUNSELL_H[h1], H2 = _MUNSELL_H[h2];
+	let H1 = MUNSELL_H[h1], H2 = MUNSELL_H[h2];
 	if (H1 > H2) H2 = 100;
 	return H1 + (H2 - H1) * (h - h1) / (h2 - h1);
 }
 
-function _calcMunsellC(h: number, l: number, s: number): number {
-	const a = _calcInterpolatedCoefficients(h);
+function calcMunsellC(h: number, l: number, s: number): number {
+	const a = calcInterpolatedCoefficients(h);
 	const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
 	return (a[3] * s * s * s + a[2] * s * s + a[1] * s) * (1 - Math.exp(-g * l));
 }
 
 
-// Calculation of PCCS value (concise) -------------------------------------
+// Calculation of PCCS value (concise) -----------------------------------------
 
 
-function _simplyCalcPccsH(H: number): number {
+function simplyCalcPccsH(H: number): number {
 	const y = H * Math.PI / 50;
 	return 24 * y / PI2 + 1.24
 			+ 0.02 * Math.cos(y) - 0.1 * Math.cos(2 * y) - 0.11  * Math.cos(3 * y)
 			+ 0.68 * Math.sin(y) - 0.3 * Math.sin(2 * y) + 0.013 * Math.sin(3 * y);
 }
 
-function _simplyCalcPccsS(V: number, C: number, h: number): number {
+function simplyCalcPccsS(V: number, C: number, h: number): number {
 	const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
 	const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
 	const e2 = 0.004, e1 = 0.077, e0 = -C / (Ct * (1 - Math.exp(-gt * V)));
@@ -184,24 +184,24 @@ function _simplyCalcPccsS(V: number, C: number, h: number): number {
 }
 
 
-// Calculation of Munsell value (concise) ----------------------------------
+// Calculation of Munsell value (concise) --------------------------------------
 
 
-function _simplyCalcMunsellH(h: number): number {
+function simplyCalcMunsellH(h: number): number {
 	const x = (h - 1) * Math.PI / 12;
 	return 100 * x / PI2 - 1
 			+ 0.12 * Math.cos(x) + 0.34 * Math.cos(2 * x) + 0.4 * Math.cos(3 * x)
 			- 2.7  * Math.sin(x) + 1.5  * Math.sin(2 * x) - 0.4 * Math.sin(3 * x);
 }
 
-function _simplyCalcMunsellC(h: number, l: number, s: number): number {
+function simplyCalcMunsellC(h: number, l: number, s: number): number {
 	const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
 	const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
 	return Ct * (0.077 * s + 0.0040 * s * s) * (1 - Math.exp(-gt * l));
 }
 
 
-// Munsell -----------------------------------------------------------------
+// Munsell ---------------------------------------------------------------------
 
 
 /**
@@ -251,7 +251,7 @@ export function toMunsell([h, l, s]: Triplet, dest: Triplet = [0, 0, 0]): Triple
 }
 
 
-// -------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 
 /**
@@ -350,8 +350,8 @@ export function toString(hls: Triplet): string {
 		let tn = Math.round(hls[0]);
 		if (tn <= 0) tn = MAX_HUE;
 		if (MAX_HUE < tn) tn -= MAX_HUE;
-		const hue = _HUE_NAMES[tn];
-		const t = _TONE_NAMES[tone(hls)];
+		const hue = HUE_NAMES[tn];
+		const t = TONE_NAMES[tone(hls)];
 
 		if (t === 'none') return `${str_h}:${hue}-${str_l}-${str_s}s`;
 		return `${t}${str_h} ${str_h}:${hue}-${str_l}-${str_s}s`;
@@ -370,7 +370,7 @@ export function toHueString([h,, s]: Triplet): string {
 		let tn = Math.round(h);
 		if (tn <= 0) tn = MAX_HUE;
 		if (MAX_HUE < tn) tn -= MAX_HUE;
-		return _HUE_NAMES[tn];
+		return HUE_NAMES[tn];
 	}
 }
 
@@ -385,6 +385,6 @@ export function toToneString(hls: Triplet): string {
 		if (hls[1] <= 1.5) return 'Bk';
 		return 'Gy';
 	} else {
-		return _TONE_NAMES[tone(hls)];
+		return TONE_NAMES[tone(hls)];
 	}
 }

@@ -3,7 +3,7 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-08-19
  */
 
 import { Triplet } from '../type';
@@ -14,7 +14,7 @@ export const INV_MAX: number = 1 / MAX;
 
 export let isSaturated: boolean = false;
 
-function _checkRange(vs: Triplet, min: number, max: number): boolean {
+function checkRange(vs: Triplet, min: number, max: number): boolean {
 	let isSaturated: boolean = false;
 	for (let i = 0; i < 3; ++i) {
 		if (vs[i] > max) { vs[i] = max; isSaturated = true; }
@@ -24,17 +24,17 @@ function _checkRange(vs: Triplet, min: number, max: number): boolean {
 }
 
 // Convert sRGB to Linear RGB (gamma correction).
-function _fn(v: number): number {
+function fn(v: number): number {
 	return (v < 0.03928) ? (v / 12.92) : Math.pow((v + 0.055) / 1.055, 2.4);
 }
 
 // Convert Linear RGB to sRGB (inverse gamma correction).
-function _ifn(v: number): number {
+function ifn(v: number): number {
 	return (v > 0.00304) ? (Math.pow(v, 1 / 2.4) * 1.055 - 0.055) : (v * 12.92);
 }
 
 
-// LRGB --------------------------------------------------------------------
+// LRGB ------------------------------------------------------------------------
 
 
 /**
@@ -44,10 +44,10 @@ function _ifn(v: number): number {
  * @return {Triplet} sRGB color.
  */
 export function fromLRGB([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	dest[0] = _ifn(lr) * MAX | 0;
-	dest[1] = _ifn(lg) * MAX | 0;
-	dest[2] = _ifn(lb) * MAX | 0;
-	isSaturated = _checkRange(dest, MIN, MAX);
+	dest[0] = ifn(lr) * MAX | 0;
+	dest[1] = ifn(lg) * MAX | 0;
+	dest[2] = ifn(lb) * MAX | 0;
+	isSaturated = checkRange(dest, MIN, MAX);
 	return dest;
 }
 
@@ -58,8 +58,8 @@ export function fromLRGB([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Trip
  * @return {Triplet} Linear RGB color.
  */
 export function toLRGB([r, g, b]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	dest[0] = _fn(r * INV_MAX);
-	dest[1] = _fn(g * INV_MAX);
-	dest[2] = _fn(b * INV_MAX);
+	dest[0] = fn(r * INV_MAX);
+	dest[1] = fn(g * INV_MAX);
+	dest[2] = fn(b * INV_MAX);
 	return dest;
 }

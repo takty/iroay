@@ -8,7 +8,7 @@
  */
 
 import { Triplet } from './../type';
-import { RAD_DEG, PI2 } from './../const';
+import { RAD_DEG, atan2rad } from './../math';
 
 /**
  * Calculate the conspicuity degree.
@@ -17,7 +17,7 @@ import { RAD_DEG, PI2 } from './../const';
  * TODO Consider chroma (ab radius of LAB)
  */
 export function conspicuityOfLab([, as, bs]: Triplet): number {
-	const rad = Math.atan2(bs, as) + (bs < 0 ? PI2 : 0);
+	const rad = atan2rad(bs, as);
 	const h = rad * RAD_DEG;
 	const a = 35;  // Constant
 	if (h < a) return Math.abs(180 - (360 + h - a));

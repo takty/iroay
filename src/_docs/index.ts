@@ -2,11 +2,12 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-08-17
+ * @version 2024-08-20
  */
 
 import 'klales/klales.min.css';
 import { Color, ColorSpace, Munsell } from './../../iroay.ts';
+import { PI2, atan2rad, mag } from '../math.ts';
 
 type Triplet = [number, number, number];
 
@@ -182,11 +183,11 @@ function drawChartMunsellPolar(w: number, h: number, ctx: CanvasRenderingContext
 		for (let x = 0; x < w; x += 1) {
 			const xx = (x / w) * 256 - 128;
 			const yy = (y / h) * 256 - 128;
-			const rad = (yy > 0) ? Math.atan2(yy, xx) : (Math.atan2(-yy, -xx) + Math.PI);
+			const rad = atan2rad(yy, xx);
 
 			let tb0 = rad / (Math.PI * 2) * 100 + 30;
 			if (tb0 >= 100) tb0 -= 100;
-			const tb2 = Math.sqrt((xx / 128 * 33) * (xx / 128 * 33) + (yy / 128 * 33) * (yy / 128 * 33));
+			const tb2 = mag(xx / 128 * 33, yy / 128 * 33);
 
 			c.set(ColorSpace.Munsell, [tb0, v * 10, tb2]);
 
@@ -239,12 +240,12 @@ function drawChartPCCSPolar(w: number, h: number, ctx: CanvasRenderingContext2D,
 		for (let x = 0; x < w; x += 1) {
 			const xx = (x / w) * 256 - 128;
 			const yy = (y / h) * 256 - 128;
-			const rad = ((yy > 0) ? Math.atan2(yy, xx) : (Math.atan2(-yy, -xx) + Math.PI)) / (Math.PI * 2);
+			const rad = atan2rad(yy, xx) / PI2;
 
 			let tb0 = rad * 24 - 8;
 			if (tb0 >= 24) tb0 -= 24;
 			if (tb0 < 0) tb0 += 24;
-			const tb2 = Math.sqrt((xx / 128 * 10) * (xx / 128 * 10) + (yy / 128 * 10) * (yy / 128 * 10));
+			const tb2 = mag(xx / 128 * 10, yy / 128 * 10);
 
 			c.set(ColorSpace.PCCS, [tb0, v * 10, tb2]);
 
