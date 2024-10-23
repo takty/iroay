@@ -3,10 +3,10 @@
  * D65 is used as tristimulus value.
  * Since conversion is performed by approximation based on the distance to the sample color, the conversion result is approximate value.
  * Also, when H is -1, it is regarded as an achromatic color (N) in particular.
- * Reference: http://www.cis.rit.edu/mcsl/online/munsell.php
+ * Reference: https://www.rit.edu/science/munsell-color-science-lab-educational-resources#munsell-renotation-data
  *
  * @author Takuto Yanagida
- * @version 2024-08-19
+ * @version 2024-10-23
  */
 
 import { TBL_SRC_MIN, TBL_V } from '../table/hc2xy-all-min';
