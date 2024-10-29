@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-10-29
  */
 
 import { Triplet } from './type';
@@ -36,8 +36,8 @@ export enum ColorSpace {
 }
 
 export class Color {
-	private ts = new Map<ColorSpace, Triplet>();
-	private us = new Map<string, string|boolean|number>();
+	private ts: Map<ColorSpace, Triplet> = new Map();
+	private us: Map<string, string | boolean | number> = new Map();
 	private cs: ColorSpace | null = null;
 
 	public constructor(cs: ColorSpace|null = null, t: Triplet|null = null) {
@@ -263,7 +263,7 @@ export class Color {
 		if (this.us.has('munsell_notation')) {
 			return this.us.get('munsell_notation') as string;
 		}
-		const s = Munsell.toString(this.asMunsell());
+		const s: string = Munsell.toString(this.asMunsell());
 		this.us.set('munsell_notation', s);
 		return s;
 	}
@@ -272,7 +272,7 @@ export class Color {
 		if (this.us.has('pccs_notation')) {
 			return this.us.get('pccs_notation') as string;
 		}
-		const s = PCCS.toString(this.asPCCS());
+		const s: string = PCCS.toString(this.asPCCS());
 		this.us.set('pccs_notation', s);
 		return s;
 	}
@@ -285,7 +285,7 @@ export class Color {
 		if (this.us.has('conspicuity')) {
 			return this.us.get('conspicuity') as number;
 		}
-		const s = Conspicuity.conspicuityOfLab(this.asLab());
+		const s: number = Conspicuity.conspicuityOfLab(this.asLab());
 		this.us.set('conspicuity', s);
 		return s;
 	}
@@ -294,7 +294,7 @@ export class Color {
 		if (this.us.has('category')) {
 			return this.us.get('category') as string;
 		}
-		const n = Category.categoryOfYxy(this.asYxy());
+		const n: string = Category.categoryOfYxy(this.asYxy());
 		this.us.set('category', n);
 		return n;
 	}
@@ -319,11 +319,11 @@ export class Color {
 		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
-				const lms0 = ColorVisionSimulation.lmsToProtanopia(this.asLMS());
+				const lms0: Triplet = ColorVisionSimulation.lmsToProtanopia(this.asLMS());
 				return new Color(ColorSpace.LMS, lms0);
 			case 'lrgb':
 			default:
-				const lms1 = ColorVisionSimulation.lrgbToProtanopia(this.asLRGB());
+				const lms1: Triplet = ColorVisionSimulation.lrgbToProtanopia(this.asLRGB());
 				return new Color(ColorSpace.LMS, lms1);
 		}
 	}
@@ -332,11 +332,11 @@ export class Color {
 		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
-				const lms0 = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS());
+				const lms0: Triplet = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS());
 				return new Color(ColorSpace.LMS, lms0);
 			case 'lrgb':
 			default:
-				const lms1 = ColorVisionSimulation.lrgbToDeuteranopia(this.asLRGB());
+				const lms1: Triplet = ColorVisionSimulation.lrgbToDeuteranopia(this.asLRGB());
 				return new Color(ColorSpace.LMS, lms1);
 		}
 	}
