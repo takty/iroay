@@ -17,4 +17,4 @@ export * as Munsell from './src/cs/munsell';
 export * as PCCS from './src/cs/pccs';
 
 export { convert, getConverter } from './src/conv';
-export { toMonochromeRGB } from './src/util';
+export { fromColorInteger, toColorInteger, toMonochromeRGB } from './src/util';
