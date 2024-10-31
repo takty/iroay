@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-10-29
+ * @version 2024-10-31
  */
 
 import { Triplet } from './type';
@@ -299,7 +299,7 @@ export class Color {
 		return n;
 	}
 
-	public distanceTo(c: Color, method: 'sqrt'|'cie76'|'ciede2000' = 'ciede2000'): number {
+	public differenceFrom(c: Color, method: 'sqrt'|'cie76'|'ciede2000' = 'ciede2000'): number {
 		switch (method) {
 			case 'sqrt':
 				return Difference.distance(this.asLab(), c.asLab());

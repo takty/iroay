@@ -50,15 +50,15 @@ console.log(labColor); // [53.23288, 80.10933, 67.22006]
 
 `as()` メソッドは、指定した表色系に色を変換し、その結果を配列として返します。
 
-### 色の距離計算
+### 色差の計算
 
-2つの色の間の距離を計算するには、 `distanceTo()` メソッドを使用します。例えば、CIEDE2000での距離を計算するには次のようにします:
+2つの色の色差を計算するには、 `differenceFrom()` メソッドを使用します。例えば、CIEDE2000での色差を計算するには次のようにします:
 
 ```javascript
 const color1 = new iroay.Color('lab', [50, 2.6772, -79.7751]);
 const color2 = new iroay.Color('lab', [50, 0, -82.7485]);
-const distance = color1.distanceTo(color2, 'ciede2000');
-console.log(distance);  // 2.0425
+const diff = color1.differenceFrom(color2, 'ciede2000');
+console.log(diff);  // 2.0425
 ```
 
 このように、iroayライブラリは色の操作を強力かつ簡単に行うためのツールを提供します。

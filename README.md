@@ -50,15 +50,15 @@ console.log(labColor); // [53.23288, 80.10933, 67.22006]
 
 The `as()` method converts the color to the specified color space and returns the result as an array.
 
-### Calculating Color Distance
+### Calculating Color Differences
 
-To calculate the distance between two colors, use the `distanceTo()` method. For example, to calculate the distance using the CIEDE2000 algorithm:
+To calculate the difference between two colors, use the `differenceFrom()` method. For example, to calculate the difference using the CIEDE2000 algorithm:
 
 ```javascript
 const color1 = new iroay.Color('lab', [50, 2.6772, -79.7751]);
 const color2 = new iroay.Color('lab', [50, 0, -82.7485]);
-const distance = color1.distanceTo(color2, 'ciede2000');
-console.log(distance);  // 2.0425
+const diff = color1.differenceFrom(color2, 'ciede2000');
+console.log(diff);  // 2.0425
 ```
 
 This shows how the iroay library provides powerful and easy-to-use tools for color manipulation.
