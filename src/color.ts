@@ -11,6 +11,8 @@ import * as Conspicuity from './eval/conspicuity';
 import * as Difference from './eval/difference';
 import * as ColorVisionSimulation from './sim/color-vision';
 
+import { fromColorInteger, toColorInteger } from './util';
+
 import * as RGB from './cs/rgb';
 import * as YIQ from './cs/yiq';
 import * as LRGB from './cs/lrgb';
@@ -36,6 +38,11 @@ export enum ColorSpace {
 }
 
 export class Color {
+
+	static fromInteger(i: number): Color {
+		return new Color(ColorSpace.RGB, fromColorInteger(i | 0xff000000));
+	}
+
 	private ts: Map<ColorSpace, Triplet> = new Map();
 	private us: Map<string, string | boolean | number> = new Map();
 	private cs: ColorSpace | null = null;
@@ -281,6 +288,15 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
+	public asInteger(): number {
+		if (this.us.has('integer')) {
+			return this.us.get('integer') as number;
+		}
+		const i: number = toColorInteger(this.asRGB());
+		this.us.set('integer', i);
+		return i;
+	}
+
 	public asConspicuity(): number {
 		if (this.us.has('conspicuity')) {
 			return this.us.get('conspicuity') as number;
@@ -309,6 +325,14 @@ export class Color {
 			default:
 				return Difference.CIEDE2000(this.asLab(), c.asLab());
 		}
+	}
+
+
+	// -------------------------------------------------------------------------
+
+
+	public toMonochrome(): Color {
+		return new Color(ColorSpace.Lab, [this.asLab()[0], 0, 0]);
 	}
 
 
