@@ -2,16 +2,16 @@
  * This class converts the CIE 1931 XYZ color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-11-08
  */
 
 import { Triplet } from '../type';
 
-export { toXYZ as fromLRGB, fromXYZ as toLRGB } from './lrgb';
-export { toXYZ as fromYxy, fromXYZ as toYxy } from './yxy';
-export { toXYZ as fromLab, fromXYZ as toLab } from './lab';
-export { toXYZ as fromLMS, fromXYZ as toLMS } from './lms';
-export { toXYZ as fromMunsell, fromXYZ as toMunsell } from './munsell';
+export { toXyz as fromLrgb, fromXyz as toLrgb } from './lrgb';
+export { toXyz as fromXyy, fromXyz as toXyy } from './xyy';
+export { toXyz as fromLab, fromXyz as toLab } from './lab';
+export { toXyz as fromLms, fromXyz as toLms } from './lms';
+export { toXyz as fromMunsell, fromXyz as toMunsell } from './munsell';
 
 
 // Conversion of Standard Illuminant ---------------------------------------

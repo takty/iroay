@@ -2,15 +2,15 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-11-08
  */
 
 import { Triplet } from './type';
 
 import * as Lab from './cs/lab';
-import * as LRGB from './cs/lrgb';
-import * as RGB from './cs/rgb';
-import * as XYZ from './cs/xyz';
+import * as Lrgb from './cs/lrgb';
+import * as Rgb from './cs/rgb';
+import * as Xyz from './cs/xyz';
 
 /**
  * Convert color integer to sRGB.
@@ -39,7 +39,7 @@ export function toColorInteger([r, g, b]: Triplet): number {
  * @param {Triplet} rgb sRGB color
  * @return {Triplet} Lightness-only sRGB color
  */
-export function toMonochromeRGB(rgb: Triplet): Triplet {
-	const l = Lab.lightnessFromXYZ(XYZ.fromLRGB(LRGB.fromRGB(rgb)));
-	return RGB.fromLRGB(LRGB.fromXYZ(XYZ.fromLab([l, 0, 0])));
+export function toMonochromeRgb(rgb: Triplet): Triplet {
+	const l: number = Lab.lightnessFromXyz(Xyz.fromLrgb(Lrgb.fromRgb(rgb)));
+	return Rgb.fromLrgb(Lrgb.fromXyz(Xyz.fromLab([l, 0, 0])));
 }

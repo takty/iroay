@@ -2,7 +2,7 @@
  * This class converts the LMS color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-11-08
  */
 
 import { Triplet } from '../type';
@@ -70,8 +70,8 @@ let conversionMethod = ConversionMethod.SMITH_POKORNY;
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} LMS color.
  */
-export function fromXYZ([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const cm = conversionMethod.direct;
+export function fromXyz([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+	const cm: Triplet[] = conversionMethod.direct;
 	dest[0] = cm[0][0] * x + cm[0][1] * y + cm[0][2] * z;
 	dest[1] = cm[1][0] * x + cm[1][1] * y + cm[1][2] * z;
 	dest[2] = cm[2][0] * x + cm[2][1] * y + cm[2][2] * z;
@@ -84,8 +84,8 @@ export function fromXYZ([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet 
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} XYZ color.
  */
-export function toXYZ([l, m, s]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const cm = conversionMethod.inverse;
+export function toXyz([l, m, s]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+	const cm: Triplet[] = conversionMethod.inverse;
 	dest[0] = cm[0][0] * l + cm[0][1] * m + cm[0][2] * s;
 	dest[1] = cm[1][0] * l + cm[1][1] * m + cm[1][2] * s;
 	dest[2] = cm[2][0] * l + cm[2][1] * m + cm[2][2] * s;

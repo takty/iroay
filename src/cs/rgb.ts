@@ -3,7 +3,7 @@
  * Reference: http://www.w3.org/Graphics/Color/sRGB.html
  *
  * @author Takuto Yanagida
- * @version 2024-08-19
+ * @version 2024-11-08
  */
 
 import { Triplet } from '../type';
@@ -16,7 +16,7 @@ export let isSaturated: boolean = false;
 
 function checkRange(vs: Triplet, min: number, max: number): boolean {
 	let isSaturated: boolean = false;
-	for (let i = 0; i < 3; ++i) {
+	for (let i: number = 0; i < 3; ++i) {
 		if (vs[i] > max) { vs[i] = max; isSaturated = true; }
 		else if (vs[i] < min) { vs[i] = min; isSaturated = true; }
 	}
@@ -43,7 +43,7 @@ function ifn(v: number): number {
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} sRGB color.
  */
-export function fromLRGB([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+export function fromLrgb([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 	dest[0] = ifn(lr) * MAX | 0;
 	dest[1] = ifn(lg) * MAX | 0;
 	dest[2] = ifn(lb) * MAX | 0;
@@ -57,7 +57,7 @@ export function fromLRGB([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Trip
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} Linear RGB color.
  */
-export function toLRGB([r, g, b]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+export function toLrgb([r, g, b]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 	dest[0] = fn(r * INV_MAX);
 	dest[1] = fn(g * INV_MAX);
 	dest[2] = fn(b * INV_MAX);

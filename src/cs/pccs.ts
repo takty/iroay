@@ -6,7 +6,7 @@
  * Journal of the Color Science Association of Japan 25(4), 249-261, 2001.
  *
  * @author Takuto Yanagida
- * @version 2024-08-19
+ * @version 2024-11-08
  */
 
 import { Triplet, Quartet } from '../type';
@@ -19,9 +19,9 @@ export const MIN_HUE: number = 0;
 export const MAX_HUE: number = 24;
 export const MONO_LIMIT_S: number = 0.01;
 
-const HUE_NAMES  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
-const TONE_NAMES = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
-const MUNSELL_H = [
+const HUE_NAMES: string[]  = ['', 'pR', 'R', 'yR', 'rO', 'O', 'yO', 'rY', 'Y', 'gY', 'YG', 'yG', 'G', 'bG', 'GB', 'GB', 'gB', 'B', 'B', 'pB', 'V', 'bP', 'P', 'rP', 'RP'];
+const TONE_NAMES: string[] = ['p', 'p+', 'ltg', 'g', 'dkg', 'lt', 'lt+', 'sf', 'd', 'dk', 'b', 's', 'dp', 'v', 'none'];
+const MUNSELL_H: number[] = [
 	96,  // Dummy
 	0,  4,  7, 10, 14, 18, 22, 25, 28, 33, 38, 43,
 	49, 55, 60, 65, 70, 73, 76, 79, 83, 87, 91, 96, 100
@@ -102,8 +102,9 @@ export enum Tone {
 
 
 function calcPccsH(H: number): number {
-	let h1 = -1, h2 = -1;
-	for (let i = 1; i < MUNSELL_H.length; ++i) {
+	let h1: number = -1;
+	let h2: number = -1;
+	for (let i: number = 1; i < MUNSELL_H.length; ++i) {
 		if (MUNSELL_H[i] <= H) h1 = i;
 		if (H < MUNSELL_H[i]) {
 			h2 = i;
@@ -116,32 +117,32 @@ function calcPccsH(H: number): number {
 }
 
 function calcPccsS(V: number, C: number, h: number): number {
-	const a = calcInterpolatedCoefficients(h);
-	const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
-	const a0 = -C / (1 - Math.exp(-g * V));
+	const a: Quartet = calcInterpolatedCoefficients(h);
+	const g: number = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
+	const a0: number = -C / (1 - Math.exp(-g * V));
 	return solveEquation(simplyCalcPccsS(V, C, h), a[3], a[2], a[1], a0);
 }
 
 function calcInterpolatedCoefficients(h: number): Quartet {
 	if (MAX_HUE < h) h -= MAX_HUE;
-	let hf = 0 | Math.floor(h);
+	let hf: number = 0 | Math.floor(h);
 	if (hf % 2 !== 0) --hf;
-	let hc = hf + 2;
+	let hc: number = hf + 2;
 	if (MAX_HUE < hc) hc -= MAX_HUE;
 
 	const af: Triplet = COEFFICIENTS[hf / 2], ac: Triplet = COEFFICIENTS[hc / 2], a: Quartet = [0, 0, 0, 0];
-	for (let i = 0; i < 3; ++i) {
+	for (let i: number = 0; i < 3; ++i) {
 		a[i + 1] = (h - hf) / (hc - hf) * (ac[i]- af[i]) + af[i];
 	}
 	return a;
 }
 
 function solveEquation(x0: number, a3: number, a2: number, a1: number, a0: number): number {
-	let x = x0;
+	let x: number = x0;
 	while (true) {
-		const y = a3 * x * x * x + a2 * x * x + a1 * x + a0;
-		const yp = 3 * a3 * x * x + 2 * a2 * x + a1;
-		const x1 = -y / yp + x;
+		const y: number = a3 * x * x * x + a2 * x * x + a1 * x + a0;
+		const yp: number = 3 * a3 * x * x + 2 * a2 * x + a1;
+		const x1: number = -y / yp + x;
 		if (Math.abs(x1 - x) < 0.001) break;
 		x = x1;
 	}
@@ -153,15 +154,17 @@ function solveEquation(x0: number, a3: number, a2: number, a1: number, a0: numbe
 
 
 function calcMunsellH(h: number): number {
-	const h1 = 0 | Math.floor(h), h2 = h1 + 1;
-	let H1 = MUNSELL_H[h1], H2 = MUNSELL_H[h2];
+	const h1: number = 0 | Math.floor(h);
+	const h2: number = h1 + 1;
+	let H1: number = MUNSELL_H[h1];
+	let H2: number = MUNSELL_H[h2];
 	if (H1 > H2) H2 = 100;
 	return H1 + (H2 - H1) * (h - h1) / (h2 - h1);
 }
 
 function calcMunsellC(h: number, l: number, s: number): number {
-	const a = calcInterpolatedCoefficients(h);
-	const g = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
+	const a: Quartet = calcInterpolatedCoefficients(h);
+	const g: number = 0.81 - 0.24 * Math.sin((h - 2.6) / 12 * Math.PI);
 	return (a[3] * s * s * s + a[2] * s * s + a[1] * s) * (1 - Math.exp(-g * l));
 }
 
@@ -170,16 +173,16 @@ function calcMunsellC(h: number, l: number, s: number): number {
 
 
 function simplyCalcPccsH(H: number): number {
-	const y = H * Math.PI / 50;
+	const y: number = H * Math.PI / 50;
 	return 24 * y / PI2 + 1.24
 			+ 0.02 * Math.cos(y) - 0.1 * Math.cos(2 * y) - 0.11  * Math.cos(3 * y)
 			+ 0.68 * Math.sin(y) - 0.3 * Math.sin(2 * y) + 0.013 * Math.sin(3 * y);
 }
 
 function simplyCalcPccsS(V: number, C: number, h: number): number {
-	const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
-	const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
-	const e2 = 0.004, e1 = 0.077, e0 = -C / (Ct * (1 - Math.exp(-gt * V)));
+	const Ct: number = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
+	const gt: number = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
+	const e2 = 0.004, e1 = 0.077, e0: number = -C / (Ct * (1 - Math.exp(-gt * V)));
 	return (-e1 + Math.sqrt(e1 * e1 - 4 * e2 * e0)) / (2 * e2);
 }
 
@@ -188,15 +191,15 @@ function simplyCalcPccsS(V: number, C: number, h: number): number {
 
 
 function simplyCalcMunsellH(h: number): number {
-	const x = (h - 1) * Math.PI / 12;
+	const x: number = (h - 1) * Math.PI / 12;
 	return 100 * x / PI2 - 1
 			+ 0.12 * Math.cos(x) + 0.34 * Math.cos(2 * x) + 0.4 * Math.cos(3 * x)
 			- 2.7  * Math.sin(x) + 1.5  * Math.sin(2 * x) - 0.4 * Math.sin(3 * x);
 }
 
 function simplyCalcMunsellC(h: number, l: number, s: number): number {
-	const Ct = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
-	const gt = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
+	const Ct: number = 12 + 1.7 * Math.sin((h + 2.2) * Math.PI / 12);
+	const gt: number = 0.81 - 0.24 * Math.sin((h - 2.6) * Math.PI / 12);
 	return Ct * (0.077 * s + 0.0040 * s * s) * (1 - Math.exp(-gt * l));
 }
 
@@ -211,8 +214,8 @@ function simplyCalcMunsellC(h: number, l: number, s: number): number {
  * @return {Triplet} PCCS color.
  */
 export function fromMunsell([H, V, C]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	let h = 0;
-	let s = 0;
+	let h: number = 0;
+	let s: number = 0;
 
 	if (Munsell.MAX_HUE <= H) H -= Munsell.MAX_HUE;
 	h = conversionMethod.calcPccsH(H);
@@ -234,8 +237,8 @@ export function fromMunsell([H, V, C]: Triplet, dest: Triplet = [0, 0, 0]): Trip
  * @return {Triplet} Munsell color.
  */
 export function toMunsell([h, l, s]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	let H = 0;
-	let C = 0;
+	let H: number = 0;
+	let C: number = 0;
 
 	H = conversionMethod.calcMunsellH(h);
 	if (MONO_LIMIT_S <= s) {
@@ -260,10 +263,10 @@ export function toMunsell([h, l, s]: Triplet, dest: Triplet = [0, 0, 0]): Triple
  * @return {number} Tone
  */
 export function tone(hls: Triplet): number {
-	const s = hls[2];
-	const t = relativeLightness(hls);
-	const tu = s * -3 / 10 + 8.5;
-	const td = s * 3 / 10 + 2.5;
+	const s: number = hls[2];
+	const t: number = relativeLightness(hls);
+	const tu: number = s * -3 / 10 + 8.5;
+	const td: number = s * 3 / 10 + 2.5;
 
 	if (s < 1) {
 		return Tone.none;
@@ -338,20 +341,20 @@ export function toNormalCoordinate(hLs: Triplet, dest: Triplet = [0, 0, 0]): Tri
  * @return {string} String representation
  */
 export function toString(hls: Triplet): string {
-	const str_l = Math.round(hls[1] * 10) / 10;
+	const str_l: number = Math.round(hls[1] * 10) / 10;
 	if (hls[2] < MONO_LIMIT_S) {
 		if (9.5 <= hls[1]) return `W N-${str_l}`;
 		if (hls[1] <= 1.5) return `Bk N-${str_l}`;
 		return `Gy-${str_l} N-${str_l}`;
 	} else {
-		const str_h = Math.round(hls[0] * 10) / 10;
-		const str_s = Math.round(hls[2] * 10) / 10;
+		const str_h: number = Math.round(hls[0] * 10) / 10;
+		const str_s: number = Math.round(hls[2] * 10) / 10;
 
-		let tn = Math.round(hls[0]);
+		let tn: number = Math.round(hls[0]);
 		if (tn <= 0) tn = MAX_HUE;
 		if (MAX_HUE < tn) tn -= MAX_HUE;
-		const hue = HUE_NAMES[tn];
-		const t = TONE_NAMES[tone(hls)];
+		const hue: string = HUE_NAMES[tn];
+		const t: string = TONE_NAMES[tone(hls)];
 
 		if (t === 'none') return `${str_h}:${hue}-${str_l}-${str_s}s`;
 		return `${t}${str_h} ${str_h}:${hue}-${str_l}-${str_s}s`;
@@ -367,7 +370,7 @@ export function toHueString([h,, s]: Triplet): string {
 	if (s < MONO_LIMIT_S) {
 		return 'N';
 	} else {
-		let tn = Math.round(h);
+		let tn: number = Math.round(h);
 		if (tn <= 0) tn = MAX_HUE;
 		if (MAX_HUE < tn) tn -= MAX_HUE;
 		return HUE_NAMES[tn];

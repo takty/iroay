@@ -7,8 +7,8 @@
 
 import { Triplet } from '../type';
 
-import { fromXYZ as xyz2lms } from '../cs/lms';
-import { fromLRGB as lrgb2xyz } from '../cs/xyz';
+import { fromXyz as xyz2lms } from '../cs/lms';
+import { fromLrgb as lrgb2xyz } from '../cs/xyz';
 
 /*
  * Reference: Brettel, H.; Viénot, F. & Mollon, J. D.,

@@ -13,22 +13,22 @@ import * as ColorVisionSimulation from './sim/color-vision';
 
 import { fromColorInteger, toColorInteger } from './util';
 
-import * as RGB from './cs/rgb';
-import * as YIQ from './cs/yiq';
-import * as LRGB from './cs/lrgb';
-import * as Yxy from './cs/yxy';
+import * as Rgb from './cs/rgb';
+import * as Yiq from './cs/yiq';
+import * as Lrgb from './cs/lrgb';
+import * as Xxy from './cs/xyy';
 import * as Lab from './cs/lab';
-import * as LCh from './cs/lch';
-import * as LMS from './cs/lms';
+import * as Lch from './cs/lch';
+import * as Lms from './cs/lms';
 import * as Munsell from './cs/munsell';
-import * as PCCS from './cs/pccs';
+import * as Pccs from './cs/pccs';
 
 export enum ColorSpace {
 	RGB,
 	YIQ,
 	LRGB,
 	XYZ,
-	Yxy,
+	xyY,
 	Lab,
 	LCh,
 	LMS,
@@ -64,16 +64,16 @@ export class Color {
 
 	public as(cs: ColorSpace): Triplet {
 		switch (cs) {
-			case ColorSpace.RGB    : return this.asRGB();
-			case ColorSpace.YIQ    : return this.asYIQ();
-			case ColorSpace.LRGB   : return this.asLRGB();
-			case ColorSpace.XYZ    : return this.asXYZ();
-			case ColorSpace.Yxy    : return this.asYxy();
+			case ColorSpace.RGB    : return this.asRgb();
+			case ColorSpace.YIQ    : return this.asYiq();
+			case ColorSpace.LRGB   : return this.asLrgb();
+			case ColorSpace.XYZ    : return this.asXyz();
+			case ColorSpace.xyY    : return this.asXyy();
 			case ColorSpace.Lab    : return this.asLab();
-			case ColorSpace.LCh    : return this.asLCh();
-			case ColorSpace.LMS    : return this.asLMS();
+			case ColorSpace.LCh    : return this.asLch();
+			case ColorSpace.LMS    : return this.asLms();
 			case ColorSpace.Munsell: return this.asMunsell();
-			case ColorSpace.PCCS   : return this.asPCCS();
+			case ColorSpace.PCCS   : return this.asPccs();
 			case ColorSpace.Tone   : return this.asTone();
 		}
 	}
@@ -82,46 +82,46 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public asRGB(): Triplet {
+	public asRgb(): Triplet {
 		if (this.ts.has(ColorSpace.RGB)) {
 			return this.ts.get(ColorSpace.RGB) as Triplet;
 		}
-		const t: Triplet = RGB.fromLRGB(this.asLRGB());
+		const t: Triplet = Rgb.fromLrgb(this.asLrgb());
 		this.ts.set(ColorSpace.RGB, t);
-		this.us.set('rgb_saturation', RGB.isSaturated);
+		this.us.set('rgb_saturation', Rgb.isSaturated);
 		return t;
 	}
 
-	public asYIQ(): Triplet {
+	public asYiq(): Triplet {
 		if (this.ts.has(ColorSpace.YIQ)) {
 			return this.ts.get(ColorSpace.YIQ) as Triplet;
 		}
-		const t: Triplet = YIQ.fromLRGB(this.asLRGB());
+		const t: Triplet = Yiq.fromLrgb(this.asLrgb());
 		this.ts.set(ColorSpace.YIQ, t);
 		return t;
 	}
 
-	public asLRGB(): Triplet {
+	public asLrgb(): Triplet {
 		if (this.ts.has(ColorSpace.LRGB)) {
 			return this.ts.get(ColorSpace.LRGB) as Triplet;
 		}
 		let t: Triplet;
 		switch (this.cs) {
 			case ColorSpace.RGB:
-				t = RGB.toLRGB(this.asRGB());
+				t = Rgb.toLrgb(this.asRgb());
 				break;
 			case ColorSpace.YIQ:
-				t = YIQ.toLRGB(this.asYIQ());
+				t = Yiq.toLrgb(this.asYiq());
 				break;
 			default:
-				t = LRGB.fromXYZ(this.asXYZ());
+				t = Lrgb.fromXyz(this.asXyz());
 				break;
 		}
 		this.ts.set(ColorSpace.LRGB, t);
 		return t;
 	}
 
-	public asXYZ(): Triplet {
+	public asXyz(): Triplet {
 		if (this.ts.has(ColorSpace.XYZ)) {
 			return this.ts.get(ColorSpace.XYZ) as Triplet;
 		}
@@ -130,23 +130,23 @@ export class Color {
 			case ColorSpace.RGB:
 			case ColorSpace.YIQ:
 			case ColorSpace.LRGB:
-				t = LRGB.toXYZ(this.asLRGB());
+				t = Lrgb.toXyz(this.asLrgb());
 				break;
 			case ColorSpace.LCh:
 			case ColorSpace.Lab:
-				t = Lab.toXYZ(this.asLab());
+				t = Lab.toXyz(this.asLab());
 				break;
-			case ColorSpace.Yxy:
-				t = Yxy.toXYZ(this.asYxy());
-				this.us.set('yxy_saturation', Yxy.isSaturated);
+			case ColorSpace.xyY:
+				t = Xxy.toXyz(this.asXyy());
+				this.us.set('xyy_saturation', Xxy.isSaturated);
 				break;
 			case ColorSpace.LMS:
-				t = LMS.toXYZ(this.asLMS());
+				t = Lms.toXyz(this.asLms());
 				break;
 			case ColorSpace.Munsell:
 			case ColorSpace.PCCS:
 			case ColorSpace.Tone:
-				t = Munsell.toXYZ(this.asMunsell());
+				t = Munsell.toXyz(this.asMunsell());
 				this.us.set('munsell_saturation', Munsell.isSaturated);
 				break;
 		}
@@ -154,12 +154,12 @@ export class Color {
 		return t;
 	}
 
-	public asYxy(): Triplet {
-		if (this.ts.has(ColorSpace.Yxy)) {
-			return this.ts.get(ColorSpace.Yxy) as Triplet;
+	public asXyy(): Triplet {
+		if (this.ts.has(ColorSpace.xyY)) {
+			return this.ts.get(ColorSpace.xyY) as Triplet;
 		}
-		const t: Triplet = Yxy.fromXYZ(this.asXYZ());
-		this.ts.set(ColorSpace.Yxy, t);
+		const t: Triplet = Xxy.fromXyz(this.asXyz());
+		this.ts.set(ColorSpace.xyY, t);
 		return t;
 	}
 
@@ -170,30 +170,30 @@ export class Color {
 		let t: Triplet;
 		switch (this.cs) {
 			case ColorSpace.LCh:
-				t = LCh.toLab(this.asLCh());
+				t = Lch.toLab(this.asLch());
 				break;
 			default:
-				t = Lab.fromXYZ(this.asXYZ());
+				t = Lab.fromXyz(this.asXyz());
 				break;
 		}
 		this.ts.set(ColorSpace.Lab, t);
 		return t;
 	}
 
-	public asLCh(): Triplet {
+	public asLch(): Triplet {
 		if (this.ts.has(ColorSpace.LCh)) {
 			return this.ts.get(ColorSpace.LCh) as Triplet;
 		}
-		const t: Triplet = LCh.fromLab(this.asLab());
+		const t: Triplet = Lch.fromLab(this.asLab());
 		this.ts.set(ColorSpace.LCh, t);
 		return t;
 	}
 
-	public asLMS(): Triplet {
+	public asLms(): Triplet {
 		if (this.ts.has(ColorSpace.LMS)) {
 			return this.ts.get(ColorSpace.LMS) as Triplet;
 		}
-		const t: Triplet = LMS.fromXYZ(this.asXYZ());
+		const t: Triplet = Lms.fromXyz(this.asXyz());
 		this.ts.set(ColorSpace.LMS, t);
 		return t;
 	}
@@ -206,10 +206,10 @@ export class Color {
 		switch (this.cs) {
 			case ColorSpace.PCCS:
 			case ColorSpace.Tone:
-				t = PCCS.toMunsell(this.asPCCS());
+				t = Pccs.toMunsell(this.asPccs());
 				break;
 			default:
-				t = Munsell.fromXYZ(this.asXYZ());
+				t = Munsell.fromXyz(this.asXyz());
 				this.us.set('munsell_saturation', Munsell.isSaturated);
 				break;
 		}
@@ -217,17 +217,17 @@ export class Color {
 		return t;
 	}
 
-	public asPCCS(): Triplet {
+	public asPccs(): Triplet {
 		if (this.ts.has(ColorSpace.PCCS)) {
 			return this.ts.get(ColorSpace.PCCS) as Triplet;
 		}
 		let t: Triplet;
 		switch (this.cs) {
 			case ColorSpace.Tone:
-				t = PCCS.toNormalCoordinate(this.asTone());
+				t = Pccs.toNormalCoordinate(this.asTone());
 				break;
 			default:
-				t = PCCS.fromMunsell(this.asMunsell());
+				t = Pccs.fromMunsell(this.asMunsell());
 				break;
 		}
 		this.ts.set(ColorSpace.PCCS, t);
@@ -238,7 +238,7 @@ export class Color {
 		if (this.ts.has(ColorSpace.Tone)) {
 			return this.ts.get(ColorSpace.Tone) as Triplet;
 		}
-		const t: Triplet = PCCS.toToneCoordinate(this.asPCCS());
+		const t: Triplet = Pccs.toToneCoordinate(this.asPccs());
 		this.ts.set(ColorSpace.Tone, t);
 		return t;
 	}
@@ -249,13 +249,13 @@ export class Color {
 
 	public isRGBSaturated(forceToCheck: boolean = false): boolean {
 		if (forceToCheck && !this.us.has('rgb_saturation')) {
-			this.asRGB();
+			this.asRgb();
 		}
 		return (this.us.get('rgb_saturation') ?? false) as boolean;
 	}
 
-	public isYxySaturated(): boolean {
-		return (this.us.get('yxy_saturation') ?? false) as boolean;
+	public isXyySaturated(): boolean {
+		return (this.us.get('xyy_saturation') ?? false) as boolean;
 	}
 
 	public isMunsellSaturated(): boolean {
@@ -279,7 +279,7 @@ export class Color {
 		if (this.us.has('pccs_notation')) {
 			return this.us.get('pccs_notation') as string;
 		}
-		const s: string = PCCS.toString(this.asPCCS());
+		const s: string = Pccs.toString(this.asPccs());
 		this.us.set('pccs_notation', s);
 		return s;
 	}
@@ -292,7 +292,7 @@ export class Color {
 		if (this.us.has('integer')) {
 			return this.us.get('integer') as number;
 		}
-		const i: number = toColorInteger(this.asRGB());
+		const i: number = toColorInteger(this.asRgb());
 		this.us.set('integer', i);
 		return i;
 	}
@@ -310,7 +310,7 @@ export class Color {
 		if (this.us.has('category')) {
 			return this.us.get('category') as string;
 		}
-		const n: string = Category.categoryOfYxy(this.asYxy());
+		const n: string = Category.categoryOfXyy(this.asXyy());
 		this.us.set('category', n);
 		return n;
 	}
@@ -343,11 +343,11 @@ export class Color {
 		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
-				const lms0: Triplet = ColorVisionSimulation.lmsToProtanopia(this.asLMS());
+				const lms0: Triplet = ColorVisionSimulation.lmsToProtanopia(this.asLms());
 				return new Color(ColorSpace.LMS, lms0);
 			case 'lrgb':
 			default:
-				const lms1: Triplet = ColorVisionSimulation.lrgbToProtanopia(this.asLRGB());
+				const lms1: Triplet = ColorVisionSimulation.lrgbToProtanopia(this.asLrgb());
 				return new Color(ColorSpace.LMS, lms1);
 		}
 	}
@@ -356,11 +356,11 @@ export class Color {
 		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
-				const lms0: Triplet = ColorVisionSimulation.lmsToDeuteranopia(this.asLMS());
+				const lms0: Triplet = ColorVisionSimulation.lmsToDeuteranopia(this.asLms());
 				return new Color(ColorSpace.LMS, lms0);
 			case 'lrgb':
 			default:
-				const lms1: Triplet = ColorVisionSimulation.lrgbToDeuteranopia(this.asLRGB());
+				const lms1: Triplet = ColorVisionSimulation.lrgbToDeuteranopia(this.asLrgb());
 				return new Color(ColorSpace.LMS, lms1);
 		}
 	}

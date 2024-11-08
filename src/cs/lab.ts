@@ -4,23 +4,23 @@
  * Reference: http://en.wikipedia.org/wiki/Lab_color_space
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-11-08
  */
 
 import { Triplet } from '../type';
 import { D65_XYZ } from '../const';
 
-export { toLab as fromLCh, fromLab as toLCh } from './lch';
+export { toLab as fromLch, fromLab as toLch } from './lch';
 
 // Constants for simplification of calculation
-const C1 = Math.pow(6, 3) / Math.pow(29, 3);      // (6/29)^3 = 0.0088564516790356308171716757554635
-const C2 = 3 * Math.pow(6, 2) / Math.pow(29, 2);  // 3*(6/29)^2 = 0.12841854934601664684898929845422
-const C3 = 6 / 29;                                // 6/29 = 0.20689655172413793103448275862069
+const C1: number = Math.pow(6, 3) / Math.pow(29, 3);      // (6/29)^3 = 0.0088564516790356308171716757554635
+const C2: number = 3 * Math.pow(6, 2) / Math.pow(29, 2);  // 3*(6/29)^2 = 0.12841854934601664684898929845422
+const C3: number = 6 / 29;                                // 6/29 = 0.20689655172413793103448275862069
 
 /**
  * XYZ tristimulus value
  */
-const XYZ_TRISTIMULUS_VALUES = D65_XYZ;
+const XYZ_TRISTIMULUS_VALUES: Triplet = D65_XYZ;
 
 // Conversion function
 function fn(v: number): number {
@@ -42,10 +42,10 @@ function ifn(v: number): number {
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} CIELAB color.
  */
-export function fromXYZ([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const fx = fn(x / XYZ_TRISTIMULUS_VALUES[0]);
-	const fy = fn(y / XYZ_TRISTIMULUS_VALUES[1]);
-	const fz = fn(z / XYZ_TRISTIMULUS_VALUES[2]);
+export function fromXyz([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+	const fx: number = fn(x / XYZ_TRISTIMULUS_VALUES[0]);
+	const fy: number = fn(y / XYZ_TRISTIMULUS_VALUES[1]);
+	const fz: number = fn(z / XYZ_TRISTIMULUS_VALUES[2]);
 	dest[0] = 116 * fy - 16;
 	dest[1] = 500 * (fx - fy);
 	dest[2] = 200 * (fy - fz);
@@ -58,10 +58,10 @@ export function fromXYZ([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet 
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} XYZ color.
  */
-export function toXYZ([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const fy = (ls + 16) / 116;
-	const fx = fy + as / 500;
-	const fz = fy - bs / 200;
+export function toXyz([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+	const fy: number = (ls + 16) / 116;
+	const fx: number = fy + as / 500;
+	const fz: number = fy - bs / 200;
 	dest[0] = ifn(fx) * XYZ_TRISTIMULUS_VALUES[0];
 	dest[1] = ifn(fy) * XYZ_TRISTIMULUS_VALUES[1];
 	dest[2] = ifn(fz) * XYZ_TRISTIMULUS_VALUES[2];
@@ -73,7 +73,7 @@ export function toXYZ([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet
  * @param {Triplet} xyz XYZ color.
  * @return {number} L*
  */
-export function lightnessFromXYZ([, y,]: Triplet): number {
-	const fy = fn(y / XYZ_TRISTIMULUS_VALUES[1]);
+export function lightnessFromXyz([, y,]: Triplet): number {
+	const fy: number = fn(y / XYZ_TRISTIMULUS_VALUES[1]);
 	return 116 * fy - 16;
 }

@@ -4,13 +4,13 @@
  * Reference: http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
  *
  * @author Takuto Yanagida
- * @version 2024-08-18
+ * @version 2024-11-08
  */
 
 import { Triplet } from '../type';
 
-export { toLRGB as fromRGB, fromLRGB as toRGB } from './rgb';
-export { toLRGB as fromYIQ, fromLRGB as toYIQ } from './yiq';
+export { toLrgb as fromRgb, fromLrgb as toRgb } from './rgb';
+export { toLrgb as fromYiq, fromLrgb as toYiq } from './yiq';
 
 
 // XYZ ---------------------------------------------------------------------
@@ -22,7 +22,7 @@ export { toLRGB as fromYIQ, fromLRGB as toYIQ } from './yiq';
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} Linear RGB color.
  */
-export function fromXYZ([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+export function fromXyz([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 	dest[0] =  3.2404542 * x + -1.5371385 * y + -0.4985314 * z;
 	dest[1] = -0.9692660 * x +  1.8760108 * y +  0.0415560 * z;
 	dest[2] =  0.0556434 * x + -0.2040259 * y +  1.0572252 * z;
@@ -35,7 +35,7 @@ export function fromXYZ([x, y, z]: Triplet, dest: Triplet = [0, 0, 0]): Triplet 
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} XYZ color.
  */
-export function toXYZ([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+export function toXyz([lr, lg, lb]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
 	dest[0] = 0.4124564 * lr + 0.3575761 * lg + 0.1804375 * lb;
 	dest[1] = 0.2126729 * lr + 0.7151522 * lg + 0.0721750 * lb;
 	dest[2] = 0.0193339 * lr + 0.1191920 * lg + 0.9503041 * lb;

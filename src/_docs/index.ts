@@ -47,7 +47,7 @@ function draw(w: number, h: number, ctx: CanvasRenderingContext2D, sel: HTMLSele
 		['xyz', drawChartXYZ],
 		['lab', drawChartLab],
 		['lch', drawChartLCh],
-		['yxy', drawChartYxy],
+		['xyy', drawChartXyy],
 		['mun', drawChartMunsell],
 		['mun_p', drawChartMunsellPolar],
 		['mun_i', drawChartMunsellFromXYZ],
@@ -80,7 +80,7 @@ function drawChartYIQ(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.YIQ, [v, 0.5959 * (x / (w - 1) - 0.5), 0.5229 * (y / (h - 1) - 0.5)]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			setPixel(ctx, x, (h - 1) - y, rgb);
 		}
 	}
@@ -93,7 +93,7 @@ function drawChartLRGB(w: number, h: number, ctx: CanvasRenderingContext2D, v: n
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.LRGB, [x / (w - 1), v, y / (h - 1)]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			setPixel(ctx, x, (h - 1) - y, rgb);
 		}
 	}
@@ -106,7 +106,7 @@ function drawChartXYZ(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.XYZ, [x / (w - 1), v, y / (h - 1)]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
 					setPixel(ctx, x, (h - 1) - y, rgb);
 			}
@@ -121,7 +121,7 @@ function drawChartLab(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.Lab, [v * 100, (x / w) * 256 - 128, (y / h) * 256 - 128]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
@@ -137,7 +137,7 @@ function drawChartLCh(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.LCh, [v * 100, (y / (h - 1)) * 128, (x / (w - 1)) * 360]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			if (ss || !c.isRGBSaturated() || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
@@ -145,15 +145,15 @@ function drawChartLCh(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 	}
 }
 
-function drawChartYxy(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+function drawChartXyy(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
 
 	for (let y = 0; y < h; y += 1) {
 		for (let x = 0; x < w; x += 1) {
-			c.set(ColorSpace.Yxy, [v, x / (w - 1), y / (h - 1)]);
+			c.set(ColorSpace.xyY, [v, x / (w - 1), y / (h - 1)]);
 
-			const rgb = c.asRGB();
-			if (ss || (!c.isRGBSaturated() && !c.isYxySaturated()) || 0 === (x + y) % 7) {
+			const rgb = c.asRgb();
+			if (ss || (!c.isRGBSaturated() && !c.isXyySaturated()) || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
 		}
@@ -167,7 +167,7 @@ function drawChartMunsell(w: number, h: number, ctx: CanvasRenderingContext2D, v
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.Munsell, [x * 100 / (w - 1), v * 10, y * 38 / (h - 1)]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			const s = c.isRGBSaturated() || c.isMunsellSaturated();
 			if (ss || !s || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
@@ -191,7 +191,7 @@ function drawChartMunsellPolar(w: number, h: number, ctx: CanvasRenderingContext
 
 			c.set(ColorSpace.Munsell, [tb0, v * 10, tb2]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			const s = c.isRGBSaturated() || c.isMunsellSaturated();
 			if (ss || !s || 0 === (x + y) % 7) {
 				setPixel(ctx, x, y, rgb);
@@ -210,7 +210,7 @@ function drawChartMunsellFromXYZ(w: number, h: number, ctx: CanvasRenderingConte
 			c2.set(ColorSpace.Munsell, c.asMunsell());
 			const s = Munsell.isSaturated;
 
-			const rgb = c2.asRGB();
+			const rgb = c2.asRgb();
 			if (ss || !s || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
@@ -225,7 +225,7 @@ function drawChartPCCS(w: number, h: number, ctx: CanvasRenderingContext2D, v: n
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.PCCS, [x * 24 / (w - 1), v * 10, y * 10 / (h - 1)]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}
@@ -249,7 +249,7 @@ function drawChartPCCSPolar(w: number, h: number, ctx: CanvasRenderingContext2D,
 
 			c.set(ColorSpace.PCCS, [tb0, v * 10, tb2]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
 				setPixel(ctx, x, y, rgb);
 			}
@@ -264,7 +264,7 @@ function drawChartTone(w: number, h: number, ctx: CanvasRenderingContext2D, v: n
 		for (let x = 0; x < w; x += 1) {
 			c.set(ColorSpace.Tone, [v * 24, y * 10 / (h - 1), x * 10 / (w - 1)]);
 
-			const rgb = c.asRGB();
+			const rgb = c.asRgb();
 			if (ss || (!c.isRGBSaturated() && !c.isMunsellSaturated()) || 0 === (x + y) % 7) {
 				setPixel(ctx, x, (h - 1) - y, rgb);
 			}

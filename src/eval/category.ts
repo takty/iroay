@@ -2,7 +2,7 @@
  * Determination of the basic categorical color.
  *
  * @author Takuto Yanagida
- * @version 2024-08-19
+ * @version 2024-11-08
  */
 
 import { Triplet } from './../type';
@@ -24,10 +24,10 @@ const LUM_TABLE = [2, 5, 10, 20, 30, 40];
 
 /**
  * Find the basic categorical color of the specified color.
- * @param {Triplet} yxy Yxy color
+ * @param {Triplet} xyy xyY color
  * @return {string} Basic categorical color
  */
-export function categoryOfYxy([y, sx, sy]: Triplet): string {
+export function categoryOfXyy([y, sx, sy]: Triplet): string {
 	const lum = Math.pow(y * Y_TO_LUM, 0.9);  // magic number
 
 	let diff = Number.MAX_VALUE;

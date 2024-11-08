@@ -6,7 +6,7 @@
  * Reference: https://www.rit.edu/science/munsell-color-science-lab-educational-resources#munsell-renotation-data
  *
  * @author Takuto Yanagida
- * @version 2024-10-23
+ * @version 2024-11-08
  */
 
 import { TBL_SRC_MIN, TBL_V } from '../table/hc2xy-all-min';
@@ -14,9 +14,9 @@ import { Tree } from '../lib/kdt';
 import { Pair, Triplet } from '../type';
 
 import { toIlluminantC as xyz2c,  fromIlluminantC as c2xyz } from './xyz';
-import { fromXYZ as xyz2yxy, toXYZ as yxy2xyz }  from './yxy';
+import { fromXyz as xyz2xyy, toXyz as xyy2xyz }  from './xyy';
 
-export { toMunsell as fromPCCS, fromMunsell as toPCCS } from './pccs';
+export { toMunsell as fromPccs, fromMunsell as toPccs } from './pccs';
 
 function eq0(x: number): boolean {
 	return Math.abs(x) < EP;
@@ -148,7 +148,7 @@ function y2v(y: number): number {
 
 
 // Find the Munsell value from xyY (standard illuminant C).
-function yxy2mun([Y, x, y]: Triplet): Triplet {
+function xyy2mun([Y, x, y]: Triplet): Triplet {
 	const v: number = y2v(Y);  // Find Munsell lightness
 	isSaturated = false;
 
@@ -315,7 +315,7 @@ function calcIdpHc([h0, c0]: Pair, [h1, c1]: Pair, r: number): Pair {
 // -------------------------------------------------------------------------
 
 
-function mun2yxy([h, v, c]: Triplet): Triplet {
+function mun2xyy([h, v, c]: Triplet): Triplet {
 	if (MAX_HUE <= h) h -= MAX_HUE;
 	const Y: number = v2y(v);
 	isSaturated = false;
@@ -465,8 +465,8 @@ function scanXY(h: number, c: number, vi: number): [number, number, boolean] {
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} Munsell color.
  */
-export function fromXYZ(xyz: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const r = yxy2mun(xyz2yxy(xyz2c(xyz, dest), dest));
+export function fromXyz(xyz: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+	const r: Triplet = xyy2mun(xyz2xyy(xyz2c(xyz, dest), dest));
 	dest[0] = r[0];
 	dest[1] = r[1];
 	dest[2] = r[2];
@@ -479,8 +479,8 @@ export function fromXYZ(xyz: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
  * @param {Triplet} dest dest An array where the result will be stored. If not provided, a new array will be created and returned.
  * @return {Triplet} XYZ color.
  */
-export function toXYZ([h, v, c]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	return c2xyz(yxy2xyz(mun2yxy([h, v, c]), dest), dest);
+export function toXyz([h, v, c]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
+	return c2xyz(xyy2xyz(mun2xyy([h, v, c]), dest), dest);
 }
 
 
