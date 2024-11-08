@@ -2,7 +2,7 @@
  * Calculation of the color difference.
  *
  * @author Takuto Yanagida
- * @version 2024-08-19
+ * @version 2024-11-09
  */
 
 import { Triplet } from '../type';
@@ -13,12 +13,12 @@ import { DEG_RAD, RAD_DEG, atan2rad, mag } from '../math';
  * The values represent the lower limit of each range.
  */
 export enum NBS {
-	TRACE       = 0.0,
-	SLIGHT      = 0.5,
-	NOTICEABLE  = 1.5,
-	APPRECIABLE = 3.0,
-	MUCH        = 6.0,
-	VERY_MUCH   = 12.0,
+	Trace       = 0.0,
+	Slight      = 0.5,
+	Noticeable  = 1.5,
+	Appreciable = 3.0,
+	Much        = 6.0,
+	VeryMuch    = 12.0,
 };
 
 /**

@@ -49,7 +49,7 @@ export const ConversionMethod = Object.freeze({
 	/**
 	 * Concise conversion
 	 */
-	CONCISE: {
+	Concise: {
 		calcMunsellH: simplyCalcMunsellH,
 		calcMunsellS: simplyCalcMunsellC,
 		calcPccsH: simplyCalcPccsH,
@@ -59,7 +59,7 @@ export const ConversionMethod = Object.freeze({
 	/**
 	 * Accurate conversion
 	 */
-	ACCURATE: {
+	Accurate: {
 		calcMunsellH: calcMunsellH,
 		calcMunsellC: calcMunsellC,
 		calcPccsH: calcPccsH,
@@ -74,7 +74,7 @@ export function setConversionMethod(cm: { calcMunsellH: (h: number) => number; c
 /**
  * Indicates the currently selected color vision characteristic conversion method.
  */
-export let conversionMethod = ConversionMethod.ACCURATE;
+export let conversionMethod = ConversionMethod.Accurate;
 
 /**
  * Enum type for Tone.
