@@ -47,7 +47,7 @@ export class Color {
 	private us: Map<string, string | boolean | number> = new Map();
 	private cs: ColorSpace | null = null;
 
-	public constructor(cs: ColorSpace|null = null, t: Triplet|null = null) {
+	public constructor(cs: ColorSpace | null = null, t: Triplet | null = null) {
 		if (cs !== null && t !== null) {  // Must check for null.
 			this.ts.set(cs, t);
 			this.cs = cs;
@@ -315,7 +315,7 @@ export class Color {
 		return n;
 	}
 
-	public differenceFrom(c: Color, method: 'sqrt'|'cie76'|'ciede2000' = 'ciede2000'): number {
+	public differenceFrom(c: Color, method: 'sqrt' | 'cie76' | 'ciede2000' = 'ciede2000'): number {
 		switch (method) {
 			case 'sqrt':
 				return Difference.distance(this.asLab(), c.asLab());
@@ -339,7 +339,7 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public toProtanopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+	public toProtanopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
 		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
@@ -352,7 +352,7 @@ export class Color {
 		}
 	}
 
-	public toDeuteranopia(method: 'lms'|'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+	public toDeuteranopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
 		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':

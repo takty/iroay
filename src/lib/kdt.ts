@@ -66,8 +66,8 @@ export class Tree {
 				rs.sort((a, b) => a.d - b.d);
 			}
 
-			const nb = tar[ax] < n.p[ax] ? n.nl : n.nr;
-			const ob = nb === n.nl ? n.nr : n.nl;
+			const nb: Node | null = tar[ax] < n.p[ax] ? n.nl : n.nr;
+			const ob: Node | null = nb === n.nl ? n.nr : n.nl;
 
 			search(nb, dep + 1);
 

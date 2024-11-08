@@ -39,11 +39,11 @@ export function categoryOfXyy([sx, sy, y]: Triplet): string {
 			clu = l;
 		}
 	}
-	const t: string = CC_TABLE[clu as 2|5|10|20|30|40] as string;
+	const t: string = CC_TABLE[clu as 2 | 5 | 10 | 20 | 30 | 40] as string;
 	sx *= 1000;
 	sy *= 1000;
 	let dis: number = Number.MAX_VALUE;
-	let cc: number|string = 1;
+	let cc: number | string = 1;
 	for (let i: number = 0; i < 18 * 21; i += 1) {
 		if (t[i] === '.') continue;
 		const x: number = (i % 18) * 25 + 150;

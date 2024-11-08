@@ -51,7 +51,7 @@ const EP = 0.0000000000001;
 const ILLUMINANT_C: Pair = [0.3101, 0.3162];  // Standard illuminant C, white point
 
 let TBL_MAX_C: number[][];
-let TBL: (Pair|null)[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
+let TBL: (Pair | null)[][][];  // [vi][10 * h / 25][c / 2] -> [x, y]
 let TBL_TREES: Tree[] = [];
 
 export const MIN_HUE = 0;
