@@ -148,28 +148,28 @@ function y2v(y: number): number {
 
 
 // Find the Munsell value from xyY (standard illuminant C).
-function xyy2mun([Y, x, y]: Triplet): Triplet {
-	const v: number = y2v(Y);  // Find Munsell lightness
+function xyy2mun([sx, sy, y]: Triplet): Triplet {
+	const v: number = y2v(y);  // Find Munsell lightness
 	isSaturated = false;
 
 	// When the lightness is maximum 10
 	if (eq(v, TBL_V.at(-1) as number)) {
-		const [h, c] = scanHC(x, y, TBL_V.length - 1);
+		const [h, c] = scanHC(sx, sy, TBL_V.length - 1);
 		return [h, v, c];
 	}
 	// When the lightness is 0 or the lightness is larger than the maximum 10, or when it is an achromatic color (standard illuminant C)
-	if (eq0(v) || TBL_V.at(-1) as number < v || (eq(x, ILLUMINANT_C[0]) && eq(y, ILLUMINANT_C[1]))) {
+	if (eq0(v) || TBL_V.at(-1) as number < v || (eq(sx, ILLUMINANT_C[0]) && eq(sy, ILLUMINANT_C[1]))) {
 		return [0, v, 0];
 	}
 	// Obtain lower side
 	let vi_l: number = -1;
 	while (TBL_V[vi_l + 1] <= v) ++vi_l;
 	let hc_l: Pair = [0, 0] as Pair;  // Hue and chroma of the lower side
-	if (vi_l !== -1) hc_l = scanHC(x, y, vi_l);
+	if (vi_l !== -1) hc_l = scanHC(sx, sy, vi_l);
 
 	// Obtain upper side
 	const vi_u: number = vi_l + 1;
-	const hc_u: Pair = scanHC(x, y, vi_u);
+	const hc_u: Pair = scanHC(sx, sy, vi_u);
 
 	// When the lightness on the lower side is the minimum 0, the hue is matched with the upper side, and the chroma is set to 0
 	if (vi_l === -1) {
@@ -210,7 +210,7 @@ function scanHC(x: number, y: number, vi: number): Pair {
 			}
 		}
 	}
-	const ps = TBL_TREES[vi].neighbors(p, 2);
+	const ps: [Pair, number][] = TBL_TREES[vi].neighbors(p, 2);
 	if (2 === ps.length) {
 		isSaturated = true;
 		let [[[ht0, c0], d0], [[ht1, c1], d1]] = ps;
@@ -323,14 +323,14 @@ function mun2xyy([h, v, c]: Triplet): Triplet {
 	// When the lightness is 0 or achromatic (check this first)
 	if (eq0(v) || h < 0 || c < MONO_LIMIT_C) {
 		isSaturated = eq0(v) && 0 < c;
-		return [Y, ...ILLUMINANT_C];
+		return [...ILLUMINANT_C, Y];
 	}
 	// When the lightness is the maximum value 10 or more
 	const v_max = TBL_V.at(-1) as number;
 	if (v_max <= v) {
-		const xy = scanXY(h, c, TBL_V.length - 1);
+		const xy: [number, number, boolean] = scanXY(h, c, TBL_V.length - 1);
 		isSaturated = (v_max < v);
-		return [Y, xy[0], xy[1]];
+		return [xy[0], xy[1], Y];
 	}
 	let vi_l: number = -1;
 	while (TBL_V[vi_l + 1] <= v) ++vi_l;
@@ -345,7 +345,7 @@ function mun2xyy([h, v, c]: Triplet): Triplet {
 		isSaturated = true;
 	}
 	// Obtain upper side
-	const xy_u = scanXY(h, c, vi_u);
+	const xy_u: [number, number, boolean] = scanXY(h, c, vi_u);
 
 	const v_l: number = ((vi_l === -1) ? 0 : TBL_V[vi_l]);
 	const v_u: number = TBL_V[vi_u];
@@ -361,7 +361,7 @@ function mun2xyy([h, v, c]: Triplet): Triplet {
 		}
 	}
 	const xy: Pair = div(xy_l as unknown as Pair, xy_u as unknown as Pair, r);
-	return [Y, ...xy];
+	return [...xy, Y];
 }
 
 // Obtain the hue and chroma for the chromaticity coordinates (h, c) on the surface of the given lightness index.
@@ -498,9 +498,9 @@ export function hueNameToHueValue(hueName: string): number {
 
 	function isDigit(s: string) { return Number.isInteger(parseInt(s)); }
 	const len = isDigit(hueName.charAt(hueName.length - 2)) ? 1 : 2;  // Length of color name
-	const n = hueName.substring(hueName.length - len);
+	const n: string = hueName.substring(hueName.length - len);
 
-	let hv = parseFloat(hueName.substring(0, hueName.length - len));
+	let hv: number = parseFloat(hueName.substring(0, hueName.length - len));
 	hv += HUE_NAMES.indexOf(n) * 10;
 	if (MAX_HUE <= hv) hv -= MAX_HUE;
 	return hv;
@@ -516,8 +516,8 @@ export function hueNameToHueValue(hueName: string): number {
 export function hueValueToHueName(hue: number, chroma: number): string {
 	if (hue === -1 || eq0(chroma)) return 'N';
 	if (hue <= 0) hue += MAX_HUE;
-	let h10 = (0 | hue * 10) % 100;
-	let c = 0 | (hue / 10);
+	let h10: number = (0 | hue * 10) % 100;
+	let c: number = 0 | (hue / 10);
 	if (h10 === 0) {
 		h10 = 100;
 		c -= 1;
@@ -531,12 +531,12 @@ export function hueValueToHueName(hue: number, chroma: number): string {
  * @return {string} String representation
  */
 export function toString([h, v, c]: Triplet): string {
-	const str_v = Math.round(v * 10) / 10;
+	const str_v: number = Math.round(v * 10) / 10;
 	if (c < MONO_LIMIT_C) {
 		return `N ${str_v}`;
 	} else {
-		const hue = hueValueToHueName(h, c);
-		const str_c = Math.round(c * 10) / 10;
+		const hue: string = hueValueToHueName(h, c);
+		const str_c: number = Math.round(c * 10) / 10;
 		return `${hue} ${str_v}/${str_c}`;
 	}
 }
