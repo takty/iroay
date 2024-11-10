@@ -13,7 +13,7 @@ export { toLrgb as fromRgb, fromLrgb as toRgb } from './rgb';
 export { toLrgb as fromYiq, fromLrgb as toYiq } from './yiq';
 
 
-// XYZ ---------------------------------------------------------------------
+// XYZ -------------------------------------------------------------------------
 
 
 /**

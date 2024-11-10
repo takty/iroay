@@ -14,7 +14,7 @@ export { toXyz as fromLms, fromXyz as toLms } from './lms';
 export { toXyz as fromMunsell, fromXyz as toMunsell } from './munsell';
 
 
-// Conversion of Standard Illuminant ---------------------------------------
+// Conversion of Standard Illuminant -------------------------------------------
 
 
 /**

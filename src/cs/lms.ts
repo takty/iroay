@@ -2,7 +2,7 @@
  * This class converts the LMS color system.
  *
  * @author Takuto Yanagida
- * @version 2024-11-08
+ * @version 2024-11-10
  */
 
 import { Triplet } from '../type';
@@ -58,10 +58,10 @@ export function setConversionMethod(cm: { direct: Triplet[]; inverse: Triplet[] 
 	conversionMethod = cm;
 }
 
-let conversionMethod = ConversionMethod.SMITH_POKORNY;
+let conversionMethod: { direct: Triplet[], inverse: Triplet[] } = ConversionMethod.SMITH_POKORNY;
 
 
-// XYZ ---------------------------------------------------------------------
+// XYZ -------------------------------------------------------------------------
 
 
 /**

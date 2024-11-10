@@ -2,14 +2,14 @@
  * This class converts the LCh color system.
  *
  * @author Takuto Yanagida
- * @version 2024-08-19
+ * @version 2024-11-10
  */
 
 import { Triplet } from '../type';
 import { DEG_RAD, RAD_DEG, atan2rad, mag } from '../math';
 
 
-// Lab ---------------------------------------------------------------------
+// Lab -------------------------------------------------------------------------
 
 
 /**
@@ -19,7 +19,7 @@ import { DEG_RAD, RAD_DEG, atan2rad, mag } from '../math';
  * @return {Triplet} LCh color.
  */
 export function fromLab([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const rad = atan2rad(bs, as);
+	const rad: number = atan2rad(bs, as);
 	dest[0] = ls;
 	dest[1] = mag(as, bs);
 	dest[2] = rad * RAD_DEG;
@@ -33,7 +33,7 @@ export function fromLab([ls, as, bs]: Triplet, dest: Triplet = [0, 0, 0]): Tripl
  * @return {Triplet} L*, a*, b* of CIELAB color.
  */
 export function toLab([ls, cs, h]: Triplet, dest: Triplet = [0, 0, 0]): Triplet {
-	const rad = h * DEG_RAD;
+	const rad: number = h * DEG_RAD;
 	dest[0] = ls;
 	dest[1] = Math.cos(rad) * cs;
 	dest[2] = Math.sin(rad) * cs;
