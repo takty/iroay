@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-11-08
+ * @version 2024-11-10
  */
 
 import { Triplet } from './type';
@@ -14,6 +14,7 @@ import * as ColorVisionSimulation from './sim/color-vision';
 import { fromColorInteger, toColorInteger } from './util';
 
 import * as Rgb from './cs/rgb';
+import * as Hsl from './cs/hsl';
 import * as Yiq from './cs/yiq';
 import * as Lrgb from './cs/lrgb';
 import * as Xxy from './cs/xyy';
@@ -25,6 +26,7 @@ import * as Pccs from './cs/pccs';
 
 export enum ColorSpace {
 	Rgb,
+	Hsl,
 	Yiq,
 	Lrgb,
 	Xyz,
@@ -65,6 +67,7 @@ export class Color {
 	public as(cs: ColorSpace): Triplet {
 		switch (cs) {
 			case ColorSpace.Rgb    : return this.asRgb();
+			case ColorSpace.Hsl    : return this.asHsl();
 			case ColorSpace.Yiq    : return this.asYiq();
 			case ColorSpace.Lrgb   : return this.asLrgb();
 			case ColorSpace.Xyz    : return this.asXyz();
@@ -86,9 +89,26 @@ export class Color {
 		if (this.ts.has(ColorSpace.Rgb)) {
 			return this.ts.get(ColorSpace.Rgb) as Triplet;
 		}
-		const t: Triplet = Rgb.fromLrgb(this.asLrgb());
+		let t: Triplet;
+		switch (this.cs) {
+			case ColorSpace.Hsl:
+				t = Hsl.toRgb(this.asHsl());
+				break;
+			default:
+				t = Rgb.fromLrgb(this.asLrgb());
+				break;
+		}
 		this.ts.set(ColorSpace.Rgb, t);
 		this.us.set('rgb_saturation', Rgb.isSaturated);
+		return t;
+	}
+
+	public asHsl(): Triplet {
+		if (this.ts.has(ColorSpace.Hsl)) {
+			return this.ts.get(ColorSpace.Hsl) as Triplet;
+		}
+		const t: Triplet = Hsl.fromRgb(this.asRgb());
+		this.ts.set(ColorSpace.Hsl, t);
 		return t;
 	}
 

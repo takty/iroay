@@ -2,7 +2,7 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-11-08
+ * @version 2024-11-10
  */
 
 import { Triplet } from './type';
@@ -28,6 +28,7 @@ import * as Pccs from './cs/pccs';
 export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb'): Triplet {
 	const type: string = from.toLowerCase() + '-' + to.toLowerCase();
 	switch (type) {
+		case 'hsl-rgb'     : return Rgb.fromHsl(vs);
 		case 'yiq-rgb'     : return Rgb.fromLrgb(Lrgb.fromYiq(vs));
 		case 'lrgb-rgb'    : return Rgb.fromLrgb(vs);
 		case 'xyz-rgb'     : return Rgb.fromLrgb(Lrgb.fromXyz(vs));
@@ -38,6 +39,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-rgb' : return Rgb.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(vs)));
 		case 'pccs-rgb'    : return Rgb.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs))));
 
+		case 'hsl-lrgb'    : return Lrgb.fromRgb(Rgb.fromHsl(vs));
 		case 'rgb-lrgb'    : return Lrgb.fromRgb(vs);
 		case 'yiq-lrgb'    : return Lrgb.fromYiq(vs);
 		case 'xyz-lrgb'    : return Lrgb.fromXyz(vs);
@@ -48,6 +50,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-lrgb': return Lrgb.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-lrgb'   : return Lrgb.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-yiq'     : return Yiq.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)));
 		case 'rgb-yiq'     : return Yiq.fromLrgb(Lrgb.fromRgb(vs));
 		case 'lrgb-yiq'    : return Yiq.fromLrgb(vs);
 		case 'xyz-yiq'     : return Yiq.fromLrgb(Lrgb.fromXyz(vs));
@@ -58,6 +61,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-yiq' : return Yiq.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(vs)));
 		case 'pccs-yiq'    : return Yiq.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs))));
 
+		case 'hsl-xyz'     : return Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)));
 		case 'rgb-xyz'     : return Xyz.fromLrgb(Lrgb.fromRgb(vs));
 		case 'yiq-xyz'     : return Xyz.fromLrgb(Lrgb.fromYiq(vs));
 		case 'lrgb-xyz'    : return Xyz.fromLrgb(vs);
@@ -68,6 +72,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-xyz' : return Xyz.fromMunsell(vs);
 		case 'pccs-xyz'    : return Xyz.fromMunsell(Munsell.fromPccs(vs));
 
+		case 'hsl-xyy'     : return Xyy.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-xyy'     : return Xyy.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-xyy'     : return Xyy.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-xyy'    : return Xyy.fromXyz(Xyz.fromLrgb(vs));
@@ -78,6 +83,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-xyy' : return Xyy.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-xyy'    : return Xyy.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-lab'     : return Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-lab'     : return Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-lab'     : return Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-lab'    : return Lab.fromXyz(Xyz.fromLrgb(vs));
@@ -88,6 +94,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-lab' : return Lab.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-lab'    : return Lab.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-lch'     : return Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)))));
 		case 'rgb-lch'     : return Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs))));
 		case 'yiq-lch'     : return Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs))));
 		case 'lrgb-lch'    : return Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(vs)));
@@ -98,6 +105,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-lch' : return Lch.fromLab(Lab.fromXyz(Xyz.fromMunsell(vs)));
 		case 'pccs-lch'    : return Lch.fromLab(Lab.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs))));
 
+		case 'hsl-lms'     : return Lms.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-lms'     : return Lms.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-lms'     : return Lms.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-lms'    : return Lms.fromXyz(Xyz.fromLrgb(vs));
@@ -108,6 +116,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'munsell-lms' : return Lms.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-lms'    : return Lms.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-munsell' : return Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-munsell' : return Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-munsell' : return Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-munsell': return Munsell.fromXyz(Xyz.fromLrgb(vs));
@@ -118,6 +127,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 		case 'lms-munsell' : return Munsell.fromXyz(Xyz.fromLms(vs));
 		case 'pccs-munsell': return Munsell.fromPccs(vs);
 
+		case 'hsl-pccs'    : return Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)))));
 		case 'rgb-pccs'    : return Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs))));
 		case 'yiq-pccs'    : return Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs))));
 		case 'lrgb-pccs'   : return Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(vs)));
@@ -133,6 +143,7 @@ export function convert(vs: Triplet, from: string, to: string | undefined = 'rgb
 export function getConverter(from: string, to: string = 'rgb') {
 	const type: string = from.toLowerCase() + '-' + to.toLowerCase();
 	switch (type) {
+		case 'hsl-rgb'     : return (vs: Triplet) => Rgb.fromHsl(vs);
 		case 'yiq-rgb'     : return (vs: Triplet) => Rgb.fromLrgb(Lrgb.fromYiq(vs));
 		case 'lrgb-rgb'    : return (vs: Triplet) => Rgb.fromLrgb(vs);
 		case 'xyz-rgb'     : return (vs: Triplet) => Rgb.fromLrgb(Lrgb.fromXyz(vs));
@@ -143,6 +154,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-rgb' : return (vs: Triplet) => Rgb.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(vs)));
 		case 'pccs-rgb'    : return (vs: Triplet) => Rgb.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs))));
 
+		case 'hsl-lrgb'    : return (vs: Triplet) => Lrgb.fromRgb(Rgb.fromHsl(vs));
 		case 'rgb-lrgb'    : return (vs: Triplet) => Lrgb.fromRgb(vs);
 		case 'yiq-lrgb'    : return (vs: Triplet) => Lrgb.fromYiq(vs);
 		case 'xyz-lrgb'    : return (vs: Triplet) => Lrgb.fromXyz(vs);
@@ -153,6 +165,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-lrgb': return (vs: Triplet) => Lrgb.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-lrgb'   : return (vs: Triplet) => Lrgb.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-yiq'     : return (vs: Triplet) => Yiq.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)));
 		case 'rgb-yiq'     : return (vs: Triplet) => Yiq.fromLrgb(Lrgb.fromRgb(vs));
 		case 'lrgb-yiq'    : return (vs: Triplet) => Yiq.fromLrgb(vs);
 		case 'xyz-yiq'     : return (vs: Triplet) => Yiq.fromLrgb(Lrgb.fromXyz(vs));
@@ -163,6 +176,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-yiq' : return (vs: Triplet) => Yiq.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(vs)));
 		case 'pccs-yiq'    : return (vs: Triplet) => Yiq.fromLrgb(Lrgb.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs))));
 
+		case 'hsl-xyz'     : return (vs: Triplet) => Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)));
 		case 'rgb-xyz'     : return (vs: Triplet) => Xyz.fromLrgb(Lrgb.fromRgb(vs));
 		case 'yiq-xyz'     : return (vs: Triplet) => Xyz.fromLrgb(Lrgb.fromYiq(vs));
 		case 'lrgb-xyz'    : return (vs: Triplet) => Xyz.fromLrgb(vs);
@@ -173,6 +187,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-xyz' : return (vs: Triplet) => Xyz.fromMunsell(vs);
 		case 'pccs-xyz'    : return (vs: Triplet) => Xyz.fromMunsell(Munsell.fromPccs(vs));
 
+		case 'hsl-xyy'     : return (vs: Triplet) => Xyy.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-xyy'     : return (vs: Triplet) => Xyy.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-xyy'     : return (vs: Triplet) => Xyy.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-xyy'    : return (vs: Triplet) => Xyy.fromXyz(Xyz.fromLrgb(vs));
@@ -183,6 +198,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-xyy' : return (vs: Triplet) => Xyy.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-xyy'    : return (vs: Triplet) => Xyy.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-lab'     : return (vs: Triplet) => Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-lab'     : return (vs: Triplet) => Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-lab'     : return (vs: Triplet) => Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-lab'    : return (vs: Triplet) => Lab.fromXyz(Xyz.fromLrgb(vs));
@@ -193,6 +209,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-lab' : return (vs: Triplet) => Lab.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-lab'    : return (vs: Triplet) => Lab.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-lch'     : return (vs: Triplet) => Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)))));
 		case 'rgb-lch'     : return (vs: Triplet) => Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs))));
 		case 'yiq-lch'     : return (vs: Triplet) => Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs))));
 		case 'lrgb-lch'    : return (vs: Triplet) => Lch.fromLab(Lab.fromXyz(Xyz.fromLrgb(vs)));
@@ -203,6 +220,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-lch' : return (vs: Triplet) => Lch.fromLab(Lab.fromXyz(Xyz.fromMunsell(vs)));
 		case 'pccs-lch'    : return (vs: Triplet) => Lch.fromLab(Lab.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs))));
 
+		case 'hsl-lms'     : return (vs: Triplet) => Lms.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-lms'     : return (vs: Triplet) => Lms.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-lms'     : return (vs: Triplet) => Lms.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-lms'    : return (vs: Triplet) => Lms.fromXyz(Xyz.fromLrgb(vs));
@@ -213,6 +231,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'munsell-lms' : return (vs: Triplet) => Lms.fromXyz(Xyz.fromMunsell(vs));
 		case 'pccs-lms'    : return (vs: Triplet) => Lms.fromXyz(Xyz.fromMunsell(Munsell.fromPccs(vs)));
 
+		case 'hsl-munsell' : return (vs: Triplet) => Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs))));
 		case 'rgb-munsell' : return (vs: Triplet) => Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs)));
 		case 'yiq-munsell' : return (vs: Triplet) => Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs)));
 		case 'lrgb-munsell': return (vs: Triplet) => Munsell.fromXyz(Xyz.fromLrgb(vs));
@@ -223,6 +242,7 @@ export function getConverter(from: string, to: string = 'rgb') {
 		case 'lms-munsell' : return (vs: Triplet) => Munsell.fromXyz(Xyz.fromLms(vs));
 		case 'pccs-munsell': return (vs: Triplet) => Munsell.fromPccs(vs);
 
+		case 'hsl-pccs'    : return (vs: Triplet) => Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(Rgb.fromHsl(vs)))));
 		case 'rgb-pccs'    : return (vs: Triplet) => Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromRgb(vs))));
 		case 'yiq-pccs'    : return (vs: Triplet) => Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(Lrgb.fromYiq(vs))));
 		case 'lrgb-pccs'   : return (vs: Triplet) => Pccs.fromMunsell(Munsell.fromXyz(Xyz.fromLrgb(vs)));

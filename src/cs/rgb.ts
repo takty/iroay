@@ -8,6 +8,8 @@
 
 import { Triplet } from '../type';
 
+export { toRgb as fromHsl, fromRgb as toHsl } from './hsl';
+
 export const MIN: number = 0;
 export const MAX: number = 255;
 export const INV_MAX: number = 1 / MAX;

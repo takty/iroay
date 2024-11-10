@@ -5,6 +5,7 @@ export * as Difference from './src/eval/difference';
 export * as AgeSimulation from './src/sim/age';
 export * as ColorVisionSimulation from './src/sim/color-vision';
 
+export * as Hsl from './src/cs/hsl';
 export * as Lab from './src/cs/lab';
 export * as Lch from './src/cs/lch';
 export * as Lms from './src/cs/lms';

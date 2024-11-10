@@ -42,6 +42,7 @@ function draw(w: number, h: number, ctx: CanvasRenderingContext2D, sel: HTMLSele
 
 	const fns = new Map([
 		['rgb', drawChartRgb],
+		['hsl', drawChartHsl],
 		['yiq', drawChartYiq],
 		['lrgb', drawChartLrgb],
 		['xyz', drawChartXyz],
@@ -68,6 +69,19 @@ function drawChartRgb(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 	for (let y: number = 0; y < h; y += 1) {
 		for (let x: number = 0; x < w; x += 1) {
 			const rgb = [255 * x / (w - 1), v * 255, 255 * y / (h - 1)] as Triplet;
+			setPixel(ctx, x, (h - 1) - y, rgb);
+		}
+	}
+}
+
+function drawChartHsl(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
+	const c = new Color();
+
+	for (let y: number = 0; y < h; y += 1) {
+		for (let x: number = 0; x < w; x += 1) {
+			c.set(ColorSpace.Hsl, [360 * x / (w - 1), 100 * y / (h - 1), v * 100]);
+
+			const rgb: Triplet = c.asRgb();
 			setPixel(ctx, x, (h - 1) - y, rgb);
 		}
 	}
