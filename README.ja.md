@@ -11,7 +11,7 @@ iroayは、表色系を変換するためのJavaScriptライブラリです。�
 
 ## 特徴
 
-- RGB, LRGB, YIQ, XYZ, xyY, LMS, Lab, LCh, Munsell, and PCCSといった複数の表色系に対応
+- RGB, LRGB, HSL, YIQ, XYZ, xyY, LMS, Lab, LCh, Munsell, and PCCSといった複数の表色系に対応
 - P型（1型2色覚）およびD型（2型2色覚）の色覚特性のシミュレーション機能
 - 年齢による色覚の変化のシミュレーション機能
 - カテゴリカルカラーの検出と誘目度の計算

@@ -11,7 +11,7 @@ iroay is a JavaScript library designed for color space conversion. The name "iro
 
 ## Features
 
-- Supports multiple color spaces, including RGB, LRGB, YIQ, XYZ, xyY, LMS, Lab, LCh, Munsell, and PCCS
+- Supports multiple color spaces, including RGB, LRGB, HSL, YIQ, XYZ, xyY, LMS, Lab, LCh, Munsell, and PCCS
 - Simulation of color vision characteristics for Protanopia (P-type) and Deuteranopia (D-type)
 - Simulation of age-related changes in color vision
 - Detection of categorical colors and calculation of conspicuity
