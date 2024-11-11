@@ -2,12 +2,12 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-11-08
+ * @version 2024-11-11
  */
 
 import 'klales/klales.min.css';
-import { Color, ColorSpace, Munsell } from './../../iroay.ts';
 import { PI2, atan2rad, mag } from '../math.ts';
+import { Color, ColorSpace, Munsell, parse } from './../../iroay.ts';
 
 type Triplet = [number, number, number];
 
@@ -15,20 +15,20 @@ document.addEventListener('DOMContentLoaded', () => {
 	const sel = document.querySelector('select') as HTMLSelectElement;
 	const sli = document.querySelector('#value') as HTMLInputElement;
 	const ss  = document.querySelector('#show-saturation') as HTMLInputElement;
-	const can = document.querySelector('canvas');
+	const can  = document.querySelector('canvas');
 	if (can) {
 		const ctx = can.getContext('2d') as CanvasRenderingContext2D;
-		const w = can.width;
-		const h = can.height;
+		const w: number = can.width;
+		const h: number = can.height;
 
 		draw(w, h, ctx, sel, sli, ss);
-		sel?.addEventListener('change', () => {
+		sel?.addEventListener('change', (): void => {
 			draw(w, h, ctx, sel, sli, ss);
 		});
-		sli?.addEventListener('input', () => {
+		sli?.addEventListener('input', (): void => {
 			draw(w, h, ctx, sel, sli, ss);
 		});
-		ss?.addEventListener('change', () => {
+		ss?.addEventListener('change', (): void => {
 			draw(w, h, ctx, sel, sli, ss);
 		});
 	}
@@ -57,8 +57,7 @@ function draw(w: number, h: number, ctx: CanvasRenderingContext2D, sel: HTMLSele
 		['tone', drawChartTone],
 	]);
 	ctx.save();
-	const idx = sel.value;
-	const f = fns.get(idx);
+	const f = fns.get(sel.value);
 	if  (f) {
 		f(w, h, ctx, parseInt(sli.value) / 255, ss.checked);
 	}
@@ -145,7 +144,6 @@ function drawChartLab(w: number, h: number, ctx: CanvasRenderingContext2D, v: nu
 
 function drawChartLch(w: number, h: number, ctx: CanvasRenderingContext2D, v: number, ss: boolean): void {
 	const c = new Color();
-	const c2 = new Color();
 
 	for (let y: number = 0; y < h; y += 1) {
 		for (let x: number = 0; x < w; x += 1) {
@@ -290,3 +288,23 @@ function setPixel(ctx: CanvasRenderingContext2D, x: number, y: number, [r = 0, g
 	ctx.fillStyle = `rgb(${r},${g},${b}`;
 	ctx.fillRect(x, y, 1, 1);
 }
+
+
+// -----------------------------------------------------------------------------
+
+
+document.addEventListener('DOMContentLoaded', () => {
+	const inp = document.getElementById('inp') as HTMLInputElement;
+	const btn = document.getElementById('parse') as HTMLButtonElement;
+	const out = document.getElementById('out') as HTMLOutputElement;
+
+	btn.addEventListener('click', () => {
+		const ca = parse(inp.value);
+		if (ca) {
+			const [c, a] = ca;
+			out.value = c.toString();
+		} else {
+			out.value = '';
+		}
+	});
+});

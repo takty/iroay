@@ -6,7 +6,7 @@
 <meta name="description" content="Samples of the Iroay">
 <meta name="author" content="">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script type="module" crossorigin src="./assets/index-D2L_zNpU.js"></script>
+  <script type="module" crossorigin src="./assets/index-BcbPccPg.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-BEXUKqBM.css">
 </head>
 <body>
@@ -20,6 +20,7 @@
 		<div>
 			<select>
 				<option value="rgb" selected>RGB</option>
+				<option value="hsl">HSL</option>
 				<option value="yiq">YIQ</option>
 				<option value="lrgb">LRGB</option>
 				<option value="xyz">XYZ</option>
@@ -43,6 +44,15 @@
 		</div>
 
 		<canvas width="512" height="512" style="--w:512px;--h:512px;"></canvas>
+
+		<h2>Parsing Color Syntax</h2>
+
+		<div>
+			<div>
+				<input type="text" id="inp"><button id="parse">Parse</button>
+				<output id="out"></output>
+			</div>
+		</div>
 	</main>
 </body>
 </html>
