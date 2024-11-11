@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-11-10
+ * @version 2024-11-11
  */
 
 import { Triplet } from './type';
@@ -11,7 +11,7 @@ import * as Conspicuity from './eval/conspicuity';
 import * as Difference from './eval/difference';
 import * as ColorVisionSimulation from './sim/color-vision';
 
-import { fromColorInteger, toColorInteger } from './util';
+import { fromInteger, toInteger } from './util';
 
 import * as Rgb from './cs/rgb';
 import * as Hsl from './cs/hsl';
@@ -42,7 +42,7 @@ export enum ColorSpace {
 export class Color {
 
 	static fromInteger(i: number): Color {
-		return new Color(ColorSpace.Rgb, fromColorInteger(i | 0xff000000));
+		return new Color(ColorSpace.Rgb, fromInteger(i | 0xff000000));
 	}
 
 	private ts: Map<ColorSpace, Triplet> = new Map();
@@ -54,6 +54,17 @@ export class Color {
 			this.ts.set(cs, t);
 			this.cs = cs;
 		}
+	}
+
+	/**
+	 * Returns a string representation of an object.
+	 * */
+	toString(): string {
+		if (null === this.cs) {
+			return 'empty';
+		}
+		const t = this.ts.get(this.cs) as Triplet;
+		return `${ColorSpace[this.cs]} [${t[0]}, ${t[1]}, ${t[2]}]`;
 	}
 
 	public set(cs: ColorSpace, t: Triplet): void {
@@ -312,7 +323,7 @@ export class Color {
 		if (this.us.has('integer')) {
 			return this.us.get('integer') as number;
 		}
-		const i: number = toColorInteger(this.asRgb());
+		const i: number = toInteger(this.asRgb());
 		this.us.set('integer', i);
 		return i;
 	}

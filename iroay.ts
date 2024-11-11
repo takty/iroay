@@ -18,4 +18,4 @@ export * as Munsell from './src/cs/munsell';
 export * as Pccs from './src/cs/pccs';
 
 export { convert, getConverter } from './src/conv';
-export { fromColorInteger, toColorInteger, toMonochromeRgb as toMonochromeRGB } from './src/util';
+export { fromInteger, toInteger, toMonochromeRgb, parse } from './src/util';
