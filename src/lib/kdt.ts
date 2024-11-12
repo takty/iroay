@@ -2,7 +2,7 @@
  * KD Tree
  *
  * @author Takuto Yanagida
- * @version 2024-08-06
+ * @version 2024-11-12
  */
 
 type Pair = [number, number];
@@ -27,10 +27,10 @@ export class Tree {
 
 	constructor(ps: [Pair, Pair][], k: number = 2) {
 		this.k = k;
-		this.root = this.build(ps, 0);
+		this.root = this.#build(ps, 0);
 	}
 
-	private build(ps: [Pair, Pair][], dep: number): Node | null {
+	#build(ps: [Pair, Pair][], dep: number): Node | null {
 		if (ps.length === 0) return null;
 
 		const ax = dep % this.k;
@@ -40,12 +40,12 @@ export class Tree {
 		return new Node(
 			ps[med][0],
 			ps[med][1],
-			this.build(ps.slice(0, med), dep + 1),
-			this.build(ps.slice(med + 1), dep + 1),
+			this.#build(ps.slice(0, med), dep + 1),
+			this.#build(ps.slice(med + 1), dep + 1),
 		);
 	}
 
-	private dist(p0: Pair, p1: Pair): number {
+	#dist(p0: Pair, p1: Pair): number {
 		return Math.sqrt((p0[0] - p1[0]) * (p0[0] - p1[0]) + (p0[1] - p1[1]) * (p0[1] - p1[1]));
 	}
 
@@ -56,7 +56,7 @@ export class Tree {
 			if (n === null) return;
 
 			const ax = dep % this.k;
-			const d = this.dist(tar, n.p);
+			const d = this.#dist(tar, n.p);
 
 			if (rs.length < size) {
 				rs.push({ n, d });
