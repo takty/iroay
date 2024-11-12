@@ -2,12 +2,12 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-11-11
+ * @version 2024-11-12
  */
 
 import 'klales/klales.min.css';
 import { PI2, atan2rad, mag } from '../math.ts';
-import { Color, ColorSpace, Munsell, parse } from './../../iroay.ts';
+import { Color, ColorSpace, Munsell } from './../../iroay.ts';
 
 type Triplet = [number, number, number];
 
@@ -293,15 +293,14 @@ function setPixel(ctx: CanvasRenderingContext2D, x: number, y: number, [r = 0, g
 // -----------------------------------------------------------------------------
 
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', (): void => {
 	const inp = document.getElementById('inp') as HTMLInputElement;
 	const btn = document.getElementById('parse') as HTMLButtonElement;
 	const out = document.getElementById('out') as HTMLOutputElement;
 
-	btn.addEventListener('click', () => {
-		const ca = parse(inp.value);
-		if (ca) {
-			const [c, a] = ca;
+	btn.addEventListener('click', (): void => {
+		const c: Color | null = Color.fromString(inp.value);
+		if (c) {
 			out.value = c.toString();
 		} else {
 			out.value = '';
