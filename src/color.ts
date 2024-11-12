@@ -168,6 +168,7 @@ export class Color {
 		let t: Triplet;
 		switch (this.#cs) {
 			case ColorSpace.Rgb:
+			case ColorSpace.Hsl:
 				t = Rgb.toLrgb(this.asRgb());
 				break;
 			case ColorSpace.Yiq:
@@ -188,6 +189,7 @@ export class Color {
 		let t: Triplet = [0, 0, 0];
 		switch (this.#cs) {
 			case ColorSpace.Rgb:
+			case ColorSpace.Hsl:
 			case ColorSpace.Yiq:
 			case ColorSpace.Lrgb:
 				t = Lrgb.toXyz(this.asLrgb());
