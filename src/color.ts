@@ -2,16 +2,15 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-11-11
+ * @version 2024-11-12
  */
 
 import { Triplet } from './type';
 import * as Category from './eval/category';
 import * as Conspicuity from './eval/conspicuity';
 import * as Difference from './eval/difference';
-import * as ColorVisionSimulation from './sim/color-vision';
-
-import { fromInteger, toInteger } from './util';
+import * as ColorVision from './sim/color-vision';
+import * as Util from './util';
 
 import * as Rgb from './cs/rgb';
 import * as Hsl from './cs/hsl';
@@ -41,41 +40,71 @@ export enum ColorSpace {
 
 export class Color {
 
+
+	/**
+	 * Creates a Color object based on the integer.
+	 * @param i Integer.
+	 * @returns A Color object.
+	 */
 	static fromInteger(i: number): Color {
-		return new Color(ColorSpace.Rgb, fromInteger(i | 0xff000000));
+		return new Color(ColorSpace.Rgb, Util.fromInteger(i | 0xff000000));
 	}
 
-	private ts: Map<ColorSpace, Triplet> = new Map();
-	private us: Map<string, string | boolean | number> = new Map();
-	private cs: ColorSpace | null = null;
+	/**
+	 * Parses a color string in various formats and returns a corresponding Color object.
+	 *
+	 * @param {string} str - The color string to parse.
+	 * @returns {Color | null} A Color object if parsing is successful; otherwise, null.
+	 */
+	static fromString(str: string): Color | null {
+		let cs: any = null;
+		if (cs = Util.parseRgb(str)) return new Color(ColorSpace.Rgb, [cs[0], cs[1], cs[2]], cs[3]);
+		if (cs = Util.parseHex(str)) return new Color(ColorSpace.Rgb, [cs[0], cs[1], cs[2]], cs[3]);
+		if (cs = Util.parseHsl(str)) return new Color(ColorSpace.Hsl, [cs[0], cs[1], cs[2]], cs[3]);
+		if (cs = Util.parseLab(str)) return new Color(ColorSpace.Lab, [cs[0], cs[1], cs[2]], cs[3]);
+		if (cs = Util.parseLch(str)) return new Color(ColorSpace.Lch, [cs[0], cs[1], cs[2]], cs[3]);
+		return null;
+	}
 
-	public constructor(cs: ColorSpace | null = null, t: Triplet | null = null) {
+	#ts: Map<ColorSpace, Triplet> = new Map();
+	#us: Map<string, string | boolean | number> = new Map();
+	#cs: ColorSpace | null = null;
+	#al: number = 1;
+
+	constructor(cs: ColorSpace | null = null, t: Triplet | null = null, al: number = 1) {
 		if (cs !== null && t !== null) {  // Must check for null.
-			this.ts.set(cs, t);
-			this.cs = cs;
+			this.#ts.set(cs, t);
+			this.#cs = cs;
+			this.#al = al;
 		}
 	}
 
 	/**
 	 * Returns a string representation of an object.
-	 * */
+	 */
 	toString(): string {
-		if (null === this.cs) {
+		if (null === this.#cs) {
 			return 'empty';
 		}
-		const t = this.ts.get(this.cs) as Triplet;
-		return `${ColorSpace[this.cs]} [${t[0]}, ${t[1]}, ${t[2]}]`;
+		const t = this.#ts.get(this.#cs) as Triplet;
+		return `${ColorSpace[this.#cs]} [${t[0]}, ${t[1]}, ${t[2]}] (${this.#al})`;
 	}
 
-	public set(cs: ColorSpace, t: Triplet): void {
-		this.ts.clear();
-		this.us.clear();
+	set(cs: ColorSpace, t: Triplet, al: number = 1): void {
+		this.#ts.clear();
+		this.#us.clear();
 
-		this.ts.set(cs, t);
-		this.cs = cs;
+		this.#ts.set(cs, t);
+		this.#cs = cs;
+		this.#al = al;
 	}
 
-	public as(cs: ColorSpace): Triplet {
+	alpha(al: number | null = null): number | void {
+		if (null === al) return this.#al;
+		this.#al = al;
+	}
+
+	as(cs: ColorSpace): Triplet {
 		switch (cs) {
 			case ColorSpace.Rgb    : return this.asRgb();
 			case ColorSpace.Hsl    : return this.asHsl();
@@ -96,12 +125,12 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public asRgb(): Triplet {
-		if (this.ts.has(ColorSpace.Rgb)) {
-			return this.ts.get(ColorSpace.Rgb) as Triplet;
+	asRgb(): Triplet {
+		if (this.#ts.has(ColorSpace.Rgb)) {
+			return this.#ts.get(ColorSpace.Rgb) as Triplet;
 		}
 		let t: Triplet;
-		switch (this.cs) {
+		switch (this.#cs) {
 			case ColorSpace.Hsl:
 				t = Hsl.toRgb(this.asHsl());
 				break;
@@ -109,35 +138,35 @@ export class Color {
 				t = Rgb.fromLrgb(this.asLrgb());
 				break;
 		}
-		this.ts.set(ColorSpace.Rgb, t);
-		this.us.set('rgb_saturation', Rgb.isSaturated);
+		this.#ts.set(ColorSpace.Rgb, t);
+		this.#us.set('rgb_saturation', Rgb.isSaturated);
 		return t;
 	}
 
-	public asHsl(): Triplet {
-		if (this.ts.has(ColorSpace.Hsl)) {
-			return this.ts.get(ColorSpace.Hsl) as Triplet;
+	asHsl(): Triplet {
+		if (this.#ts.has(ColorSpace.Hsl)) {
+			return this.#ts.get(ColorSpace.Hsl) as Triplet;
 		}
 		const t: Triplet = Hsl.fromRgb(this.asRgb());
-		this.ts.set(ColorSpace.Hsl, t);
+		this.#ts.set(ColorSpace.Hsl, t);
 		return t;
 	}
 
-	public asYiq(): Triplet {
-		if (this.ts.has(ColorSpace.Yiq)) {
-			return this.ts.get(ColorSpace.Yiq) as Triplet;
+	asYiq(): Triplet {
+		if (this.#ts.has(ColorSpace.Yiq)) {
+			return this.#ts.get(ColorSpace.Yiq) as Triplet;
 		}
 		const t: Triplet = Yiq.fromLrgb(this.asLrgb());
-		this.ts.set(ColorSpace.Yiq, t);
+		this.#ts.set(ColorSpace.Yiq, t);
 		return t;
 	}
 
-	public asLrgb(): Triplet {
-		if (this.ts.has(ColorSpace.Lrgb)) {
-			return this.ts.get(ColorSpace.Lrgb) as Triplet;
+	asLrgb(): Triplet {
+		if (this.#ts.has(ColorSpace.Lrgb)) {
+			return this.#ts.get(ColorSpace.Lrgb) as Triplet;
 		}
 		let t: Triplet;
-		switch (this.cs) {
+		switch (this.#cs) {
 			case ColorSpace.Rgb:
 				t = Rgb.toLrgb(this.asRgb());
 				break;
@@ -148,16 +177,16 @@ export class Color {
 				t = Lrgb.fromXyz(this.asXyz());
 				break;
 		}
-		this.ts.set(ColorSpace.Lrgb, t);
+		this.#ts.set(ColorSpace.Lrgb, t);
 		return t;
 	}
 
-	public asXyz(): Triplet {
-		if (this.ts.has(ColorSpace.Xyz)) {
-			return this.ts.get(ColorSpace.Xyz) as Triplet;
+	asXyz(): Triplet {
+		if (this.#ts.has(ColorSpace.Xyz)) {
+			return this.#ts.get(ColorSpace.Xyz) as Triplet;
 		}
 		let t: Triplet = [0, 0, 0];
-		switch (this.cs) {
+		switch (this.#cs) {
 			case ColorSpace.Rgb:
 			case ColorSpace.Yiq:
 			case ColorSpace.Lrgb:
@@ -169,7 +198,7 @@ export class Color {
 				break;
 			case ColorSpace.Xyy:
 				t = Xxy.toXyz(this.asXyy());
-				this.us.set('xyy_saturation', Xxy.isSaturated);
+				this.#us.set('xyy_saturation', Xxy.isSaturated);
 				break;
 			case ColorSpace.Lms:
 				t = Lms.toXyz(this.asLms());
@@ -178,28 +207,28 @@ export class Color {
 			case ColorSpace.Pccs:
 			case ColorSpace.Tone:
 				t = Munsell.toXyz(this.asMunsell());
-				this.us.set('munsell_saturation', Munsell.isSaturated);
+				this.#us.set('munsell_saturation', Munsell.isSaturated);
 				break;
 		}
-		this.ts.set(ColorSpace.Xyz, t);
+		this.#ts.set(ColorSpace.Xyz, t);
 		return t;
 	}
 
-	public asXyy(): Triplet {
-		if (this.ts.has(ColorSpace.Xyy)) {
-			return this.ts.get(ColorSpace.Xyy) as Triplet;
+	asXyy(): Triplet {
+		if (this.#ts.has(ColorSpace.Xyy)) {
+			return this.#ts.get(ColorSpace.Xyy) as Triplet;
 		}
 		const t: Triplet = Xxy.fromXyz(this.asXyz());
-		this.ts.set(ColorSpace.Xyy, t);
+		this.#ts.set(ColorSpace.Xyy, t);
 		return t;
 	}
 
-	public asLab(): Triplet {
-		if (this.ts.has(ColorSpace.Lab)) {
-			return this.ts.get(ColorSpace.Lab) as Triplet;
+	asLab(): Triplet {
+		if (this.#ts.has(ColorSpace.Lab)) {
+			return this.#ts.get(ColorSpace.Lab) as Triplet;
 		}
 		let t: Triplet;
-		switch (this.cs) {
+		switch (this.#cs) {
 			case ColorSpace.Lch:
 				t = Lch.toLab(this.asLch());
 				break;
@@ -207,53 +236,53 @@ export class Color {
 				t = Lab.fromXyz(this.asXyz());
 				break;
 		}
-		this.ts.set(ColorSpace.Lab, t);
+		this.#ts.set(ColorSpace.Lab, t);
 		return t;
 	}
 
-	public asLch(): Triplet {
-		if (this.ts.has(ColorSpace.Lch)) {
-			return this.ts.get(ColorSpace.Lch) as Triplet;
+	asLch(): Triplet {
+		if (this.#ts.has(ColorSpace.Lch)) {
+			return this.#ts.get(ColorSpace.Lch) as Triplet;
 		}
 		const t: Triplet = Lch.fromLab(this.asLab());
-		this.ts.set(ColorSpace.Lch, t);
+		this.#ts.set(ColorSpace.Lch, t);
 		return t;
 	}
 
-	public asLms(): Triplet {
-		if (this.ts.has(ColorSpace.Lms)) {
-			return this.ts.get(ColorSpace.Lms) as Triplet;
+	asLms(): Triplet {
+		if (this.#ts.has(ColorSpace.Lms)) {
+			return this.#ts.get(ColorSpace.Lms) as Triplet;
 		}
 		const t: Triplet = Lms.fromXyz(this.asXyz());
-		this.ts.set(ColorSpace.Lms, t);
+		this.#ts.set(ColorSpace.Lms, t);
 		return t;
 	}
 
-	public asMunsell(): Triplet {
-		if (this.ts.has(ColorSpace.Munsell)) {
-			return this.ts.get(ColorSpace.Munsell) as Triplet;
+	asMunsell(): Triplet {
+		if (this.#ts.has(ColorSpace.Munsell)) {
+			return this.#ts.get(ColorSpace.Munsell) as Triplet;
 		}
 		let t: Triplet;
-		switch (this.cs) {
+		switch (this.#cs) {
 			case ColorSpace.Pccs:
 			case ColorSpace.Tone:
 				t = Pccs.toMunsell(this.asPccs());
 				break;
 			default:
 				t = Munsell.fromXyz(this.asXyz());
-				this.us.set('munsell_saturation', Munsell.isSaturated);
+				this.#us.set('munsell_saturation', Munsell.isSaturated);
 				break;
 		}
-		this.ts.set(ColorSpace.Munsell, t);
+		this.#ts.set(ColorSpace.Munsell, t);
 		return t;
 	}
 
-	public asPccs(): Triplet {
-		if (this.ts.has(ColorSpace.Pccs)) {
-			return this.ts.get(ColorSpace.Pccs) as Triplet;
+	asPccs(): Triplet {
+		if (this.#ts.has(ColorSpace.Pccs)) {
+			return this.#ts.get(ColorSpace.Pccs) as Triplet;
 		}
 		let t: Triplet;
-		switch (this.cs) {
+		switch (this.#cs) {
 			case ColorSpace.Tone:
 				t = Pccs.toNormalCoordinate(this.asTone());
 				break;
@@ -261,16 +290,16 @@ export class Color {
 				t = Pccs.fromMunsell(this.asMunsell());
 				break;
 		}
-		this.ts.set(ColorSpace.Pccs, t);
+		this.#ts.set(ColorSpace.Pccs, t);
 		return t;
 	}
 
-	public asTone(): Triplet {
-		if (this.ts.has(ColorSpace.Tone)) {
-			return this.ts.get(ColorSpace.Tone) as Triplet;
+	asTone(): Triplet {
+		if (this.#ts.has(ColorSpace.Tone)) {
+			return this.#ts.get(ColorSpace.Tone) as Triplet;
 		}
 		const t: Triplet = Pccs.toToneCoordinate(this.asPccs());
-		this.ts.set(ColorSpace.Tone, t);
+		this.#ts.set(ColorSpace.Tone, t);
 		return t;
 	}
 
@@ -278,40 +307,40 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public isRGBSaturated(forceToCheck: boolean = false): boolean {
-		if (forceToCheck && !this.us.has('rgb_saturation')) {
+	isRGBSaturated(forceToCheck: boolean = false): boolean {
+		if (forceToCheck && !this.#us.has('rgb_saturation')) {
 			this.asRgb();
 		}
-		return (this.us.get('rgb_saturation') ?? false) as boolean;
+		return (this.#us.get('rgb_saturation') ?? false) as boolean;
 	}
 
-	public isXyySaturated(): boolean {
-		return (this.us.get('xyy_saturation') ?? false) as boolean;
+	isXyySaturated(): boolean {
+		return (this.#us.get('xyy_saturation') ?? false) as boolean;
 	}
 
-	public isMunsellSaturated(): boolean {
-		return (this.us.get('munsell_saturation') ?? false) as boolean;
+	isMunsellSaturated(): boolean {
+		return (this.#us.get('munsell_saturation') ?? false) as boolean;
 	}
 
 
 	// -------------------------------------------------------------------------
 
 
-	public asMunsellNotation(): string {
-		if (this.us.has('munsell_notation')) {
-			return this.us.get('munsell_notation') as string;
+	asMunsellNotation(): string {
+		if (this.#us.has('munsell_notation')) {
+			return this.#us.get('munsell_notation') as string;
 		}
 		const s: string = Munsell.toString(this.asMunsell());
-		this.us.set('munsell_notation', s);
+		this.#us.set('munsell_notation', s);
 		return s;
 	}
 
-	public asPCCSNotation(): string {
-		if (this.us.has('pccs_notation')) {
-			return this.us.get('pccs_notation') as string;
+	asPCCSNotation(): string {
+		if (this.#us.has('pccs_notation')) {
+			return this.#us.get('pccs_notation') as string;
 		}
 		const s: string = Pccs.toString(this.asPccs());
-		this.us.set('pccs_notation', s);
+		this.#us.set('pccs_notation', s);
 		return s;
 	}
 
@@ -319,34 +348,34 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public asInteger(): number {
-		if (this.us.has('integer')) {
-			return this.us.get('integer') as number;
+	asInteger(): number {
+		if (this.#us.has('integer')) {
+			return this.#us.get('integer') as number;
 		}
-		const i: number = toInteger(this.asRgb());
-		this.us.set('integer', i);
+		const i: number = Util.toInteger(this.asRgb());
+		this.#us.set('integer', i);
 		return i;
 	}
 
-	public asConspicuity(): number {
-		if (this.us.has('conspicuity')) {
-			return this.us.get('conspicuity') as number;
+	asConspicuity(): number {
+		if (this.#us.has('conspicuity')) {
+			return this.#us.get('conspicuity') as number;
 		}
 		const s: number = Conspicuity.conspicuityOfLab(this.asLab());
-		this.us.set('conspicuity', s);
+		this.#us.set('conspicuity', s);
 		return s;
 	}
 
-	public asCategory(): string {
-		if (this.us.has('category')) {
-			return this.us.get('category') as string;
+	asCategory(): string {
+		if (this.#us.has('category')) {
+			return this.#us.get('category') as string;
 		}
 		const n: string = Category.categoryOfXyy(this.asXyy());
-		this.us.set('category', n);
+		this.#us.set('category', n);
 		return n;
 	}
 
-	public differenceFrom(c: Color, method: 'sqrt' | 'cie76' | 'ciede2000' = 'ciede2000'): number {
+	differenceFrom(c: Color, method: 'sqrt' | 'cie76' | 'ciede2000' = 'ciede2000'): number {
 		switch (method) {
 			case 'sqrt':
 				return Difference.distance(this.asLab(), c.asLab());
@@ -362,7 +391,7 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public toMonochrome(): Color {
+	toMonochrome(): Color {
 		return new Color(ColorSpace.Lab, [this.asLab()[0], 0, 0]);
 	}
 
@@ -370,28 +399,28 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
-	public toProtanopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
-		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
+	toProtanopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+		ColorVision.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
-				const lms0: Triplet = ColorVisionSimulation.lmsToProtanopia(this.asLms());
+				const lms0: Triplet = ColorVision.lmsToProtanopia(this.asLms());
 				return new Color(ColorSpace.Lms, lms0);
 			case 'lrgb':
 			default:
-				const lms1: Triplet = ColorVisionSimulation.lrgbToProtanopia(this.asLrgb());
+				const lms1: Triplet = ColorVision.lrgbToProtanopia(this.asLrgb());
 				return new Color(ColorSpace.Lms, lms1);
 		}
 	}
 
-	public toDeuteranopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
-		ColorVisionSimulation.setOkajimaCorrectionOption(doCorrection);
+	toDeuteranopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
+		ColorVision.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
 			case 'lms':
-				const lms0: Triplet = ColorVisionSimulation.lmsToDeuteranopia(this.asLms());
+				const lms0: Triplet = ColorVision.lmsToDeuteranopia(this.asLms());
 				return new Color(ColorSpace.Lms, lms0);
 			case 'lrgb':
 			default:
-				const lms1: Triplet = ColorVisionSimulation.lrgbToDeuteranopia(this.asLrgb());
+				const lms1: Triplet = ColorVision.lrgbToDeuteranopia(this.asLrgb());
 				return new Color(ColorSpace.Lms, lms1);
 		}
 	}

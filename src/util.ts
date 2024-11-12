@@ -2,10 +2,9 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-11-11
+ * @version 2024-11-12
  */
 
-import { Color, ColorSpace } from './color';
 import { Triplet } from './type';
 
 import * as Lab from './cs/lab';
@@ -52,37 +51,6 @@ export function toInteger([r, g, b]: Triplet): number {
 
 // -----------------------------------------------------------------------------
 
-
-/**
- * Parses a color string in various formats and returns a corresponding Color object.
- *
- * @param {string} str - The color string to parse.
- * @returns {[Color, number] | null} A Color object if parsing is successful; otherwise, null.
- */
-export function parse(str: string): [Color, number] | null {
-	let cs: any = null;
-	if (cs = parseRgb(str)) {
-		console.log(cs);
-		return [new Color(ColorSpace.Rgb, [cs[0], cs[1], cs[2]]), cs[3]];
-	}
-	if (cs = parseHex(str)) {
-		console.log(cs);
-		return [new Color(ColorSpace.Rgb, [cs[0], cs[1], cs[2]]), cs[3]];
-	}
-	if (cs = parseHsl(str)) {
-		console.log(cs);
-		return [new Color(ColorSpace.Hsl, [cs[0], cs[1], cs[2]]), cs[3]];
-	}
-	if (cs = parseLab(str)) {
-		console.log(cs);
-		return [new Color(ColorSpace.Lab, [cs[0], cs[1], cs[2]]), cs[3]];
-	}
-	if (cs = parseLch(str)) {
-		console.log(cs);
-		return [new Color(ColorSpace.Lch, [cs[0], cs[1], cs[2]]), cs[3]];
-	}
-	return null;
-}
 
 /**
  * Parse a CSS RGB or RGBA color string in various formats and return an array of R, G, B, and A values as numbers.
