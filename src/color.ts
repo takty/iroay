@@ -2,7 +2,7 @@
  * Color
  *
  * @author Takuto Yanagida
- * @version 2024-11-12
+ * @version 2025-02-25
  */
 
 import { Triplet } from './type';
@@ -81,6 +81,7 @@ export class Color {
 
 	/**
 	 * Returns a string representation of an object.
+	 * @returns A string representation.
 	 */
 	toString(): string {
 		if (null === this.#cs) {
@@ -90,6 +91,12 @@ export class Color {
 		return `${ColorSpace[this.#cs]} [${t[0]}, ${t[1]}, ${t[2]}] (${this.#al})`;
 	}
 
+	/**
+	 * Sets the color space and the triplet.
+	 * @param {ColorSpace} cs - The color space.
+	 * @param {Triplet} t - The triplet.
+	 * @param {number} al - The alpha value.
+	 */
 	set(cs: ColorSpace, t: Triplet, al: number = 1): void {
 		this.#ts.clear();
 		this.#us.clear();
@@ -393,6 +400,10 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
+	/**
+	 * Converts the color to grayscale.
+	 * @returns {Color} A new Color object.
+	 */
 	toMonochrome(): Color {
 		return new Color(ColorSpace.Lab, [this.asLab()[0], 0, 0]);
 	}
@@ -401,6 +412,12 @@ export class Color {
 	// -------------------------------------------------------------------------
 
 
+	/**
+	 * Converts the color to protanopia.
+	 * @param {string} method - The method to use for the conversion. 'lms' or 'lrgb'.
+	 * @param {boolean} doCorrection - Whether to apply the Okajima correction.
+	 * @returns {Color} A new Color object.
+	 */
 	toProtanopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
 		ColorVision.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
@@ -414,6 +431,12 @@ export class Color {
 		}
 	}
 
+	/**
+	 * Converts the color to deuteranopia.
+	 * @param {string} method - The method to use for the conversion. 'lms' or 'lrgb'.
+	 * @param {boolean} doCorrection - Whether to apply the Okajima correction.
+	 * @returns {Color} A new Color object.
+	 */
 	toDeuteranopia(method: 'lms' | 'lrgb' = 'lrgb', doCorrection: boolean = false): Color {
 		ColorVision.setOkajimaCorrectionOption(doCorrection);
 		switch (method) {
