@@ -2,7 +2,7 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2024-11-12
+ * @version 2025-02-25
  */
 
 import { Triplet } from './type';
@@ -170,4 +170,72 @@ export function parseLch(str: string): number[] | null {
 		return [l, c, h, al];
 	}
 	return null;
+}
+
+
+// -----------------------------------------------------------------------------
+
+
+/**
+ * Convert an array of R, G, B, and A values to a CSS RGB or RGBA color string.
+ * @param {Triplet | Quartet} rgb - Array of [R, G, B, A] as numbers.
+ * @return {string} CSS RGB or RGBA color string.
+ */
+export function stringifyRgb([r, g, b, al = 1]: [number, number, number, number?]): string {
+	if (al !== 1) {
+		return `rgb(${r} ${g} ${b} / ${al})`;
+	}
+	return `rgb(${r} ${g} ${b})`;
+}
+
+/**
+ * Convert an array of R, G, B, and A values to a CSS hex color string.
+ * @param {Triplet | Quartet} rgb - Array of [R, G, B, A] as numbers.
+ * @return {string} CSS hex color string.
+ */
+export function stringifyHex([r, g, b, al = 1]: [number, number, number, number?]): string {
+	const toHex: (n: number) => string = (n: number): string => n.toString(16).padStart(2, '0');
+
+	const rgbH = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+	if (al !== 1) {
+		const alH: string = toHex(Math.round(al * 255));
+		return `${rgbH}${alH}`;
+	}
+	return rgbH;
+}
+
+/**
+ * Convert an array of H, S, L, and A values to a CSS HSL or HSLA color string.
+ * @param {Triplet | Quartet} hsl - Array of [H, S, L, A] as numbers.
+ * @return {string} CSS HSL or HSLA color string.
+ */
+export function stringifyHsl([h, s, l, al = 1]: [number, number, number, number?]): string {
+	if (al !== 1) {
+		return `hsl(${h} ${s}% ${l}% / ${al})`;
+	}
+	return `hsl(${h} ${s}% ${l}%)`;
+}
+
+/**
+ * Convert an array of L, a, b, and A values to a CSS Lab color string.
+ * @param {Triplet | Quartet} lab - Array of [L, a, b, A] as numbers.
+ * @return {string} CSS Lab color string.
+ */
+export function stringifyLab([l, a, b, al = 1]: [number, number, number, number?]): string {
+	if (al !== 1) {
+		return `lab(${l}% ${a} ${b} / ${al})`;
+	}
+	return `lab(${l}% ${a} ${b})`;
+}
+
+/**
+ * Convert an array of L, C, H, and A values to a CSS LCH color string.
+ * @param {Triplet | Quartet} lch - Array of [L, C, H, A] as numbers.
+ * @return {string} CSS LCH color string.
+ */
+export function stringifyLch([l, c, h, al = 1]: [number, number, number, number?]): string {
+	if (al !== 1) {
+		return `lch(${l}% ${c} ${h}deg / ${al})`;
+	}
+	return `lch(${l}% ${c} ${h}deg)`;
 }

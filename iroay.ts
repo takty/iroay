@@ -1,4 +1,6 @@
 export { Color, ColorSpace } from './src/color';
+export * as ColorUtil from './src/color-util';
+
 export * as Category from './src/eval/category';
 export * as Conspicuity from './src/eval/conspicuity';
 export * as Difference from './src/eval/difference';
