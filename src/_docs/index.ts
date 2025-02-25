@@ -2,12 +2,12 @@
  * Script for Sample
  *
  * @author Takuto Yanagida
- * @version 2024-11-12
+ * @version 2025-02-25
  */
 
 import 'klales/klales.min.css';
 import { PI2, atan2rad, mag } from '../math.ts';
-import { Color, ColorSpace, Munsell } from './../../iroay.ts';
+import { Color, ColorSpace, ColorUtil, Munsell } from './../../iroay.ts';
 
 type Triplet = [number, number, number];
 
@@ -296,14 +296,27 @@ function setPixel(ctx: CanvasRenderingContext2D, x: number, y: number, [r = 0, g
 document.addEventListener('DOMContentLoaded', (): void => {
 	const inp = document.getElementById('inp') as HTMLInputElement;
 	const btn = document.getElementById('parse') as HTMLButtonElement;
-	const out = document.getElementById('out') as HTMLOutputElement;
+
+	const outRgb = document.getElementById('out-rgb') as HTMLOutputElement;
+	const outHex = document.getElementById('out-hex') as HTMLOutputElement;
+	const outHsl = document.getElementById('out-hsl') as HTMLOutputElement;
+	const outLab = document.getElementById('out-lab') as HTMLOutputElement;
+	const outLch = document.getElementById('out-lch') as HTMLOutputElement;
 
 	btn.addEventListener('click', (): void => {
-		const c: Color | null = Color.fromString(inp.value);
+		const c: Color | null = ColorUtil.fromString(inp.value);
 		if (c) {
-			out.value = c.toString();
+			outRgb.value = ColorUtil.toStringRgb(c);
+			outHex.value = ColorUtil.toStringHex(c);
+			outHsl.value = ColorUtil.toStringHsl(c);
+			outLab.value = ColorUtil.toStringLab(c);
+			outLch.value = ColorUtil.toStringLch(c);
 		} else {
-			out.value = '';
+			outRgb.value = '';
+			outHex.value = '';
+			outHsl.value = '';
+			outLab.value = '';
+			outLch.value = '';
 		}
 	});
 });
