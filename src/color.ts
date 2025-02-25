@@ -88,7 +88,10 @@ export class Color {
 			return 'empty';
 		}
 		const t = this.#ts.get(this.#cs) as Triplet;
-		return `${ColorSpace[this.#cs]} [${t[0]}, ${t[1]}, ${t[2]}] (${this.#al})`;
+		if (this.#al !== 1) {
+			return `${ColorSpace[this.#cs]}[${t[0]}, ${t[1]}, ${t[2]}, ${this.#al}]`;
+		}
+		return `${ColorSpace[this.#cs]}[${t[0]}, ${t[1]}, ${t[2]}]`;
 	}
 
 	/**
