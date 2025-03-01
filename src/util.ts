@@ -2,7 +2,7 @@
  * Functions for Color Space Conversion
  *
  * @author Takuto Yanagida
- * @version 2025-02-25
+ * @version 2025-03-01
  */
 
 import { Triplet } from './type';
@@ -109,7 +109,7 @@ export function parseHex(str: string): number[] | null {
  * @return {number[]} Array of [H, S, L, A] as numbers.
  */
 export function parseHsl(str: string): number[] | null {
-	const re = /hsla?\(\s*([\d.]+)\s*[,\s]\s*([\d.]+)%\s*[,\s]\s*([\d.]+)%\s*(?:\/\s*([\d.]+%?))?\s*\)/i;
+	const re = /hsla?\(\s*([\d.]+)(?:deg)?\s*[,\s]\s*([\d.]+)%\s*[,\s]\s*([\d.]+)%\s*(?:\/\s*([\d.]+%?))?\s*\)/i;
 	const m: RegExpMatchArray | null = str.match(re);
 
 	if (m) {
@@ -155,17 +155,20 @@ export function parseLab(str: string): number[] | null {
  * @return {number[]} Array of [L, C, H, A] as numbers.
  */
 export function parseLch(str: string): number[] | null {
-	const re = /lch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+))?\s*\)/i;
+	const re = /lch\(\s*([\d.]+)%?\s+([\d.]+)(%)?\s+([\d.]+)(?:deg)?\s*(?:\/\s*([\d.]+))?\s*\)/i;
 	const m: RegExpMatchArray | null = str.match(re);
 
 	if (m) {
 		const l: number = parseFloat(m[1]);
-		const c: number = parseFloat(m[2]);
-		const h: number = parseFloat(m[3]);
+		let   c: number = parseFloat(m[2]);
+		const h: number = parseFloat(m[4]);
 
+		if (m[3] === '%') {
+			c = (c / 100) * 150;
+		}
 		let al: number = 1;
-		if (m[4] !== undefined) {
-			al = parseFloat(m[4]);
+		if (m[5] !== undefined) {
+			al = parseFloat(m[5]);
 		}
 		return [l, c, h, al];
 	}
@@ -181,11 +184,14 @@ export function parseLch(str: string): number[] | null {
  * @param {Triplet | Quartet} rgb - Array of [R, G, B, A] as numbers.
  * @return {string} CSS RGB or RGBA color string.
  */
-export function stringifyRgb([r, g, b, al = 1]: [number, number, number, number?]): string {
+export function stringifyRgb([r, g, b, al = 1]: [number, number, number, number?], digits: number = 2): string {
+	const sr: string = toFixed(r, digits);
+	const sg: string = toFixed(g, digits);
+	const sb: string = toFixed(b, digits);
 	if (al !== 1) {
-		return `rgb(${r} ${g} ${b} / ${al})`;
+		return `rgb(${sr} ${sg} ${sb} / ${al})`;
 	}
-	return `rgb(${r} ${g} ${b})`;
+	return `rgb(${sr} ${sg} ${sb})`;
 }
 
 /**
@@ -209,11 +215,14 @@ export function stringifyHex([r, g, b, al = 1]: [number, number, number, number?
  * @param {Triplet | Quartet} hsl - Array of [H, S, L, A] as numbers.
  * @return {string} CSS HSL or HSLA color string.
  */
-export function stringifyHsl([h, s, l, al = 1]: [number, number, number, number?]): string {
+export function stringifyHsl([h, s, l, al = 1]: [number, number, number, number?], digits: number = 1): string {
+	const sh: string = toFixed(h, digits);
+	const ss: string = toFixed(s, digits);
+	const sl: string = toFixed(l, digits);
 	if (al !== 1) {
-		return `hsl(${h} ${s}% ${l}% / ${al})`;
+		return `hsl(${sh} ${ss}% ${sl}% / ${al})`;
 	}
-	return `hsl(${h} ${s}% ${l}%)`;
+	return `hsl(${sh} ${ss}% ${sl}%)`;
 }
 
 /**
@@ -221,11 +230,14 @@ export function stringifyHsl([h, s, l, al = 1]: [number, number, number, number?
  * @param {Triplet | Quartet} lab - Array of [L, a, b, A] as numbers.
  * @return {string} CSS Lab color string.
  */
-export function stringifyLab([l, a, b, al = 1]: [number, number, number, number?]): string {
+export function stringifyLab([l, a, b, al = 1]: [number, number, number, number?], digits: number = 4): string {
+	const sl: string = toFixed(l, digits);
+	const sa: string = toFixed(a, digits);
+	const sb: string = toFixed(b, digits);
 	if (al !== 1) {
-		return `lab(${l}% ${a} ${b} / ${al})`;
+		return `lab(${sl}% ${sa} ${sb} / ${al})`;
 	}
-	return `lab(${l}% ${a} ${b})`;
+	return `lab(${sl}% ${sa} ${sb})`;
 }
 
 /**
@@ -233,9 +245,22 @@ export function stringifyLab([l, a, b, al = 1]: [number, number, number, number?
  * @param {Triplet | Quartet} lch - Array of [L, C, H, A] as numbers.
  * @return {string} CSS LCH color string.
  */
-export function stringifyLch([l, c, h, al = 1]: [number, number, number, number?]): string {
+export function stringifyLch([l, c, h, al = 1]: [number, number, number, number?], digits: number = 4): string {
+	const sl: string = toFixed(l, digits);
+	const sc: string = toFixed(c, digits);
+	const sh: string = toFixed(h, digits);
 	if (al !== 1) {
-		return `lch(${l}% ${c} ${h}deg / ${al})`;
+		return `lch(${sl}% ${sc} ${sh} / ${al})`;
 	}
-	return `lch(${l}% ${c} ${h}deg)`;
+	return `lch(${sl}% ${sc} ${sh})`;
+}
+
+/**
+ * Returns a string representation of a number with a fixed number of digits.
+ * @param {number} num - Number to be converted.
+ * @param {number} digits - Number of digits.
+ * @return {string} String representation of the number.
+ */
+function toFixed(num: number, digits: number): string {
+	return num.toFixed(digits).replace(/\.?0+$/, '');
 }
