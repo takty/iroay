@@ -32,11 +32,11 @@
 	},
 	"packageManager": "yarn@1.22.22",
 	"dependencies": {
-		"esbuild": "^0.25.0",
+		"esbuild": "^0.25.2",
 		"glob": "^11.0.1",
 		"klales": "github:takty/klales",
-		"sass": "^1.85.1",
+		"sass": "^1.86.1",
 		"typescript": "^5.8.2",
-		"vite": "^6.2.0"
+		"vite": "^6.2.4"
 	}
 }
