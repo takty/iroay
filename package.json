@@ -37,6 +37,6 @@
 		"klales": "github:takty/klales",
 		"sass": "^1.86.3",
 		"typescript": "^5.8.2",
-		"vite": "^6.2.5"
+		"vite": "^6.2.6"
 	}
 }
