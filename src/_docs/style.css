@@ -5,8 +5,6 @@
  * @version 2024-08-11
  */
 
-@use 'sass:math';
-
 :root {
 	font-size  : 16px;
 	font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
