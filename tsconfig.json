@@ -1,9 +1,9 @@
 {
 	"compilerOptions": {
-		"target": "esnext",
-		"module": "esnext",
+		"target"          : "esnext",
+		"module"          : "esnext",
 		"moduleResolution": "bundler",
-		"types": ["node"],
+		"types"           : ["node"],
 
 		"strict": true,
 
