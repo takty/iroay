@@ -38,6 +38,7 @@
 		"esbuild": "^0.28.1",
 		"klales": "github:takty/klales",
 		"typescript": "^6.0.3",
-		"vite": "^8.0.16"
+		"vite": "^8.0.16",
+		"vitest": "^4.1.9"
 	}
 }
