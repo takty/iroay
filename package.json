@@ -30,11 +30,11 @@
 		"dev": "vite src/_docs --base ./",
 		"debug": "tsc --noEmit -w"
 	},
-	"packageManager": "yarn@4.13.0",
+	"packageManager": "yarn@4.17.0",
 	"dependencies": {
 		"esbuild": "^0.28.1",
 		"klales": "github:takty/klales",
-		"typescript": "^6.0.2",
-		"vite": "^8.0.8"
+		"typescript": "^6.0.3",
+		"vite": "^8.0.16"
 	}
 }
