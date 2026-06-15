@@ -2,6 +2,8 @@
 	"compilerOptions": {
 		"target": "esnext",
 		"module": "esnext",
+		"moduleResolution": "bundler",
+		"types": ["node"],
 
 		"strict": true,
 
@@ -21,9 +23,10 @@
 		"noEmitOnError"                   : true,
 
 		"sourceMap"     : true,
-		"removeComments": true,
+		"removeComments": true
 	},
 	"files": [
-		"iroay.ts"
+		"iroay.ts",
+		"vitest.config.ts"
 	]
 }

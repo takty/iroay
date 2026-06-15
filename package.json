@@ -28,7 +28,10 @@
 		"build": "node ./build.js",
 		"docs": "vite build",
 		"dev": "vite src/_docs --base ./",
-		"debug": "tsc --noEmit -w"
+		"debug": "tsc --noEmit -w",
+		"test": "vitest",
+		"test:ui": "vitest --ui",
+		"test:coverage": "vitest --coverage"
 	},
 	"packageManager": "yarn@4.17.0",
 	"dependencies": {

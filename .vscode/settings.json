@@ -1,22 +1,29 @@
 {
-	"cSpell.words": [
-		"Brettel",
-		"colourmaps",
-		"dichromats",
-		"IEICE",
-		"iroay",
-		"Kanbe",
-		"Katsunori",
-		"Kayoko",
-		"klales",
-		"KOBAYASHI",
-		"KRIES",
-		"Mituo",
-		"Mollon",
-		"Okajima",
-		"POKORNY",
-		"Syuu",
-		"Viénot",
-		"YOSIKI"
-	]
+  "cSpell.words": [
+    "Brettel",
+    "colourmaps",
+    "dichromats",
+    "IEICE",
+    "iroay",
+    "Kanbe",
+    "Katsunori",
+    "Kayoko",
+    "klales",
+    "KOBAYASHI",
+    "KRIES",
+    "Mituo",
+    "Mollon",
+    "Okajima",
+    "POKORNY",
+    "Syuu",
+    "Viénot",
+    "YOSIKI"
+  ],
+  "search.exclude": {
+    "**/.yarn": true,
+    "**/.pnp.*": true
+  },
+  "typescript.tsdk": ".yarn/sdks/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "js/ts.tsdk.path": ".yarn/sdks/typescript/lib"
 }
