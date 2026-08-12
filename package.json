@@ -35,13 +35,13 @@
 	},
 	"packageManager": "yarn@4.18.0",
 	"dependencies": {
-		"esbuild": "^0.28.1",
+		"esbuild": "^0.28.2",
 		"klales": "github:takty/klales",
 		"typescript": "^7.0.2",
-		"vite": "^8.1.5",
+		"vite": "^8.2.1",
 		"vitest": "^4.1.10"
 	},
 	"devDependencies": {
-		"@types/node": "^26.1.2"
+		"@types/node": "^26.2.0"
 	}
 }
